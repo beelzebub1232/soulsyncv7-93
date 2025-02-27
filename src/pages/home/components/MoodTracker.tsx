@@ -1,13 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Smile, 
+  Heart, 
   ThumbsUp, 
-  Meh, 
+  Coffee, 
   Frown, 
-  AlertTriangle,
+  CloudRain,
   X 
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -36,35 +36,35 @@ const moods: Mood[] = [
   { 
     value: "amazing", 
     label: "Amazing", 
-    icon: <Smile className="h-8 w-8" />, 
+    icon: <Heart className="h-8 w-8 fill-green-500" />, 
     color: "text-green-600",
     bgColor: "bg-green-100 border-green-300"
   },
   { 
     value: "good", 
     label: "Good", 
-    icon: <ThumbsUp className="h-8 w-8" />, 
+    icon: <ThumbsUp className="h-8 w-8 fill-blue-400" />, 
     color: "text-blue-600",
     bgColor: "bg-blue-100 border-blue-300" 
   },
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <Meh className="h-8 w-8" />, 
+    icon: <Coffee className="h-8 w-8 fill-yellow-500" />, 
     color: "text-yellow-600",
     bgColor: "bg-yellow-100 border-yellow-300" 
   },
   { 
     value: "sad", 
     label: "Sad", 
-    icon: <Frown className="h-8 w-8" />, 
+    icon: <Frown className="h-8 w-8 fill-orange-300" />, 
     color: "text-orange-600",
     bgColor: "bg-orange-100 border-orange-300" 
   },
   { 
     value: "awful", 
     label: "Awful", 
-    icon: <AlertTriangle className="h-8 w-8" />, 
+    icon: <CloudRain className="h-8 w-8 fill-red-300" />, 
     color: "text-red-600",
     bgColor: "bg-red-100 border-red-300" 
   },
@@ -116,13 +116,13 @@ export function MoodTracker() {
   };
   
   // Load today's mood when component mounts
-  useState(() => {
+  useEffect(() => {
     const todaysMood = getTodaysMood();
     if (todaysMood) {
       setSelectedMood(todaysMood.value);
       setMoodNote(todaysMood.note || "");
     }
-  });
+  }, []);
   
   const handleMoodClick = (mood: Mood) => {
     setCurrentMood(mood);

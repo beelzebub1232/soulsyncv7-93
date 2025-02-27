@@ -1,21 +1,128 @@
 
-import { useState } from "react";
-import { Camera, Link2, Mic, Smile } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Camera, Link2, Mic, Tag, Heart, Bold, Italic, List, AlignLeft, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { MoodTracker } from "@/pages/home/components/MoodTracker";
+import { JournalEntry } from "@/types/journal";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 
 interface NewJournalFormProps {
-  onComplete: () => void;
+  onComplete: (entry: JournalEntry) => void;
+  existingEntry?: JournalEntry;
 }
 
-export function NewJournalForm({ onComplete }: NewJournalFormProps) {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProps) {
+  const [title, setTitle] = useState(existingEntry?.title || "");
+  const [content, setContent] = useState(existingEntry?.content || "");
+  const [mood, setMood] = useState(existingEntry?.mood || "");
+  const [tags, setTags] = useState<string[]>(existingEntry?.tags || []);
+  const [newTag, setNewTag] = useState("");
+  const [attachments, setAttachments] = useState<Array<{type: 'image' | 'audio' | 'link', url: string, name?: string}>>(
+    existingEntry?.attachments || []
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newAttachmentUrl, setNewAttachmentUrl] = useState("");
+  const [newAttachmentType, setNewAttachmentType] = useState<'image' | 'audio' | 'link'>('link');
+  const [isFavorite, setIsFavorite] = useState(existingEntry?.favorite || false);
+  
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  
+  // Update text formatting
+  const applyFormatting = (formatType: string) => {
+    const textarea = textAreaRef.current;
+    if (!textarea) return;
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    
+    let formattedText = '';
+    let cursorOffset = 0;
+    
+    switch (formatType) {
+      case 'bold':
+        formattedText = `**${selectedText}**`;
+        cursorOffset = 2;
+        break;
+      case 'italic':
+        formattedText = `*${selectedText}*`;
+        cursorOffset = 1;
+        break;
+      case 'list':
+        formattedText = selectedText
+          .split('\n')
+          .map(line => `- ${line}`)
+          .join('\n');
+        cursorOffset = 2;
+        break;
+      default:
+        return;
+    }
+    
+    const newContent = 
+      content.substring(0, start) + 
+      formattedText + 
+      content.substring(end);
+    
+    setContent(newContent);
+    
+    // Set cursor position after the formatting
+    setTimeout(() => {
+      textarea.focus();
+      if (start === end) {
+        // If no text was selected, place cursor inside the formatting
+        textarea.selectionStart = start + cursorOffset;
+        textarea.selectionEnd = start + cursorOffset;
+      } else {
+        // If text was selected, place cursor after the formatted text
+        textarea.selectionStart = start + formattedText.length;
+        textarea.selectionEnd = start + formattedText.length;
+      }
+    }, 0);
+  };
+  
+  const addAttachment = () => {
+    if (!newAttachmentUrl) return;
+    
+    const newAttachment = {
+      type: newAttachmentType,
+      url: newAttachmentUrl,
+      name: newAttachmentUrl.split('/').pop() || 'Attachment'
+    };
+    
+    setAttachments([...attachments, newAttachment]);
+    setNewAttachmentUrl("");
+    
+    toast({
+      title: "Attachment added",
+      description: `Added a new ${newAttachmentType} attachment to your journal.`
+    });
+  };
+  
+  const removeAttachment = (index: number) => {
+    const newAttachments = [...attachments];
+    newAttachments.splice(index, 1);
+    setAttachments(newAttachments);
+  };
+  
+  const addTag = () => {
+    if (!newTag.trim()) return;
+    
+    if (!tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+    }
+    
+    setNewTag("");
+  };
+  
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,15 +139,18 @@ export function NewJournalForm({ onComplete }: NewJournalFormProps) {
     setIsSubmitting(true);
     
     try {
-      // Simulate saving the journal entry
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const newEntry: JournalEntry = {
+        id: existingEntry?.id || Date.now().toString(),
+        title,
+        content,
+        date: new Date(),
+        mood,
+        tags: tags.length > 0 ? tags : undefined,
+        attachments: attachments.length > 0 ? attachments : undefined,
+        favorite: isFavorite
+      };
       
-      toast({
-        title: "Journal entry saved",
-        description: "Your thoughts have been recorded successfully.",
-      });
-      
-      onComplete();
+      onComplete(newEntry);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -52,6 +162,33 @@ export function NewJournalForm({ onComplete }: NewJournalFormProps) {
     }
   };
   
+  // Common mood options for journal entries
+  const moodOptions = [
+    "Happy", "Calm", "Excited", "Grateful", "Hopeful", 
+    "Mixed", "Anxious", "Sad", "Frustrated", "Overwhelmed"
+  ];
+  
+  // Keyboard shortcut listeners for formatting
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'b':
+            e.preventDefault();
+            applyFormatting('bold');
+            break;
+          case 'i':
+            e.preventDefault();
+            applyFormatting('italic');
+            break;
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [content]);
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-6 mt-4">
       <div className="space-y-4">
@@ -62,53 +199,221 @@ export function NewJournalForm({ onComplete }: NewJournalFormProps) {
           className="text-lg font-medium border-none focus:ring-0 p-0 h-auto"
         />
         
-        <Textarea
-          placeholder="What's on your mind today?"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="min-h-[200px] resize-none border-none focus:ring-0 p-0"
-        />
+        <div className="border border-border rounded-lg p-1 space-y-2">
+          <div className="flex overflow-x-auto p-1 gap-1 border-b border-border">
+            <ToggleGroup type="multiple" className="justify-start">
+              <ToggleGroupItem value="bold" aria-label="Bold" onClick={() => applyFormatting('bold')}>
+                <Bold className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="italic" aria-label="Italic" onClick={() => applyFormatting('italic')}>
+                <Italic className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="list" aria-label="List" onClick={() => applyFormatting('list')}>
+                <List className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="align" aria-label="Align">
+                <AlignLeft className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          
+          <Textarea
+            ref={textAreaRef}
+            placeholder="What's on your mind today?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[200px] resize-none border-none focus:ring-0 p-2"
+          />
+        </div>
       </div>
       
-      <div className="border-t border-border pt-4">
-        <h3 className="font-medium mb-3">How are you feeling?</h3>
-        <MoodTracker />
+      <div className="border-t border-border pt-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">Attachments</h3>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                <Paperclip className="h-4 w-4" />
+                <span>Add Attachment</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Add a new attachment</h4>
+                <div className="flex gap-2 mb-2">
+                  <Button 
+                    variant={newAttachmentType === 'image' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setNewAttachmentType('image')}
+                    type="button"
+                  >
+                    <Camera className="h-4 w-4 mr-1" />
+                    Image
+                  </Button>
+                  <Button 
+                    variant={newAttachmentType === 'audio' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setNewAttachmentType('audio')}
+                    type="button"
+                  >
+                    <Mic className="h-4 w-4 mr-1" />
+                    Audio
+                  </Button>
+                  <Button 
+                    variant={newAttachmentType === 'link' ? 'default' : 'outline'} 
+                    size="sm"
+                    onClick={() => setNewAttachmentType('link')}
+                    type="button"
+                  >
+                    <Link2 className="h-4 w-4 mr-1" />
+                    Link
+                  </Button>
+                </div>
+                <Input
+                  placeholder={`Enter ${newAttachmentType} URL`}
+                  value={newAttachmentUrl}
+                  onChange={(e) => setNewAttachmentUrl(e.target.value)}
+                  className="mb-2"
+                />
+                <Button 
+                  onClick={addAttachment} 
+                  disabled={!newAttachmentUrl}
+                  className="w-full"
+                  type="button"
+                >
+                  Add
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        {attachments.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {attachments.map((attachment, index) => (
+              <div key={index} className="bg-muted rounded-md p-2 flex items-center gap-2 text-sm">
+                {attachment.type === 'image' && <Camera className="h-4 w-4" />}
+                {attachment.type === 'audio' && <Mic className="h-4 w-4" />}
+                {attachment.type === 'link' && <Link2 className="h-4 w-4" />}
+                <span className="truncate max-w-[150px]">{attachment.name}</span>
+                <button 
+                  type="button" 
+                  onClick={() => removeAttachment(index)}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
-      <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-        <Button type="button" variant="outline" className="flex items-center gap-1">
-          <Camera className="h-4 w-4" />
-          <span>Photo</span>
-        </Button>
-        <Button type="button" variant="outline" className="flex items-center gap-1">
-          <Mic className="h-4 w-4" />
-          <span>Audio</span>
-        </Button>
-        <Button type="button" variant="outline" className="flex items-center gap-1">
-          <Link2 className="h-4 w-4" />
-          <span>Link</span>
-        </Button>
-        <Button type="button" variant="outline" className="flex items-center gap-1">
-          <Smile className="h-4 w-4" />
-          <span>Feeling</span>
-        </Button>
+      <div className="border-t border-border pt-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">How are you feeling?</h3>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                {mood ? mood : "Select mood"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-0">
+              <Command>
+                <CommandList>
+                  <CommandGroup>
+                    {moodOptions.map((option) => (
+                      <CommandItem 
+                        key={option}
+                        onSelect={() => setMood(option)}
+                        className="cursor-pointer"
+                      >
+                        {option}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">Tags</h3>
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Add tag"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              className="h-9 max-w-[180px]"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+            />
+            <Button 
+              onClick={addTag} 
+              disabled={!newTag.trim()}
+              size="sm"
+              type="button"
+            >
+              <Tag className="h-4 w-4 mr-1" />
+              Add
+            </Button>
+          </div>
+        </div>
+        
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <div key={tag} className="bg-mindscape-light text-mindscape-primary rounded-full px-3 py-1 text-xs flex items-center gap-1">
+                <span>{tag}</span>
+                <button 
+                  type="button" 
+                  onClick={() => removeTag(tag)}
+                  className="hover:text-destructive"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
-      <div className="flex justify-end gap-3 pt-4 border-t border-border">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onComplete}
+      <div className="flex justify-between items-center pt-4 border-t border-border">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => setIsFavorite(!isFavorite)}
+          className={isFavorite ? "text-red-500" : ""}
         >
-          Cancel
+          <Heart className={`h-4 w-4 mr-1 ${isFavorite ? "fill-red-500" : ""}`} />
+          {isFavorite ? "Favorited" : "Add to Favorites"}
         </Button>
-        <Button 
-          type="submit" 
-          className="button-primary"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Saving..." : "Save Entry"}
-        </Button>
+        
+        <div className="flex gap-3">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => onComplete({ ...existingEntry } as JournalEntry)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            className="button-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : "Save Entry"}
+          </Button>
+        </div>
       </div>
     </form>
   );
