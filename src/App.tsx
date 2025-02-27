@@ -19,6 +19,8 @@ import Journal from "@/pages/journal/Journal";
 import Community from "@/pages/community/Community";
 import Insights from "@/pages/insights/Insights";
 import Mindful from "@/pages/mindful/Mindful";
+import HabitTracker from "@/pages/habit-tracker/HabitTracker";
+import Settings from "@/pages/profile/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +45,8 @@ const App = () => (
               <Route path="community" element={<Community />} />
               <Route path="insights" element={<Insights />} />
               <Route path="mindful" element={<Mindful />} />
+              <Route path="habit-tracker" element={<HabitTracker />} />
+              <Route path="profile/settings" element={<Settings />} />
             </Route>
             
             {/* Not Found Route */}

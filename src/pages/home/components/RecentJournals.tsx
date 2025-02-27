@@ -1,5 +1,6 @@
 
 import { formatDistanceToNow } from "date-fns";
+import { Smile, ThumbsUp } from "lucide-react";
 
 // Sample journal entries for demonstration
 const journalEntries = [
@@ -49,8 +50,18 @@ export function RecentJournals() {
           </p>
           
           <div className="mt-2 flex items-center text-xs">
-            <span className="text-mindscape-primary font-medium">
-              {entry.mood === "amazing" ? "😁 Amazing" : "🙂 Good"}
+            <span className="flex items-center gap-1 text-mindscape-primary font-medium">
+              {entry.mood === "amazing" ? (
+                <>
+                  <Smile className="h-3.5 w-3.5 text-green-500" />
+                  <span>Amazing</span>
+                </>
+              ) : (
+                <>
+                  <ThumbsUp className="h-3.5 w-3.5 text-blue-500" />
+                  <span>Good</span>
+                </>
+              )}
             </span>
           </div>
         </a>
