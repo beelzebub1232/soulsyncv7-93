@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { HollowHeartIcon } from "./icons/HeartIcon";
 
 interface TopNavbarProps {
   className?: string;
@@ -27,6 +28,14 @@ export function TopNavbar({ className }: TopNavbarProps) {
     });
   };
   
+  const handleClearNotifications = () => {
+    // Clear notifications logic
+    toast({
+      title: "Notifications cleared",
+      description: "All notifications have been cleared",
+    });
+  };
+  
   return (
     <>
       <nav className={cn(
@@ -43,10 +52,10 @@ export function TopNavbar({ className }: TopNavbarProps) {
           <span className="mr-0.5">Help</span>
         </button>
         
-        {/* App Name (Center) */}
+        {/* App Name (Center) with heart icon */}
         <Link to="/" className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2">
           <div className="h-7 w-7 rounded-full bg-mindscape-primary flex items-center justify-center">
-            <span className="text-white font-semibold text-[10px]">SS</span>
+            <HollowHeartIcon className="h-4 w-4 text-white" />
           </div>
           <h1 className="text-base font-display font-medium">SoulSync</h1>
         </Link>
@@ -104,11 +113,15 @@ export function TopNavbar({ className }: TopNavbarProps) {
             </div>
             
             <div className="w-full mt-4 space-y-2">
+              <Link to="/profile/dashboard" className="block w-full p-3 rounded-lg hover:bg-mindscape-light transition-colors flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>Profile Dashboard</span>
+              </Link>
               <Link to="/profile/settings" className="block w-full p-3 rounded-lg hover:bg-mindscape-light transition-colors flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </Link>
-              <Link to="/profile/insights" className="block w-full p-3 rounded-lg hover:bg-mindscape-light transition-colors">
+              <Link to="/insights" className="block w-full p-3 rounded-lg hover:bg-mindscape-light transition-colors">
                 My Insights
               </Link>
               <Link to="/habit-tracker" className="block w-full p-3 rounded-lg hover:bg-mindscape-light transition-colors">
@@ -207,7 +220,10 @@ export function TopNavbar({ className }: TopNavbarProps) {
             </div>
             
             <div className="pt-4 text-center">
-              <button className="button-secondary">
+              <button 
+                className="button-secondary"
+                onClick={handleClearNotifications}
+              >
                 Clear All Notifications
               </button>
             </div>
