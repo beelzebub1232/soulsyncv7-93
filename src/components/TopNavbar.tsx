@@ -1,7 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
-import { Bell, MessageCircleAlert, User } from "lucide-react";
+import { Bell, AlertCircle, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -26,7 +26,7 @@ export function TopNavbar({ className }: TopNavbarProps) {
           onClick={() => setCrisisOpen(true)}
           className="button-crisis flex items-center gap-1"
         >
-          <MessageCircleAlert className="h-4 w-4" />
+          <AlertCircle className="h-4 w-4" />
           <span>Crisis Help</span>
         </button>
         
