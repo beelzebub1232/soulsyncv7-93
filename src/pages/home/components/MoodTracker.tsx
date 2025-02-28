@@ -36,35 +36,35 @@ const moods: Mood[] = [
   { 
     value: "amazing", 
     label: "Amazing", 
-    icon: <Heart className="h-8 w-8 fill-green-500" />, 
+    icon: <Heart className="h-8 w-8 stroke-green-600" />, 
     color: "text-green-600",
     bgColor: "bg-green-100 border-green-300"
   },
   { 
     value: "good", 
     label: "Good", 
-    icon: <ThumbsUp className="h-8 w-8 fill-blue-400" />, 
+    icon: <ThumbsUp className="h-8 w-8 stroke-blue-600" />, 
     color: "text-blue-600",
     bgColor: "bg-blue-100 border-blue-300" 
   },
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <Coffee className="h-8 w-8 fill-yellow-500" />, 
+    icon: <Coffee className="h-8 w-8 stroke-yellow-600" />, 
     color: "text-yellow-600",
     bgColor: "bg-yellow-100 border-yellow-300" 
   },
   { 
     value: "sad", 
     label: "Sad", 
-    icon: <Frown className="h-8 w-8 fill-orange-300" />, 
+    icon: <Frown className="h-8 w-8 stroke-orange-600" />, 
     color: "text-orange-600",
     bgColor: "bg-orange-100 border-orange-300" 
   },
   { 
     value: "awful", 
     label: "Awful", 
-    icon: <CloudRain className="h-8 w-8 fill-red-300" />, 
+    icon: <CloudRain className="h-8 w-8 stroke-red-600" />, 
     color: "text-red-600",
     bgColor: "bg-red-100 border-red-300" 
   },
