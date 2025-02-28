@@ -4,25 +4,18 @@ import { MoodTracker } from "./components/MoodTracker";
 import { DailyMotivation } from "./components/DailyMotivation";
 import { UpcomingHabits } from "./components/UpcomingHabits";
 import { RecentJournals } from "./components/RecentJournals";
-import { Card, CardContent } from "@/components/ui/card";
-import { HollowHeartIcon } from "@/components/icons/HeartIcon";
 
 export default function Home() {
   const { user } = useUser();
   
   return (
     <div className="space-y-6">
-      <Card className="border-none bg-gradient-to-br from-mindscape-light to-mindscape-light/30 overflow-hidden relative">
-        <CardContent className="p-6">
-          <div className="absolute top-[-20px] right-[-20px] opacity-10">
-            <HollowHeartIcon className="h-32 w-32 text-mindscape-primary" />
-          </div>
-          <h1 className="text-2xl font-bold font-display">
-            Hi, {user?.username || 'Friend'}!
-          </h1>
-          <p className="text-muted-foreground">Welcome to SoulSync, your mental wellness companion.</p>
-        </CardContent>
-      </Card>
+      <header className="pt-2">
+        <h1 className="text-2xl font-bold font-display">
+          Hi, {user?.username || 'Friend'}!
+        </h1>
+        <p className="text-muted-foreground">How are you feeling today?</p>
+      </header>
       
       <MoodTracker />
       
