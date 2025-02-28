@@ -3,21 +3,22 @@ import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
 import { cn } from "@/lib/utils";
+import { Heart } from "lucide-react";
 
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "register">("login");
   
   return (
     <div className="min-h-full flex flex-col">
-      <div className="flex-1 flex flex-col justify-center px-6 py-12">
+      <div className="flex-1 flex flex-col justify-center px-4 py-12 sm:px-6">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="flex justify-center">
-            <div className="h-14 w-14 rounded-full bg-mindscape-primary flex items-center justify-center">
-              <span className="text-white font-semibold text-lg">MJ</span>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-mindscape-primary to-purple-400 shadow-lg">
+              <Heart className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-display font-semibold tracking-tight">
-            Welcome to Mindscape
+          <h2 className="mt-6 text-center text-2xl sm:text-3xl font-display font-semibold tracking-tight">
+            Welcome to SoulSync
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
             Your personal mental well-being companion
@@ -50,7 +51,7 @@ export default function Auth() {
             </button>
           </div>
           
-          <div className="bg-card px-6 py-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter">
+          <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter">
             {mode === "login" ? <Login /> : <Register />}
           </div>
           
