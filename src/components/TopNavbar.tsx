@@ -1,7 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
-import { Bell, AlertCircle, User, Settings } from "lucide-react";
+import { Bell, AlertCircle, User, Settings, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -46,7 +46,7 @@ export function TopNavbar({ className }: TopNavbarProps) {
         {/* App Name (Center) */}
         <Link to="/" className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2">
           <div className="h-7 w-7 rounded-full bg-mindscape-primary flex items-center justify-center">
-            <span className="text-white font-semibold text-[10px]">SS</span>
+            <Heart className="h-4 w-4 text-white" />
           </div>
           <h1 className="text-base font-display font-medium">SoulSync</h1>
         </Link>
