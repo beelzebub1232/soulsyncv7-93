@@ -28,6 +28,16 @@ interface MoodEntry {
   userId?: string;
 }
 
+// Define Supabase mood row structure
+interface SupabaseMood {
+  id: string;
+  user_id: string;
+  mood: MoodValue;
+  note: string | null;
+  created_at: string;
+  created_date: string;
+}
+
 const moods: Mood[] = [
   { 
     value: "amazing", 
@@ -71,34 +81,36 @@ export function MoodTracker() {
   const [moodDialogOpen, setMoodDialogOpen] = useState(false);
   const [currentMood, setCurrentMood] = useState<Mood | null>(null);
   const [moodNote, setMoodNote] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
   
   // Function to get today's mood from storage
   const getTodaysMood = async (): Promise<MoodEntry | null> => {
     try {
+      setIsLoading(true);
       // First try to get mood from Supabase if user is logged in
       if (user?.id) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
         
         const { data, error } = await supabase
           .from('moods')
           .select('*')
           .eq('user_id', user.id)
-          .gte('created_at', today.toISOString())
-          .lt('created_at', tomorrow.toISOString())
+          .eq('created_date', today.toISOString().split('T')[0])
           .single();
           
         if (data && !error) {
+          console.log("Retrieved mood from Supabase:", data);
           return {
             value: data.mood as MoodValue,
             date: new Date(data.created_at),
-            note: data.note,
+            note: data.note || "",
             userId: data.user_id
           };
+        } else if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+          console.error("Error fetching mood from Supabase:", error);
         }
       }
       
@@ -113,57 +125,89 @@ export function MoodTracker() {
     } catch (error) {
       console.error("Error fetching mood:", error);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
   
   // Function to save mood to storage
   const saveMood = async (mood: MoodValue, note?: string) => {
-    const newMoodEntry: MoodEntry = {
-      value: mood,
-      date: new Date(),
-      note: note,
-      userId: user?.id
-    };
-    
-    // Try to save to Supabase if user is logged in
-    if (user?.id) {
-      try {
-        const { error } = await supabase
+    setIsLoading(true);
+    try {
+      // Try to save to Supabase if user is logged in
+      if (user?.id) {
+        const today = new Date();
+        
+        // Check if we need to update or insert
+        const { data: existingMood } = await supabase
           .from('moods')
-          .upsert({
-            user_id: user.id,
-            mood: mood,
-            note: note || null,
-            created_at: new Date().toISOString()
-          }, { 
-            onConflict: 'user_id, created_at::date'
-          });
-          
-        if (error) throw error;
-      } catch (error) {
-        console.error("Error saving mood to Supabase:", error);
-        // Fall back to localStorage if Supabase save fails
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('created_date', today.toISOString().split('T')[0])
+          .single();
+        
+        if (existingMood) {
+          // Update existing mood
+          const { error } = await supabase
+            .from('moods')
+            .update({
+              mood: mood,
+              note: note || null
+            })
+            .eq('id', existingMood.id);
+            
+          if (error) throw error;
+          console.log("Updated mood in Supabase");
+        } else {
+          // Insert new mood
+          const { error } = await supabase
+            .from('moods')
+            .insert({
+              user_id: user.id,
+              mood: mood,
+              note: note || null
+            });
+              
+          if (error) throw error;
+          console.log("Inserted new mood in Supabase");
+        }
       }
+      
+      // Always save to localStorage as a backup
+      const newMoodEntry: MoodEntry = {
+        value: mood,
+        date: new Date(),
+        note: note,
+        userId: user?.id
+      };
+      
+      const storedMoods = localStorage.getItem('soulsync_moods');
+      const moods: MoodEntry[] = storedMoods ? JSON.parse(storedMoods) : [];
+      
+      // Check if there's already an entry for today
+      const todayIndex = moods.findIndex(
+        mood => new Date(mood.date).toDateString() === new Date().toDateString()
+      );
+      
+      if (todayIndex >= 0) {
+        // Update today's entry
+        moods[todayIndex] = newMoodEntry;
+      } else {
+        // Add new entry
+        moods.push(newMoodEntry);
+      }
+      
+      localStorage.setItem('soulsync_moods', JSON.stringify(moods));
+    } catch (error) {
+      console.error("Error saving mood:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to save mood",
+        description: "There was a problem saving your mood. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Always save to localStorage as a backup
-    const storedMoods = localStorage.getItem('soulsync_moods');
-    const moods: MoodEntry[] = storedMoods ? JSON.parse(storedMoods) : [];
-    
-    // Check if there's already an entry for today
-    const todayIndex = moods.findIndex(
-      mood => new Date(mood.date).toDateString() === new Date().toDateString()
-    );
-    
-    if (todayIndex >= 0) {
-      // Update today's entry
-      moods[todayIndex] = newMoodEntry;
-    } else {
-      // Add new entry
-      moods.push(newMoodEntry);
-    }
-    
-    localStorage.setItem('soulsync_moods', JSON.stringify(moods));
   };
   
   // Load today's mood when component mounts
@@ -236,6 +280,7 @@ export function MoodTracker() {
                     `${mood.bgColor} border-2 scale-110` : 
                     "border border-transparent"
                 )}
+                disabled={isLoading}
               >
                 <div className={cn("transition-colors", mood.color, isSelected ? "animate-bounce-soft" : "")}>
                   {renderMoodIcon(index)}
@@ -279,15 +324,16 @@ export function MoodTracker() {
           </div>
           
           <DialogFooter className="flex sm:justify-between">
-            <Button variant="ghost" onClick={() => setMoodDialogOpen(false)}>
+            <Button variant="ghost" onClick={() => setMoodDialogOpen(false)} disabled={isLoading}>
               <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
             <Button 
               onClick={handleSaveMoodDetails}
               className="button-primary"
+              disabled={isLoading}
             >
-              Save
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
