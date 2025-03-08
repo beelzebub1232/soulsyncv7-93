@@ -1,13 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Heart, 
-  ThumbsUp, 
-  Coffee, 
-  Frown, 
-  CloudRain,
+  SmilePlus, 
+  Smile, 
+  Meh, 
+  Frown,
   X 
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -36,37 +35,37 @@ const moods: Mood[] = [
   { 
     value: "amazing", 
     label: "Amazing", 
-    icon: <Heart className="h-8 w-8 stroke-green-600" />, 
+    icon: <SmilePlus className="h-7 w-7 stroke-[1.5px] stroke-green-600" />, 
     color: "text-green-600",
-    bgColor: "bg-green-100 border-green-300"
+    bgColor: "bg-[#F2FCE2] border-green-200"
   },
   { 
     value: "good", 
     label: "Good", 
-    icon: <ThumbsUp className="h-8 w-8 stroke-blue-600" />, 
+    icon: <Smile className="h-7 w-7 stroke-[1.5px] stroke-blue-600" />, 
     color: "text-blue-600",
-    bgColor: "bg-blue-100 border-blue-300" 
+    bgColor: "bg-[#D3E4FD] border-blue-200" 
   },
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <Coffee className="h-8 w-8 stroke-yellow-600" />, 
+    icon: <Meh className="h-7 w-7 stroke-[1.5px] stroke-yellow-600" />, 
     color: "text-yellow-600",
-    bgColor: "bg-yellow-100 border-yellow-300" 
+    bgColor: "bg-[#FEF7CD] border-yellow-200" 
   },
   { 
     value: "sad", 
     label: "Sad", 
-    icon: <Frown className="h-8 w-8 stroke-orange-600" />, 
+    icon: <Frown className="h-7 w-7 stroke-[1.5px] stroke-orange-600" />, 
     color: "text-orange-600",
-    bgColor: "bg-orange-100 border-orange-300" 
+    bgColor: "bg-[#FEC6A1] border-orange-200" 
   },
   { 
     value: "awful", 
     label: "Awful", 
-    icon: <CloudRain className="h-8 w-8 stroke-red-600" />, 
-    color: "text-red-600",
-    bgColor: "bg-red-100 border-red-300" 
+    icon: <Heart className="h-7 w-7 stroke-[1.5px] stroke-red-500 fill-none" />, 
+    color: "text-red-500",
+    bgColor: "bg-[#FFDEE2] border-red-200" 
   },
 ];
 
@@ -77,7 +76,6 @@ export function MoodTracker() {
   const [moodNote, setMoodNote] = useState("");
   const { toast } = useToast();
   
-  // Function to get today's mood from storage
   const getTodaysMood = (): MoodEntry | null => {
     const storedMoods = localStorage.getItem('soulsync_moods');
     if (!storedMoods) return null;
@@ -88,7 +86,6 @@ export function MoodTracker() {
     return moods.find(mood => new Date(mood.date).toDateString() === today) || null;
   };
   
-  // Function to save mood to storage
   const saveMood = (mood: MoodValue, note?: string) => {
     const newMoodEntry: MoodEntry = {
       value: mood,
@@ -99,23 +96,19 @@ export function MoodTracker() {
     const storedMoods = localStorage.getItem('soulsync_moods');
     const moods: MoodEntry[] = storedMoods ? JSON.parse(storedMoods) : [];
     
-    // Check if there's already an entry for today
     const todayIndex = moods.findIndex(
       mood => new Date(mood.date).toDateString() === new Date().toDateString()
     );
     
     if (todayIndex >= 0) {
-      // Update today's entry
       moods[todayIndex] = newMoodEntry;
     } else {
-      // Add new entry
       moods.push(newMoodEntry);
     }
     
     localStorage.setItem('soulsync_moods', JSON.stringify(moods));
   };
   
-  // Load today's mood when component mounts
   useEffect(() => {
     const todaysMood = getTodaysMood();
     if (todaysMood) {
@@ -145,7 +138,7 @@ export function MoodTracker() {
   
   return (
     <>
-      <div className="card-highlight p-5">
+      <div className="card-highlight p-5 bg-gradient-to-br from-mindscape-light/70 to-mindscape-light/40">
         <div className="mb-3">
           <h2 className="text-lg font-semibold">How are you feeling?</h2>
           <p className="text-sm text-muted-foreground">Track your mood daily</p>
@@ -160,7 +153,7 @@ export function MoodTracker() {
                 key={mood.value}
                 onClick={() => handleMoodClick(mood)}
                 className={cn(
-                  "flex flex-col items-center justify-center p-2 rounded-lg transition-all hover:scale-110",
+                  "flex flex-col items-center justify-center p-2 rounded-xl transition-all hover:scale-110",
                   isSelected ? 
                     `${mood.bgColor} border-2 scale-110` : 
                     "border border-transparent"
@@ -176,7 +169,6 @@ export function MoodTracker() {
         </div>
       </div>
       
-      {/* Mood Details Dialog */}
       <Dialog open={moodDialogOpen} onOpenChange={setMoodDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
