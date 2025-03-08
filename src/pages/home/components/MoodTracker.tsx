@@ -1,12 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Sun, 
-  Smile, 
-  Meh, 
-  Frown, 
+  SunMedium, 
+  HeartHandshake, 
+  CircleEqual, 
   Cloud,
+  CloudRain,
   X 
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -35,36 +36,36 @@ const moods: Mood[] = [
   { 
     value: "amazing", 
     label: "Amazing", 
-    icon: <Sun className="h-8 w-8 stroke-[1.5]" />, 
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-50 border-yellow-200"
+    icon: <SunMedium className="h-7 w-7 stroke-[1.25]" />, 
+    color: "text-amber-500",
+    bgColor: "bg-amber-50 border-amber-200"
   },
   { 
     value: "good", 
     label: "Good", 
-    icon: <Smile className="h-8 w-8 stroke-[1.5]" />, 
-    color: "text-green-600",
-    bgColor: "bg-green-50 border-green-200" 
+    icon: <HeartHandshake className="h-7 w-7 stroke-[1.25]" />, 
+    color: "text-emerald-500",
+    bgColor: "bg-emerald-50 border-emerald-200" 
   },
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <Meh className="h-8 w-8 stroke-[1.5]" />, 
-    color: "text-blue-600",
+    icon: <CircleEqual className="h-7 w-7 stroke-[1.25]" />, 
+    color: "text-blue-500",
     bgColor: "bg-blue-50 border-blue-200" 
   },
   { 
     value: "sad", 
     label: "Sad", 
-    icon: <Frown className="h-8 w-8 stroke-[1.5]" />, 
-    color: "text-orange-600",
+    icon: <Cloud className="h-7 w-7 stroke-[1.25]" />, 
+    color: "text-orange-500",
     bgColor: "bg-orange-50 border-orange-200" 
   },
   { 
     value: "awful", 
     label: "Awful", 
-    icon: <Cloud className="h-8 w-8 stroke-[1.5]" />, 
-    color: "text-purple-600",
+    icon: <CloudRain className="h-7 w-7 stroke-[1.25]" />, 
+    color: "text-purple-500",
     bgColor: "bg-purple-50 border-purple-200" 
   },
 ];
@@ -165,7 +166,12 @@ export function MoodTracker() {
                     "border border-transparent"
                 )}
               >
-                <div className={cn("transition-colors", mood.color, isSelected ? "animate-bounce-soft" : "")}>
+                <div className={cn(
+                  "transition-colors duration-300", 
+                  mood.color, 
+                  isSelected ? "animate-bounce-soft" : "",
+                  "hover:rotate-6 transition-transform"
+                )}>
                   {mood.icon}
                 </div>
                 <span className="text-xs mt-1 font-medium">{mood.label}</span>
