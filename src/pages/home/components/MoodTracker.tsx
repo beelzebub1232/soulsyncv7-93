@@ -1,13 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Heart, 
-  ThumbsUp, 
-  Coffee, 
+  Sun, 
+  Smile, 
+  Meh, 
   Frown, 
-  CloudRain,
+  Cloud,
   X 
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -36,37 +35,37 @@ const moods: Mood[] = [
   { 
     value: "amazing", 
     label: "Amazing", 
-    icon: <Heart className="h-8 w-8 stroke-green-600" />, 
-    color: "text-green-600",
-    bgColor: "bg-green-100 border-green-300"
+    icon: <Sun className="h-8 w-8 stroke-[1.5]" />, 
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-50 border-yellow-200"
   },
   { 
     value: "good", 
     label: "Good", 
-    icon: <ThumbsUp className="h-8 w-8 stroke-blue-600" />, 
-    color: "text-blue-600",
-    bgColor: "bg-blue-100 border-blue-300" 
+    icon: <Smile className="h-8 w-8 stroke-[1.5]" />, 
+    color: "text-green-600",
+    bgColor: "bg-green-50 border-green-200" 
   },
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <Coffee className="h-8 w-8 stroke-yellow-600" />, 
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-100 border-yellow-300" 
+    icon: <Meh className="h-8 w-8 stroke-[1.5]" />, 
+    color: "text-blue-600",
+    bgColor: "bg-blue-50 border-blue-200" 
   },
   { 
     value: "sad", 
     label: "Sad", 
-    icon: <Frown className="h-8 w-8 stroke-orange-600" />, 
+    icon: <Frown className="h-8 w-8 stroke-[1.5]" />, 
     color: "text-orange-600",
-    bgColor: "bg-orange-100 border-orange-300" 
+    bgColor: "bg-orange-50 border-orange-200" 
   },
   { 
     value: "awful", 
     label: "Awful", 
-    icon: <CloudRain className="h-8 w-8 stroke-red-600" />, 
-    color: "text-red-600",
-    bgColor: "bg-red-100 border-red-300" 
+    icon: <Cloud className="h-8 w-8 stroke-[1.5]" />, 
+    color: "text-purple-600",
+    bgColor: "bg-purple-50 border-purple-200" 
   },
 ];
 
