@@ -1,6 +1,5 @@
-
 import { useState, useRef, useEffect } from "react";
-import { Camera, Link2, Mic, Tag, Heart, Bold, Italic, List, AlignLeft, Paperclip, X, Upload } from "lucide-react";
+import { Tag, Heart, Bold, Italic, List, AlignLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -23,17 +22,10 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
   const [mood, setMood] = useState(existingEntry?.mood || "");
   const [tags, setTags] = useState<string[]>(existingEntry?.tags || []);
   const [newTag, setNewTag] = useState("");
-  const [attachments, setAttachments] = useState<Array<{type: 'image' | 'audio' | 'link', url: string, name?: string}>>(
-    existingEntry?.attachments || []
-  );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newAttachmentUrl, setNewAttachmentUrl] = useState("");
-  const [newAttachmentType, setNewAttachmentType] = useState<'image' | 'audio' | 'link'>('link');
   const [isFavorite, setIsFavorite] = useState(existingEntry?.favorite || false);
   
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   // Update text formatting
@@ -90,72 +82,6 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
     }, 0);
   };
   
-  // Handle file uploads
-  const handleFileUpload = (file: File, type: 'image' | 'audio') => {
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        const newAttachment = {
-          type,
-          url: e.target.result as string,
-          name: file.name
-        };
-        setAttachments([...attachments, newAttachment]);
-        
-        toast({
-          title: "Attachment added",
-          description: `Added ${file.name} to your journal.`
-        });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-  
-  const triggerImageUpload = () => {
-    fileInputRef.current?.click();
-  };
-  
-  const triggerAudioUpload = () => {
-    audioInputRef.current?.click();
-  };
-  
-  const addLinkAttachment = () => {
-    if (!newAttachmentUrl) return;
-    
-    try {
-      // Basic URL validation
-      new URL(newAttachmentUrl);
-      
-      const newAttachment = {
-        type: 'link' as const,
-        url: newAttachmentUrl,
-        name: newAttachmentUrl.split('/').pop() || 'Link'
-      };
-      
-      setAttachments([...attachments, newAttachment]);
-      setNewAttachmentUrl("");
-      
-      toast({
-        title: "Link added",
-        description: `Added a new link to your journal.`
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Invalid URL",
-        description: "Please enter a valid URL."
-      });
-    }
-  };
-  
-  const removeAttachment = (index: number) => {
-    const newAttachments = [...attachments];
-    newAttachments.splice(index, 1);
-    setAttachments(newAttachments);
-  };
-  
   const addTag = () => {
     if (!newTag.trim()) return;
     
@@ -192,7 +118,6 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
         date: new Date().toISOString(),
         mood,
         tags: tags.length > 0 ? tags : undefined,
-        attachments: attachments.length > 0 ? attachments : undefined,
         favorite: isFavorite
       };
       
@@ -276,118 +201,6 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
             className="min-h-[200px] resize-none border-none focus:ring-0 p-2"
           />
         </div>
-      </div>
-      
-      <div className="border-t border-border pt-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium">Attachments</h3>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
-                <Paperclip className="h-4 w-4" />
-                <span>Add Attachment</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm mb-2">Add a new attachment</h4>
-                <div className="flex flex-col gap-3">
-                  {/* Image upload */}
-                  <div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={triggerImageUpload}
-                      type="button"
-                      className="w-full justify-start"
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      Upload Image
-                    </Button>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef}
-                      className="hidden"
-                      accept="image/*"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          handleFileUpload(e.target.files[0], 'image');
-                        }
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Audio upload */}
-                  <div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={triggerAudioUpload}
-                      type="button"
-                      className="w-full justify-start"
-                    >
-                      <Mic className="h-4 w-4 mr-2" />
-                      Upload Audio
-                    </Button>
-                    <input 
-                      type="file" 
-                      ref={audioInputRef}
-                      className="hidden"
-                      accept="audio/*"
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          handleFileUpload(e.target.files[0], 'audio');
-                        }
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Link input */}
-                  <div className="space-y-2">
-                    <Label htmlFor="link-input">Add Link</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="link-input"
-                        placeholder="Enter URL"
-                        value={newAttachmentUrl}
-                        onChange={(e) => setNewAttachmentUrl(e.target.value)}
-                      />
-                      <Button 
-                        variant="default"
-                        size="sm"
-                        onClick={addLinkAttachment} 
-                        disabled={!newAttachmentUrl}
-                        type="button"
-                      >
-                        <Link2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-        
-        {attachments.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {attachments.map((attachment, index) => (
-              <div key={index} className="bg-muted rounded-md p-2 flex items-center gap-2 text-sm">
-                {attachment.type === 'image' && <Camera className="h-4 w-4" />}
-                {attachment.type === 'audio' && <Mic className="h-4 w-4" />}
-                {attachment.type === 'link' && <Link2 className="h-4 w-4" />}
-                <span className="truncate max-w-[150px]">{attachment.name}</span>
-                <button 
-                  type="button" 
-                  onClick={() => removeAttachment(index)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
       
       <div className="border-t border-border pt-4 space-y-4">

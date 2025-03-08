@@ -1,6 +1,6 @@
 
 import { formatDistanceToNow, format, isToday, isYesterday, isSameWeek, isSameMonth } from "date-fns";
-import { Heart, Calendar, Tag, Paperclip } from "lucide-react";
+import { Heart, Calendar, Tag } from "lucide-react";
 import { JournalEntry } from "@/types/journal";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -159,13 +159,6 @@ function JournalCard({ entry, isFavorite, onToggleFavorite, onClick }: JournalCa
           <span className="flex items-center gap-1 text-muted-foreground">
             <Tag className="h-3 w-3" />
             {entry.tags.join(', ')}
-          </span>
-        )}
-        
-        {entry.attachments && entry.attachments.length > 0 && (
-          <span className="flex items-center gap-1 text-muted-foreground">
-            <Paperclip className="h-3 w-3" />
-            {entry.attachments.length} attachment{entry.attachments.length !== 1 ? 's' : ''}
           </span>
         )}
       </div>

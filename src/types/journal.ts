@@ -6,10 +6,5 @@ export interface JournalEntry {
   date: string; // ISO string format
   mood?: string;
   tags?: string[];
-  attachments?: Array<{
-    type: 'image' | 'audio' | 'link';
-    url: string;
-    name?: string;
-  }>;
   favorite?: boolean;
 }
