@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,7 +62,6 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom theme colors for our app
 				mindscape: {
 					primary: '#9b87f5',
 					secondary: '#7E69AB',
@@ -78,7 +76,6 @@ export default {
 					blue: '#D3E4FD',
 					gray: '#F1F0FB'
 				},
-				// Crisis color for crisis button
 				crisis: {
 					DEFAULT: '#FF686B',
 					hover: '#FF8A8C',
@@ -163,9 +160,8 @@ export default {
 				},
 				'bounce-soft': {
 					'0%': { transform: 'translateY(0)' },
-					'25%': { transform: 'translateY(-3px)' },
-					'50%': { transform: 'translateY(0)' },
-					'75%': { transform: 'translateY(-2px)' },
+					'33%': { transform: 'translateY(-2px)' },
+					'66%': { transform: 'translateY(0)' },
 					'100%': { transform: 'translateY(0)' }
 				}
 			},
@@ -183,7 +179,7 @@ export default {
 				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out',
 				'exit': 'fade-out 0.3s ease-out, scale-out 0.2s ease-out',
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
-				'bounce-soft': 'bounce-soft 4s ease-in-out infinite'
+				'bounce-soft': 'bounce-soft 8s ease-in-out infinite'
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
