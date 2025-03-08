@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Search, Calendar, SortAsc, Filter } from "lucide-react";
 import { RecentJournals } from "./components/RecentJournals";
@@ -91,7 +92,7 @@ export default function Journal() {
     
     toast({
       title: "Journal entry saved",
-      description: `"${entry.title}" has been added to your journal."
+      description: `"${entry.title}" has been added to your journal.`
     });
     
     setIsNewJournalOpen(false);
@@ -121,14 +122,13 @@ export default function Journal() {
   };
   
   const toggleFilter = () => {
-    const filters = [null, "withAttachments", "withTags", "withMood"];
+    const filters = [null, "withTags", "withMood"];
     const currentIndex = filters.indexOf(filterBy);
     const nextFilter = filters[(currentIndex + 1) % filters.length];
     
     setFilterBy(nextFilter);
     
     const filterNames: Record<string, string> = {
-      "withAttachments": "entries with attachments",
       "withTags": "entries with tags",
       "withMood": "entries with mood"
     };
