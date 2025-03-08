@@ -7,19 +7,28 @@ import { NewJournalForm } from "./components/NewJournalForm";
 import { Input } from "@/components/ui/input";
 import { JournalEntry } from "@/types/journal";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { useUser } from "@/contexts/UserContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { JournalDetails } from "./components/JournalDetails";
 
 export default function Journal() {
   const [isNewJournalOpen, setIsNewJournalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<JournalEntry[]>([]);
+  const [selectedJournal, setSelectedJournal] = useState<JournalEntry | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterBy, setFilterBy] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useUser();
   
   // Load journal entries on component mount
   useEffect(() => {
-    const storedEntries = localStorage.getItem('soulsync_journal');
+    if (!user) return;
+    
+    const storageKey = `soulsync_journal_${user.id}`;
+    const storedEntries = localStorage.getItem(storageKey);
+    
     if (storedEntries) {
       try {
         const parsedEntries = JSON.parse(storedEntries);
@@ -34,28 +43,60 @@ export default function Journal() {
         });
       }
     }
-  }, [toast]);
+  }, [toast, user]);
   
   // Filter entries when search query changes
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredEntries(entries);
-      return;
+    if (!entries.length) return;
+    
+    let result = [...entries];
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(entry => 
+        entry.title.toLowerCase().includes(lowerQuery) || 
+        entry.content.toLowerCase().includes(lowerQuery) ||
+        entry.tags?.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
+        entry.mood?.toLowerCase().includes(lowerQuery)
+      );
     }
     
-    const lowerQuery = searchQuery.toLowerCase();
-    const filtered = entries.filter(entry => 
-      entry.title.toLowerCase().includes(lowerQuery) || 
-      entry.content.toLowerCase().includes(lowerQuery)
-    );
+    // Apply category filter
+    if (filterBy) {
+      if (filterBy === "withAttachments") {
+        result = result.filter(entry => entry.attachments && entry.attachments.length > 0);
+      } else if (filterBy === "withTags") {
+        result = result.filter(entry => entry.tags && entry.tags.length > 0);
+      } else if (filterBy === "withMood") {
+        result = result.filter(entry => entry.mood);
+      }
+    }
     
-    setFilteredEntries(filtered);
-  }, [searchQuery, entries]);
+    // Apply sort
+    result.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
+    
+    setFilteredEntries(result);
+  }, [searchQuery, entries, sortOrder, filterBy]);
   
   const addNewEntry = (entry: JournalEntry) => {
-    const updatedEntries = [entry, ...entries];
+    if (!user) return;
+    
+    // Make sure date is properly serialized 
+    const entryWithDate = {
+      ...entry,
+      date: new Date().toISOString()
+    };
+    
+    const updatedEntries = [entryWithDate, ...entries];
     setEntries(updatedEntries);
-    localStorage.setItem('soulsync_journal', JSON.stringify(updatedEntries));
+    
+    const storageKey = `soulsync_journal_${user.id}`;
+    localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
     
     toast({
       title: "Journal entry saved",
@@ -63,6 +104,68 @@ export default function Journal() {
     });
     
     setIsNewJournalOpen(false);
+  };
+  
+  const toggleFavorite = (entryId: string) => {
+    if (!user) return;
+    
+    const updatedEntries = entries.map(entry => 
+      entry.id === entryId 
+        ? { ...entry, favorite: !entry.favorite }
+        : entry
+    );
+    
+    setEntries(updatedEntries);
+    
+    const storageKey = `soulsync_journal_${user.id}`;
+    localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
+  };
+  
+  const toggleSort = () => {
+    setSortOrder(prev => prev === "desc" ? "asc" : "desc");
+    toast({
+      title: `Sorted ${sortOrder === "desc" ? "oldest" : "newest"} first`,
+      description: "Your journal entries have been reordered."
+    });
+  };
+  
+  const toggleFilter = () => {
+    const filters = [null, "withAttachments", "withTags", "withMood"];
+    const currentIndex = filters.indexOf(filterBy);
+    const nextFilter = filters[(currentIndex + 1) % filters.length];
+    
+    setFilterBy(nextFilter);
+    
+    const filterNames: Record<string, string> = {
+      "withAttachments": "entries with attachments",
+      "withTags": "entries with tags",
+      "withMood": "entries with mood"
+    };
+    
+    if (nextFilter) {
+      toast({
+        title: "Filter applied",
+        description: `Showing ${filterNames[nextFilter]}.`
+      });
+    } else {
+      toast({
+        title: "Filter removed",
+        description: "Showing all journal entries."
+      });
+    }
+  };
+  
+  // Handle the "Write First Entry" button click
+  const handleWriteFirstEntry = () => {
+    setIsNewJournalOpen(true);
+  };
+  
+  const openJournalDetails = (entry: JournalEntry) => {
+    setSelectedJournal(entry);
+  };
+  
+  const closeJournalDetails = () => {
+    setSelectedJournal(null);
   };
   
   return (
@@ -94,8 +197,9 @@ export default function Journal() {
         </div>
         
         <button 
-          className="w-10 h-10 rounded-lg border border-input bg-background hover:bg-accent flex items-center justify-center"
+          className={`w-10 h-10 rounded-lg ${filterBy ? 'bg-mindscape-primary text-white' : 'border border-input bg-background hover:bg-accent'} flex items-center justify-center`}
           aria-label="Filter"
+          onClick={toggleFilter}
         >
           <Filter className="h-4 w-4" />
         </button>
@@ -103,8 +207,9 @@ export default function Journal() {
         <button 
           className="w-10 h-10 rounded-lg border border-input bg-background hover:bg-accent flex items-center justify-center"
           aria-label="Sort"
+          onClick={toggleSort}
         >
-          <SortAsc className="h-4 w-4" />
+          <SortAsc className={`h-4 w-4 transform ${sortOrder === "asc" ? "rotate-0" : "rotate-180"}`} />
         </button>
         
         <button 
@@ -123,13 +228,21 @@ export default function Journal() {
         </TabsList>
         
         <TabsContent value="recent" className="mt-4">
-          <RecentJournals entries={filteredEntries.slice(0, 10)} />
+          <RecentJournals 
+            entries={filteredEntries.slice(0, 10)} 
+            onToggleFavorite={toggleFavorite}
+            onJournalClick={openJournalDetails}
+            onWriteFirstEntry={handleWriteFirstEntry}
+          />
         </TabsContent>
         
         <TabsContent value="favorites" className="mt-4">
           <RecentJournals 
             entries={filteredEntries.filter(entry => entry.favorite)} 
+            onToggleFavorite={toggleFavorite}
+            onJournalClick={openJournalDetails}
             emptyMessage="No favorite entries yet. Star an entry to add it to favorites."
+            onWriteFirstEntry={handleWriteFirstEntry}
           />
         </TabsContent>
         
@@ -137,6 +250,9 @@ export default function Journal() {
           <RecentJournals 
             entries={filteredEntries} 
             showDateGroups={true}
+            onToggleFavorite={toggleFavorite}
+            onJournalClick={openJournalDetails}
+            onWriteFirstEntry={handleWriteFirstEntry}
           />
         </TabsContent>
       </Tabs>
@@ -147,9 +263,19 @@ export default function Journal() {
           <SheetHeader>
             <SheetTitle>New Journal Entry</SheetTitle>
           </SheetHeader>
-          <NewJournalForm onComplete={addNewEntry} />
+          <NewJournalForm onComplete={addNewEntry} onCancel={() => setIsNewJournalOpen(false)} />
         </SheetContent>
       </Sheet>
+      
+      {/* Journal Details Dialog */}
+      {selectedJournal && (
+        <JournalDetails 
+          entry={selectedJournal} 
+          isOpen={!!selectedJournal} 
+          onClose={closeJournalDetails}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
     </div>
   );
 }

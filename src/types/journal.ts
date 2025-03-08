@@ -3,7 +3,7 @@ export interface JournalEntry {
   id: string;
   title: string;
   content: string;
-  date: Date;
+  date: string; // ISO string format
   mood?: string;
   tags?: string[];
   attachments?: Array<{

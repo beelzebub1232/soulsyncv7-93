@@ -2,56 +2,37 @@
 import { formatDistanceToNow, format, isToday, isYesterday, isSameWeek, isSameMonth } from "date-fns";
 import { Heart, Calendar, Tag, Paperclip } from "lucide-react";
 import { JournalEntry } from "@/types/journal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface RecentJournalsProps {
   entries: JournalEntry[];
   showDateGroups?: boolean;
   emptyMessage?: string;
+  onToggleFavorite: (entryId: string) => void;
+  onJournalClick: (entry: JournalEntry) => void;
+  onWriteFirstEntry: () => void;
 }
 
 export function RecentJournals({ 
   entries, 
   showDateGroups = false,
-  emptyMessage = "You haven't created any journal entries yet."
+  emptyMessage = "You haven't created any journal entries yet.",
+  onToggleFavorite,
+  onJournalClick,
+  onWriteFirstEntry
 }: RecentJournalsProps) {
-  const [favoritedEntries, setFavoritedEntries] = useState<Set<string>>(
-    new Set(entries.filter(e => e.favorite).map(e => e.id))
-  );
-  
-  const toggleFavorite = (e: React.MouseEvent, entryId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const newFavorites = new Set(favoritedEntries);
-    
-    if (newFavorites.has(entryId)) {
-      newFavorites.delete(entryId);
-    } else {
-      newFavorites.add(entryId);
-    }
-    
-    setFavoritedEntries(newFavorites);
-    
-    // Update local storage
-    const storedEntries = localStorage.getItem('soulsync_journal');
-    if (storedEntries) {
-      const parsedEntries: JournalEntry[] = JSON.parse(storedEntries);
-      const updatedEntries = parsedEntries.map(entry => 
-        entry.id === entryId 
-          ? { ...entry, favorite: !newFavorites.has(entryId) }
-          : entry
-      );
-      localStorage.setItem('soulsync_journal', JSON.stringify(updatedEntries));
-    }
-  };
   
   if (entries.length === 0) {
     return (
       <div className="card-primary p-5 text-center">
         <p className="text-muted-foreground">{emptyMessage}</p>
-        <button className="button-primary mt-3">Write First Entry</button>
+        <button 
+          className="button-primary mt-3"
+          onClick={onWriteFirstEntry}
+        >
+          Write First Entry
+        </button>
       </div>
     );
   }
@@ -96,8 +77,9 @@ export function RecentJournals({
                 <JournalCard 
                   key={entry.id} 
                   entry={entry} 
-                  isFavorite={favoritedEntries.has(entry.id)}
-                  onToggleFavorite={toggleFavorite}
+                  isFavorite={!!entry.favorite}
+                  onToggleFavorite={onToggleFavorite}
+                  onClick={() => onJournalClick(entry)}
                 />
               ))}
             </div>
@@ -114,8 +96,9 @@ export function RecentJournals({
         <JournalCard 
           key={entry.id} 
           entry={entry} 
-          isFavorite={favoritedEntries.has(entry.id)}
-          onToggleFavorite={toggleFavorite}
+          isFavorite={!!entry.favorite}
+          onToggleFavorite={onToggleFavorite}
+          onClick={() => onJournalClick(entry)}
         />
       ))}
     </div>
@@ -125,22 +108,26 @@ export function RecentJournals({
 interface JournalCardProps {
   entry: JournalEntry;
   isFavorite: boolean;
-  onToggleFavorite: (e: React.MouseEvent, id: string) => void;
+  onToggleFavorite: (id: string) => void;
+  onClick: () => void;
 }
 
-function JournalCard({ entry, isFavorite, onToggleFavorite }: JournalCardProps) {
+function JournalCard({ entry, isFavorite, onToggleFavorite, onClick }: JournalCardProps) {
   const entryDate = new Date(entry.date);
   
   return (
-    <a 
-      href={`/journal/${entry.id}`}
-      className="card-primary block p-4 hover:shadow-md transition-all"
+    <div 
+      className="card-primary block p-4 hover:shadow-md transition-all cursor-pointer"
+      onClick={onClick}
     >
       <div className="flex justify-between items-start">
         <h3 className="font-medium">{entry.title}</h3>
         <div className="flex items-center gap-1">
           <button 
-            onClick={(e) => onToggleFavorite(e, entry.id)}
+            onClick={(e) => {
+              e.stopPropagation();  // Prevent triggering the card click
+              onToggleFavorite(entry.id);
+            }}
             className="p-1.5 rounded-full hover:bg-mindscape-light/70 transition-colors"
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
@@ -182,6 +169,6 @@ function JournalCard({ entry, isFavorite, onToggleFavorite }: JournalCardProps) 
           </span>
         )}
       </div>
-    </a>
+    </div>
   );
 }

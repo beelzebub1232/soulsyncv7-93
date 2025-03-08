@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Camera, Link2, Mic, Tag, Heart, Bold, Italic, List, AlignLeft, Paperclip } from "lucide-react";
+import { Camera, Link2, Mic, Tag, Heart, Bold, Italic, List, AlignLeft, Paperclip, X, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,15 @@ import { JournalEntry } from "@/types/journal";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
+import { Label } from "@/components/ui/label";
 
 interface NewJournalFormProps {
   onComplete: (entry: JournalEntry) => void;
+  onCancel: () => void;
   existingEntry?: JournalEntry;
 }
 
-export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProps) {
+export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJournalFormProps) {
   const [title, setTitle] = useState(existingEntry?.title || "");
   const [content, setContent] = useState(existingEntry?.content || "");
   const [mood, setMood] = useState(existingEntry?.mood || "");
@@ -30,6 +32,8 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
   const [isFavorite, setIsFavorite] = useState(existingEntry?.favorite || false);
   
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   // Update text formatting
@@ -86,22 +90,64 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
     }, 0);
   };
   
-  const addAttachment = () => {
+  // Handle file uploads
+  const handleFileUpload = (file: File, type: 'image' | 'audio') => {
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        const newAttachment = {
+          type,
+          url: e.target.result as string,
+          name: file.name
+        };
+        setAttachments([...attachments, newAttachment]);
+        
+        toast({
+          title: "Attachment added",
+          description: `Added ${file.name} to your journal.`
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const triggerImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const triggerAudioUpload = () => {
+    audioInputRef.current?.click();
+  };
+  
+  const addLinkAttachment = () => {
     if (!newAttachmentUrl) return;
     
-    const newAttachment = {
-      type: newAttachmentType,
-      url: newAttachmentUrl,
-      name: newAttachmentUrl.split('/').pop() || 'Attachment'
-    };
-    
-    setAttachments([...attachments, newAttachment]);
-    setNewAttachmentUrl("");
-    
-    toast({
-      title: "Attachment added",
-      description: `Added a new ${newAttachmentType} attachment to your journal.`
-    });
+    try {
+      // Basic URL validation
+      new URL(newAttachmentUrl);
+      
+      const newAttachment = {
+        type: 'link' as const,
+        url: newAttachmentUrl,
+        name: newAttachmentUrl.split('/').pop() || 'Link'
+      };
+      
+      setAttachments([...attachments, newAttachment]);
+      setNewAttachmentUrl("");
+      
+      toast({
+        title: "Link added",
+        description: `Added a new link to your journal.`
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Invalid URL",
+        description: "Please enter a valid URL."
+      });
+    }
   };
   
   const removeAttachment = (index: number) => {
@@ -124,7 +170,7 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title || !content) {
@@ -143,7 +189,7 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
         id: existingEntry?.id || Date.now().toString(),
         title,
         content,
-        date: new Date(),
+        date: new Date().toISOString(),
         mood,
         tags: tags.length > 0 ? tags : undefined,
         attachments: attachments.length > 0 ? attachments : undefined,
@@ -160,6 +206,11 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
     } finally {
       setIsSubmitting(false);
     }
+  };
+  
+  // Handle cancel button
+  const handleCancel = () => {
+    onCancel();
   };
   
   // Common mood options for journal entries
@@ -239,50 +290,80 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="space-y-2">
-                <h4 className="font-medium text-sm">Add a new attachment</h4>
-                <div className="flex gap-2 mb-2">
-                  <Button 
-                    variant={newAttachmentType === 'image' ? 'default' : 'outline'} 
-                    size="sm"
-                    onClick={() => setNewAttachmentType('image')}
-                    type="button"
-                  >
-                    <Camera className="h-4 w-4 mr-1" />
-                    Image
-                  </Button>
-                  <Button 
-                    variant={newAttachmentType === 'audio' ? 'default' : 'outline'} 
-                    size="sm"
-                    onClick={() => setNewAttachmentType('audio')}
-                    type="button"
-                  >
-                    <Mic className="h-4 w-4 mr-1" />
-                    Audio
-                  </Button>
-                  <Button 
-                    variant={newAttachmentType === 'link' ? 'default' : 'outline'} 
-                    size="sm"
-                    onClick={() => setNewAttachmentType('link')}
-                    type="button"
-                  >
-                    <Link2 className="h-4 w-4 mr-1" />
-                    Link
-                  </Button>
+                <h4 className="font-medium text-sm mb-2">Add a new attachment</h4>
+                <div className="flex flex-col gap-3">
+                  {/* Image upload */}
+                  <div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={triggerImageUpload}
+                      type="button"
+                      className="w-full justify-start"
+                    >
+                      <Camera className="h-4 w-4 mr-2" />
+                      Upload Image
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleFileUpload(e.target.files[0], 'image');
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Audio upload */}
+                  <div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={triggerAudioUpload}
+                      type="button"
+                      className="w-full justify-start"
+                    >
+                      <Mic className="h-4 w-4 mr-2" />
+                      Upload Audio
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={audioInputRef}
+                      className="hidden"
+                      accept="audio/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          handleFileUpload(e.target.files[0], 'audio');
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Link input */}
+                  <div className="space-y-2">
+                    <Label htmlFor="link-input">Add Link</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="link-input"
+                        placeholder="Enter URL"
+                        value={newAttachmentUrl}
+                        onChange={(e) => setNewAttachmentUrl(e.target.value)}
+                      />
+                      <Button 
+                        variant="default"
+                        size="sm"
+                        onClick={addLinkAttachment} 
+                        disabled={!newAttachmentUrl}
+                        type="button"
+                      >
+                        <Link2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <Input
-                  placeholder={`Enter ${newAttachmentType} URL`}
-                  value={newAttachmentUrl}
-                  onChange={(e) => setNewAttachmentUrl(e.target.value)}
-                  className="mb-2"
-                />
-                <Button 
-                  onClick={addAttachment} 
-                  disabled={!newAttachmentUrl}
-                  className="w-full"
-                  type="button"
-                >
-                  Add
-                </Button>
               </div>
             </PopoverContent>
           </Popover>
@@ -301,7 +382,7 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
                   onClick={() => removeAttachment(index)}
                   className="text-muted-foreground hover:text-destructive"
                 >
-                  ✕
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             ))}
@@ -315,7 +396,7 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
           <Popover>
             <PopoverTrigger asChild>
               <Button 
-                variant="outline" 
+                variant={mood ? "default" : "outline"}
                 size="sm"
                 className="flex items-center gap-1"
               >
@@ -379,7 +460,7 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
                   onClick={() => removeTag(tag)}
                   className="hover:text-destructive"
                 >
-                  ✕
+                  <X className="h-3 w-3" />
                 </button>
               </div>
             ))}
@@ -402,7 +483,7 @@ export function NewJournalForm({ onComplete, existingEntry }: NewJournalFormProp
           <Button 
             type="button" 
             variant="outline" 
-            onClick={() => onComplete({ ...existingEntry } as JournalEntry)}
+            onClick={handleCancel}
           >
             Cancel
           </Button>
