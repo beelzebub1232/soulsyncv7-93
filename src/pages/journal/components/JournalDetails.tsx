@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sheet";
 import { JournalEntry } from "@/types/journal";
 import { Button } from "@/components/ui/button";
-import { Heart, Calendar, Tag, Paperclip, Link2, Camera, Mic } from "lucide-react";
+import { Heart, Calendar, Tag } from "lucide-react";
 import { formatRelative } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -78,83 +78,6 @@ export function JournalDetails({
     setMediaPreview(null);
   };
   
-  const renderAttachments = () => {
-    if (!entry.attachments || entry.attachments.length === 0) return null;
-    
-    return (
-      <div className="mt-6 space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-          <Paperclip className="h-3.5 w-3.5" />
-          Attachments
-        </h3>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {entry.attachments.map((attachment, index) => {
-            if (attachment.type === 'image') {
-              return (
-                <div 
-                  key={`img-${index}`}
-                  className="relative border border-border rounded-md overflow-hidden bg-muted/50 hover:bg-muted/80 cursor-pointer transition-colors group"
-                  onClick={() => openMediaPreview(attachment)}
-                >
-                  <div className="aspect-video relative">
-                    <img 
-                      src={attachment.url} 
-                      alt={attachment.name || 'Image attachment'} 
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-2 flex items-center gap-2">
-                    <Camera className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-xs truncate">{attachment.name || 'Image'}</span>
-                  </div>
-                </div>
-              );
-            } else if (attachment.type === 'audio') {
-              return (
-                <div 
-                  key={`audio-${index}`}
-                  className="border border-border rounded-md overflow-hidden bg-muted/50 p-3 space-y-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <Mic className="h-4 w-4 text-mindscape-primary" />
-                    <span className="text-sm font-medium truncate">{attachment.name || 'Audio'}</span>
-                  </div>
-                  <audio 
-                    controls 
-                    src={attachment.url} 
-                    className="w-full h-8"
-                  />
-                </div>
-              );
-            } else if (attachment.type === 'link') {
-              return (
-                <a 
-                  key={`link-${index}`}
-                  href={attachment.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="border border-border rounded-md overflow-hidden bg-muted/50 p-3 flex items-center gap-3 hover:bg-muted/80 transition-colors"
-                >
-                  <Link2 className="h-4 w-4 text-mindscape-primary" />
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium truncate block">
-                      {attachment.name || 'Link'}
-                    </span>
-                    <span className="text-xs text-muted-foreground truncate block">
-                      {attachment.url}
-                    </span>
-                  </div>
-                </a>
-              );
-            }
-            return null;
-          })}
-        </div>
-      </div>
-    );
-  };
-  
   // Use Sheet for mobile and Dialog for desktop
   if (isMobile) {
     return (
@@ -208,8 +131,6 @@ export function JournalDetails({
                   ))}
                 </div>
               )}
-              
-              {renderAttachments()}
             </div>
             
             <div className="mt-8 flex justify-end">
@@ -302,8 +223,6 @@ export function JournalDetails({
                 ))}
               </div>
             )}
-            
-            {renderAttachments()}
           </div>
         </DialogContent>
       </Dialog>

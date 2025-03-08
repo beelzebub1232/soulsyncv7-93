@@ -1,5 +1,6 @@
+
 import { useState, useRef, useEffect } from "react";
-import { Tag, Heart, Bold, Italic, List, AlignLeft } from "lucide-react";
+import { Tag, Heart, Bold, Italic, List, AlignLeft, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";

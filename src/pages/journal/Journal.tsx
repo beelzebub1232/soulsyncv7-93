@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Search, Calendar, SortAsc, Filter } from "lucide-react";
 import { RecentJournals } from "./components/RecentJournals";
@@ -22,7 +21,6 @@ export default function Journal() {
   const { toast } = useToast();
   const { user } = useUser();
   
-  // Load journal entries on component mount
   useEffect(() => {
     if (!user) return;
     
@@ -45,13 +43,11 @@ export default function Journal() {
     }
   }, [toast, user]);
   
-  // Filter entries when search query changes
   useEffect(() => {
     if (!entries.length) return;
     
     let result = [...entries];
     
-    // Apply search filter
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter(entry => 
@@ -62,18 +58,14 @@ export default function Journal() {
       );
     }
     
-    // Apply category filter
     if (filterBy) {
-      if (filterBy === "withAttachments") {
-        result = result.filter(entry => entry.attachments && entry.attachments.length > 0);
-      } else if (filterBy === "withTags") {
+      if (filterBy === "withTags") {
         result = result.filter(entry => entry.tags && entry.tags.length > 0);
       } else if (filterBy === "withMood") {
         result = result.filter(entry => entry.mood);
       }
     }
     
-    // Apply sort
     result.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
@@ -86,7 +78,6 @@ export default function Journal() {
   const addNewEntry = (entry: JournalEntry) => {
     if (!user) return;
     
-    // Make sure date is properly serialized 
     const entryWithDate = {
       ...entry,
       date: new Date().toISOString()
@@ -100,7 +91,7 @@ export default function Journal() {
     
     toast({
       title: "Journal entry saved",
-      description: `"${entry.title}" has been added to your journal.`
+      description: `"${entry.title}" has been added to your journal."
     });
     
     setIsNewJournalOpen(false);
@@ -155,7 +146,6 @@ export default function Journal() {
     }
   };
   
-  // Handle the "Write First Entry" button click
   const handleWriteFirstEntry = () => {
     setIsNewJournalOpen(true);
   };
@@ -257,7 +247,6 @@ export default function Journal() {
         </TabsContent>
       </Tabs>
       
-      {/* New Journal Sheet */}
       <Sheet open={isNewJournalOpen} onOpenChange={setIsNewJournalOpen}>
         <SheetContent side="bottom" className="h-[90%] rounded-t-xl pt-6">
           <SheetHeader>
@@ -267,7 +256,6 @@ export default function Journal() {
         </SheetContent>
       </Sheet>
       
-      {/* Journal Details Dialog */}
       {selectedJournal && (
         <JournalDetails 
           entry={selectedJournal} 
