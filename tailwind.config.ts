@@ -162,8 +162,11 @@ export default {
 					'50%': { opacity: '0.8' }
 				},
 				'bounce-soft': {
-					'0%, 100%': { transform: 'translateY(0)' },
-					'50%': { transform: 'translateY(-5px)' }
+					'0%': { transform: 'translateY(0)' },
+					'25%': { transform: 'translateY(-3px)' },
+					'50%': { transform: 'translateY(0)' },
+					'75%': { transform: 'translateY(-2px)' },
+					'100%': { transform: 'translateY(0)' }
 				}
 			},
 			animation: {
@@ -180,7 +183,7 @@ export default {
 				'enter': 'fade-in 0.3s ease-out, scale-in 0.2s ease-out',
 				'exit': 'fade-out 0.3s ease-out, scale-out 0.2s ease-out',
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
-				'bounce-soft': 'bounce-soft 2s ease-in-out infinite'
+				'bounce-soft': 'bounce-soft 4s ease-in-out infinite'
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
