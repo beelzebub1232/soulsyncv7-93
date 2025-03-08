@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider } from "@/contexts/UserContext";
-import { CrisisHelpSidebar } from "@/components/CrisisHelpSidebar";
 
 // Layouts
 import { AppLayout } from "@/layouts/AppLayout";
@@ -55,7 +54,6 @@ const App = () => (
             {/* Not Found Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <CrisisHelpSidebar />
         </BrowserRouter>
       </TooltipProvider>
     </UserProvider>

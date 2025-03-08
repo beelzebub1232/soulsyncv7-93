@@ -41,7 +41,7 @@ export function UpcomingHabits() {
   
   if (habits.length === 0) {
     return (
-      <div className="card-primary p-5 text-center h-full flex flex-col justify-center">
+      <div className="card-primary p-5 text-center">
         <p className="text-muted-foreground">No habits scheduled for today.</p>
         <button className="button-primary mt-3">Add a Habit</button>
       </div>
