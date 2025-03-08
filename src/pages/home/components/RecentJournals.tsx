@@ -23,7 +23,7 @@ const journalEntries = [
 export function RecentJournals() {
   if (journalEntries.length === 0) {
     return (
-      <div className="card-primary p-5 text-center">
+      <div className="card-primary p-5 text-center rounded-xl shadow-sm border border-mindscape-light/30 bg-white">
         <p className="text-muted-foreground">You haven't created any journal entries yet.</p>
         <button className="button-primary mt-3">Write First Entry</button>
       </div>
@@ -36,10 +36,10 @@ export function RecentJournals() {
         <a 
           key={entry.id}
           href={`/journal/${entry.id}`}
-          className="card-primary block p-4 hover:shadow-md transition-all"
+          className="card-primary block p-4 hover:shadow-md transition-all rounded-xl border border-mindscape-light/30 bg-white"
         >
           <div className="flex justify-between items-start">
-            <h3 className="font-medium">{entry.title}</h3>
+            <h3 className="font-medium text-mindscape-primary">{entry.title}</h3>
             <span className="text-xs text-muted-foreground">
               {formatDistanceToNow(entry.date, { addSuffix: true })}
             </span>

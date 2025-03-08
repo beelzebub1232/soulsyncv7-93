@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Calendar, Tag } from "lucide-react";
 import { formatRelative } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface JournalDetailsProps {
   entry: JournalEntry;
@@ -64,16 +64,6 @@ export function JournalDetails({
     return formattedContent;
   };
   
-  const openMediaPreview = (attachment: {
-    type: 'image' | 'audio';
-    url: string;
-    name?: string;
-  }) => {
-    if (attachment.type === 'image' || attachment.type === 'audio') {
-      setMediaPreview(attachment);
-    }
-  };
-  
   const closeMediaPreview = () => {
     setMediaPreview(null);
   };
@@ -108,7 +98,7 @@ export function JournalDetails({
             
             <div className="mt-6 animate-fade-in">
               <div 
-                className="prose prose-sm max-w-none" 
+                className="prose prose-sm max-w-none card-primary p-4 shadow-sm"
                 dangerouslySetInnerHTML={{ __html: formatContent(entry.content) }}
               />
               
@@ -133,7 +123,7 @@ export function JournalDetails({
               )}
             </div>
             
-            <div className="mt-8 flex justify-end">
+            <div className="mt-8 flex justify-end pb-6">
               <Button onClick={onClose}>Close</Button>
             </div>
           </SheetContent>
@@ -145,6 +135,7 @@ export function JournalDetails({
             <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle>{mediaPreview.name || 'Preview'}</DialogTitle>
+                <DialogDescription>View your media</DialogDescription>
               </DialogHeader>
               
               <div className="mt-4">
@@ -192,15 +183,15 @@ export function JournalDetails({
                 />
               </button>
             </div>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+            <DialogDescription className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
               <Calendar className="h-3.5 w-3.5" />
               {formatRelative(new Date(entry.date), new Date())}
-            </div>
+            </DialogDescription>
           </DialogHeader>
           
           <div className="mt-6 animate-fade-in">
             <div 
-              className="prose prose-sm max-w-none" 
+              className="prose prose-sm max-w-none card-highlight p-5 rounded-xl shadow-md"
               dangerouslySetInnerHTML={{ __html: formatContent(entry.content) }}
             />
             
@@ -233,6 +224,7 @@ export function JournalDetails({
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>{mediaPreview.name || 'Preview'}</DialogTitle>
+              <DialogDescription>View your media</DialogDescription>
             </DialogHeader>
             
             <div className="mt-4">

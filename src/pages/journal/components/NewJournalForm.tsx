@@ -7,8 +7,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { JournalEntry } from "@/types/journal";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 interface NewJournalFormProps {
@@ -134,11 +139,6 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
     }
   };
   
-  // Handle cancel button
-  const handleCancel = () => {
-    onCancel();
-  };
-  
   // Common mood options for journal entries
   const moodOptions = [
     "Happy", "Calm", "Excited", "Grateful", "Hopeful", 
@@ -207,34 +207,23 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
       <div className="border-t border-border pt-4 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-medium">How are you feeling?</h3>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant={mood ? "default" : "outline"}
-                size="sm"
-                className="flex items-center gap-1"
-              >
-                {mood ? mood : "Select mood"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-0">
-              <Command>
-                <CommandList>
-                  <CommandGroup>
-                    {moodOptions.map((option) => (
-                      <CommandItem 
-                        key={option}
-                        onSelect={() => setMood(option)}
-                        className="cursor-pointer"
-                      >
-                        {option}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <div className="w-48">
+            <Select 
+              value={mood} 
+              onValueChange={setMood}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select mood" />
+              </SelectTrigger>
+              <SelectContent>
+                {moodOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         <div className="flex items-center justify-between">
@@ -282,7 +271,7 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
         )}
       </div>
       
-      <div className="flex justify-between items-center pt-4 border-t border-border">
+      <div className="flex justify-between items-center pt-4 border-t border-border pb-6">
         <Button
           type="button"
           variant="ghost"
@@ -297,7 +286,7 @@ export function NewJournalForm({ onComplete, onCancel, existingEntry }: NewJourn
           <Button 
             type="button" 
             variant="outline" 
-            onClick={handleCancel}
+            onClick={onCancel}
           >
             Cancel
           </Button>

@@ -9,6 +9,7 @@ interface JournalSearchBarProps {
   toggleFilter: () => void;
   toggleSort: () => void;
   sortOrder: "asc" | "desc";
+  onCalendarView?: () => void;
 }
 
 export function JournalSearchBar({ 
@@ -17,7 +18,8 @@ export function JournalSearchBar({
   filterBy, 
   toggleFilter, 
   toggleSort, 
-  sortOrder 
+  sortOrder,
+  onCalendarView
 }: JournalSearchBarProps) {
   return (
     <div className="flex items-center gap-2">
@@ -27,7 +29,7 @@ export function JournalSearchBar({
           placeholder="Search journal entries"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 border-mindscape-light focus:border-mindscape-primary"
+          className="pl-9 h-10 w-full border-mindscape-light focus:border-mindscape-primary text-sm"
         />
       </div>
       
@@ -50,6 +52,7 @@ export function JournalSearchBar({
       <button 
         className="w-10 h-10 rounded-lg border border-input bg-background hover:bg-accent flex items-center justify-center"
         aria-label="Calendar view"
+        onClick={onCalendarView}
       >
         <Calendar className="h-4 w-4" />
       </button>
