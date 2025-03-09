@@ -69,7 +69,7 @@ const quotes = [
 export function DailyMotivation() {
   const [quote, setQuote] = useState<typeof quotes[0] | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [animationClass, setAnimationClass] = useState("");
+  const [animation, setAnimation] = useState("");
   
   const fetchRandomQuote = () => {
     const randomIndex = Math.floor(Math.random() * quotes.length);
@@ -78,21 +78,21 @@ export function DailyMotivation() {
   
   const refreshQuote = () => {
     setRefreshing(true);
-    setAnimationClass("animate-fade-out");
+    setAnimation("animate-fade-out");
     
     setTimeout(() => {
       setQuote(fetchRandomQuote());
-      setAnimationClass("animate-fade-in");
+      setAnimation("animate-fade-in");
       
       setTimeout(() => {
         setRefreshing(false);
-      }, 500);
-    }, 500);
+      }, 300);
+    }, 300);
   };
   
   useEffect(() => {
     setQuote(fetchRandomQuote());
-    setAnimationClass("animate-scale-in");
+    setAnimation("animate-fade-in");
   }, []);
   
   if (!quote) return null;
@@ -116,7 +116,7 @@ export function DailyMotivation() {
         </button>
       </div>
       
-      <blockquote className={`mt-2 transition-all duration-500 ${animationClass}`}>
+      <blockquote className={`mt-2 ${animation}`}>
         <p className="text-base italic">"{quote.text}"</p>
         <footer className="mt-2 text-sm text-muted-foreground">— {quote.author}</footer>
       </blockquote>
