@@ -114,13 +114,13 @@ export function WeeklySummary({
         
         <div className="mt-4 pt-4 border-t border-mindscape-primary/20">
           <h3 className="font-medium mb-2">This Week's Insight</h3>
-          <p className="text-sm mb-4">
+          <div className="text-sm mb-4 p-3 bg-mindscape-light/30 rounded-lg min-h-16 max-h-32 overflow-y-auto">
             {getInsight(moodAverage)}
-          </p>
+          </div>
           
           <Button 
             variant="outline" 
-            className="w-full"
+            className="w-full mt-2"
             onClick={recommendation.action}
           >
             {recommendation.text}

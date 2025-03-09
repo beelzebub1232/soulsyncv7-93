@@ -86,24 +86,75 @@ export function WeeklyInsights() {
           // Process habit data
           let habitStreaks = 0;
           let activityLevel = 0;
+          let habitDataExists = false;
+          
           if (storedHabits) {
             const habitEntries = JSON.parse(storedHabits);
-            const completedThisWeek = habitEntries.filter((entry: any) => 
-              new Date(entry.date) >= oneWeekAgo && entry.completed
-            ).length;
             
-            // Calculate total possible habits this week
-            const totalHabitsThisWeek = habitEntries.filter((entry: any) => 
-              new Date(entry.date) >= oneWeekAgo
-            ).length;
-            
-            habitStreaks = totalHabitsThisWeek > 0 
-              ? Math.min(100, Math.round((completedThisWeek / totalHabitsThisWeek) * 100))
-              : Math.min(100, recentMoods.length * 15); // Fallback based on mood entries
-            
-            // Activity level is average of mood trend, journal consistency and habit streaks
-            activityLevel = Math.round((Math.abs(moodTrend) + journalConsistency + habitStreaks) / 3);
-          } else {
+            // Only process habits if there are any
+            if (habitEntries.length > 0) {
+              habitDataExists = true;
+              
+              // Group habits by name
+              const habitGroups: Record<string, any[]> = {};
+              habitEntries.forEach((entry: any) => {
+                if (!habitGroups[entry.name]) {
+                  habitGroups[entry.name] = [];
+                }
+                habitGroups[entry.name].push(entry);
+              });
+              
+              // Calculate streaks for each habit
+              const habitStreakValues: number[] = [];
+              
+              Object.values(habitGroups).forEach((entries: any[]) => {
+                // Sort entries by date
+                const sortedEntries = [...entries].sort(
+                  (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+                );
+                
+                // Find the longest streak of completed habits
+                let currentStreak = 0;
+                let maxStreak = 0;
+                
+                sortedEntries.forEach((entry) => {
+                  if (entry.completed) {
+                    currentStreak++;
+                    maxStreak = Math.max(maxStreak, currentStreak);
+                  } else {
+                    currentStreak = 0;
+                  }
+                });
+                
+                // Calculate streak percentage (max 100%)
+                const streakPercentage = Math.min(100, Math.round((maxStreak / 7) * 100));
+                habitStreakValues.push(streakPercentage);
+              });
+              
+              // Average of all habit streaks
+              habitStreaks = habitStreakValues.length > 0
+                ? Math.round(habitStreakValues.reduce((sum, val) => sum + val, 0) / habitStreakValues.length)
+                : 0;
+                
+              const completedThisWeek = habitEntries.filter((entry: any) => 
+                new Date(entry.date) >= oneWeekAgo && entry.completed
+              ).length;
+              
+              // Calculate total possible habits this week
+              const totalHabitsThisWeek = habitEntries.filter((entry: any) => 
+                new Date(entry.date) >= oneWeekAgo
+              ).length;
+              
+              const completionRate = totalHabitsThisWeek > 0 
+                ? Math.round((completedThisWeek / totalHabitsThisWeek) * 100)
+                : 0;
+                
+              // Activity level is average of mood trend, journal consistency and habit completion
+              activityLevel = Math.round((Math.abs(moodTrend) + journalConsistency + completionRate) / 3);
+            }
+          }
+          
+          if (!habitDataExists) {
             // Fallback to mood-based estimates if no habit data
             habitStreaks = Math.min(100, recentMoods.length * 15);
             activityLevel = Math.min(100, Math.max(30, recentMoods.length * 20));
@@ -208,16 +259,22 @@ export function WeeklyInsights() {
               // Create a dynamic bar chart visualization
               const percentage = Math.min(100, (insights.habitStreaks / 100) * (i + 1) * 14);
               const height = Math.max(4, percentage / 8); // 4-12px height range
-              const color = 100 + (i * 70); // 100-500 blue color range
               
               return (
                 <div 
                   key={i} 
-                  className={`bg-blue-${color} h-${Math.round(height)} w-2 rounded-t`}
-                  style={{ height: `${height}px` }}
+                  className="bg-blue-400 rounded-t transition-all"
+                  style={{ 
+                    height: `${height}px`, 
+                    width: '8px',
+                    opacity: 0.4 + (i * 0.1)
+                  }}
                 ></div>
               );
             })}
+          </div>
+          <div className="mt-2 text-xs text-center text-muted-foreground">
+            {insights.habitStreaks}% consistency
           </div>
         </CardContent>
       </Card>

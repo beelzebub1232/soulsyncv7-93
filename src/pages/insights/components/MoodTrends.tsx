@@ -3,7 +3,7 @@ import React from 'react';
 import { LineChart as LineChartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 
 interface MoodTrendsProps {
@@ -34,20 +34,30 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
       <CardContent>
         <div className="h-[200px] mt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#9b87f5" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#9b87f5" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value) => [`${value} entries`, 'Count']} />
-              <Line 
+              <Tooltip 
+                formatter={(value) => [`${value} entries`, 'Count']}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+              />
+              <Area 
                 type="monotone" 
                 dataKey="count" 
                 stroke="#9b87f5" 
                 strokeWidth={2}
-                dot={{ r: 4, fill: "#9b87f5", strokeWidth: 0 }}
+                fillOpacity={1}
+                fill="url(#colorCount)"
                 activeDot={{ r: 6, fill: "#6952c9", strokeWidth: 0 }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

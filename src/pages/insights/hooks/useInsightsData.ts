@@ -2,7 +2,17 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { MoodEntry } from '@/pages/home/components/mood-tracker/types';
-import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, getDay, isWithinInterval } from 'date-fns';
+import { 
+  format, 
+  subDays, 
+  startOfWeek, 
+  endOfWeek, 
+  eachDayOfInterval, 
+  getDay, 
+  isWithinInterval,
+  isSameMonth,
+  isSameYear
+} from 'date-fns';
 import { JournalEntry } from '@/types/journal';
 
 interface HabitEntry {
@@ -41,7 +51,12 @@ export interface InsightsData {
 export function useInsightsData() {
   const [data, setData] = useState<InsightsData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { user } = useUser();
+
+  const updateSelectedDate = (date: Date) => {
+    setSelectedDate(date);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -104,22 +119,27 @@ export function useInsightsData() {
           ];
         }
         
-        // Get moods from the last 31 days (for calendar view)
-        const today = new Date();
-        const thirtyOneDaysAgo = subDays(today, 31);
+        // Filter data based on selected date
+        const filteredMoods = moodEntries.filter(entry => 
+          isSameMonth(new Date(entry.date), selectedDate) && 
+          isSameYear(new Date(entry.date), selectedDate)
+        );
+        
+        // Get moods from the last 31 days for calendar view (regardless of month selection)
+        const thirtyOneDaysAgo = subDays(new Date(), 31);
         const recentMoods = moodEntries
           .filter(entry => new Date(entry.date) >= thirtyOneDaysAgo)
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         
-        // Calculate mood distribution
+        // Calculate mood distribution for selected month
         const moodDistribution: Record<string, number> = {};
-        moodEntries.forEach(entry => {
+        filteredMoods.forEach(entry => {
           moodDistribution[entry.value] = (moodDistribution[entry.value] || 0) + 1;
         });
         
-        // Define current week interval
-        const currentWeekStart = startOfWeek(today);
-        const currentWeekEnd = endOfWeek(today);
+        // Define current week interval based on selected date
+        const currentWeekStart = startOfWeek(selectedDate);
+        const currentWeekEnd = endOfWeek(selectedDate);
         const thisWeekInterval = { start: currentWeekStart, end: currentWeekEnd };
         
         // Calculate this week's mood counts by day
@@ -288,7 +308,7 @@ export function useInsightsData() {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [user]);
+  }, [user, selectedDate]);
   
-  return { data, isLoading };
+  return { data, isLoading, selectedDate, setSelectedDate: updateSelectedDate };
 }
