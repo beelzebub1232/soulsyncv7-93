@@ -1,13 +1,10 @@
 
-import { useEffect, useState } from "react";
-import { ArrowUp, ArrowDown, Activity, TrendingUp } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { useUser } from "@/contexts/UserContext";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from "react";
+import { InsightData } from "./types";
+import { calculateMoodTrend, getMoodScores } from "./utils";
 
-export function WeeklyInsights() {
-  const { user } = useUser();
-  const [insights, setInsights] = useState({
+export function useInsights(userId?: string) {
+  const [insights, setInsights] = useState<InsightData>({
     moodTrend: 0,
     journalConsistency: 0,
     habitStreaks: 0,
@@ -15,17 +12,16 @@ export function WeeklyInsights() {
   });
   
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     
-    // Load mood data
     const fetchData = () => {
       const moodStorageKey = `soulsync_moods`;
       const storedMoods = localStorage.getItem(moodStorageKey);
       
-      const journalStorageKey = `soulsync_journal_${user.id}`;
+      const journalStorageKey = `soulsync_journal_${userId}`;
       const storedJournals = localStorage.getItem(journalStorageKey);
       
-      const habitsStorageKey = `soulsync_habits_${user.id}`;
+      const habitsStorageKey = `soulsync_habits_${userId}`;
       const storedHabits = localStorage.getItem(habitsStorageKey);
       
       // Process mood data for trend
@@ -34,9 +30,7 @@ export function WeeklyInsights() {
           const moodEntries = JSON.parse(storedMoods);
           
           // Map mood values to numeric scores
-          const moodScores: Record<string, number> = {
-            "amazing": 5, "good": 4, "okay": 3, "sad": 2, "awful": 1
-          };
+          const moodScores = getMoodScores();
           
           // Get today and one week ago
           const today = new Date();
@@ -64,9 +58,7 @@ export function WeeklyInsights() {
             : 0;
           
           // Calculate trend percent change
-          const moodTrend = prevAvg > 0 
-            ? Math.round(((recentAvg - prevAvg) / prevAvg) * 100) 
-            : (recentAvg > 0 ? 100 : 0);
+          const moodTrend = calculateMoodTrend(recentAvg, prevAvg);
             
           // Process journal data
           let journalConsistency = 0;
@@ -192,105 +184,7 @@ export function WeeklyInsights() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
     
-  }, [user]);
+  }, [userId]);
 
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-medium">Mood Trend</h3>
-            <div className={`flex items-center gap-1 ${insights.moodTrend >= 0 ? 'text-green-500' : 'text-red-500'} text-xs`}>
-              {insights.moodTrend >= 0 ? (
-                <ArrowUp className="h-3 w-3" />
-              ) : (
-                <ArrowDown className="h-3 w-3" />
-              )}
-              <span>{Math.abs(insights.moodTrend)}%</span>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mb-2">
-            {insights.moodTrend >= 0 
-              ? "Your mood has been improving" 
-              : "Your mood has been declining"}
-          </p>
-          <Progress 
-            className="h-2"
-            value={Math.min(100, Math.max(30, Math.abs(insights.moodTrend) + 50))}
-            indicatorClassName={insights.moodTrend >= 0 
-              ? "bg-gradient-to-r from-green-300 to-green-500" 
-              : "bg-gradient-to-r from-orange-300 to-red-400"}
-          />
-        </CardContent>
-      </Card>
-      
-      <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-medium">Journal Consistency</h3>
-            <div className={`flex items-center gap-1 ${insights.journalConsistency >= 50 ? 'text-green-500' : 'text-red-500'} text-xs`}>
-              {insights.journalConsistency >= 50 ? (
-                <ArrowUp className="h-3 w-3" />
-              ) : (
-                <ArrowDown className="h-3 w-3" />
-              )}
-              <span>{insights.journalConsistency}%</span>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mb-2">
-            {insights.journalConsistency >= 50 
-              ? "Good journaling habits this week" 
-              : "Try to journal more regularly"}
-          </p>
-          <Progress 
-            className="h-2"
-            value={insights.journalConsistency}
-            indicatorClassName={insights.journalConsistency >= 50 
-              ? "bg-gradient-to-r from-blue-300 to-blue-500" 
-              : "bg-gradient-to-r from-orange-300 to-red-400"}
-          />
-        </CardContent>
-      </Card>
-      
-      <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-medium">Habit Streaks</h3>
-            <TrendingUp className="h-4 w-4 text-blue-500" />
-          </div>
-          <p className="text-xs text-muted-foreground mb-2">
-            {insights.habitStreaks >= 50 
-              ? "You're building good habits" 
-              : "Keep working on your habits"}
-          </p>
-          <Progress 
-            className="h-2"
-            value={insights.habitStreaks}
-            indicatorClassName="bg-gradient-to-r from-indigo-300 to-indigo-500"
-          />
-          <div className="text-xs mt-1 text-right text-muted-foreground">
-            {insights.habitStreaks}% consistency
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-medium">Activity Level</h3>
-            <Activity className="h-4 w-4 text-purple-500" />
-          </div>
-          <p className="text-xs text-muted-foreground mb-2">Weekly progress</p>
-          <Progress 
-            className="h-2"
-            value={insights.activityLevel}
-            indicatorClassName="bg-gradient-to-r from-purple-300 to-purple-500"
-          />
-          <div className="text-xs mt-1 text-right text-muted-foreground">
-            {insights.activityLevel}% of your goal
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return insights;
 }

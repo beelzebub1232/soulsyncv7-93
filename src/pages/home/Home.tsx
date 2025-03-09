@@ -4,7 +4,7 @@ import { MoodTracker } from "./components/mood-tracker";
 import { DailyMotivation } from "./components/DailyMotivation";
 import { UpcomingHabits } from "./components/upcoming-habits";
 import { RecentJournals } from "./components/RecentJournals";
-import { WeeklyInsights } from "./components/WeeklyInsights";
+import { WeeklyInsights } from "./components/weekly-insights";
 import { LightbulbIcon, SparklesIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
