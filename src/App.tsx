@@ -18,6 +18,7 @@ import Home from "@/pages/home/Home";
 import Journal from "@/pages/journal/Journal";
 import Community from "@/pages/community/Community";
 import ForumCategory from "@/pages/community/ForumCategory";
+import ForumPostPage from "@/pages/community/ForumPostPage";
 import Insights from "@/pages/insights/Insights";
 import Mindful from "@/pages/mindful/Mindful";
 import HabitTracker from "@/pages/habit-tracker/HabitTracker";
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="journal" element={<Journal />} />
               <Route path="community" element={<Community />} />
               <Route path="community/:categoryId" element={<ForumCategory />} />
+              <Route path="community/post/:postId" element={<ForumPostPage />} />
               <Route path="insights" element={<Insights />} />
               <Route path="mindful" element={<Mindful />} />
               <Route path="habit-tracker" element={<HabitTracker />} />

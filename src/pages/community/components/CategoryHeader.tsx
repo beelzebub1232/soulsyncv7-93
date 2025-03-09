@@ -11,7 +11,7 @@ interface CategoryHeaderProps {
 export const CategoryHeader: React.FC<CategoryHeaderProps> = ({ category }) => {
   return (
     <header>
-      <Link to="/community" className="flex items-center text-sm text-muted-foreground mb-4 hover:text-foreground">
+      <Link to="/community" className="flex items-center text-sm text-muted-foreground mb-4 hover:text-foreground transition-colors">
         <ChevronLeft className="h-4 w-4 mr-1" />
         Back to Forums
       </Link>
