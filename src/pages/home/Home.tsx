@@ -1,6 +1,6 @@
 
 import { useUser } from "@/contexts/UserContext";
-import { MoodTracker } from "./components/mood-tracker";
+import { MoodTracker } from "./components/MoodTracker";
 import { DailyMotivation } from "./components/DailyMotivation";
 import { UpcomingHabits } from "./components/UpcomingHabits";
 import { RecentJournals } from "./components/RecentJournals";

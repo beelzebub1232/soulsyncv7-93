@@ -1,19 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, MessageSquare, Plus, Clock, Search } from "lucide-react";
+import { ChevronLeft, MessageSquare, Plus, Clock, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ForumCategory, ForumPost } from "@/types/community";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useUser } from "@/contexts/UserContext";
 import NotFound from "../NotFound";
 
 export default function ForumCategoryPage() {
@@ -23,14 +16,7 @@ export default function ForumCategoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
   const [isLoading, setIsLoading] = useState(true);
-  const [isNewPostOpen, setIsNewPostOpen] = useState(false);
-  const [newPost, setNewPost] = useState({
-    title: "",
-    content: "",
-    isAnonymous: false
-  });
   const { toast } = useToast();
-  const { user } = useUser();
   
   useEffect(() => {
     // Load category data
@@ -94,65 +80,6 @@ export default function ForumCategoryPage() {
     });
   };
   
-  const handleCreatePost = () => {
-    if (!newPost.title || !newPost.content) {
-      toast({
-        variant: "destructive",
-        title: "Missing information",
-        description: "Please fill in all required fields."
-      });
-      return;
-    }
-    
-    if (!category) return;
-    
-    const post: ForumPost = {
-      id: Date.now().toString(),
-      title: newPost.title,
-      content: newPost.content,
-      categoryId: category.id,
-      categoryName: category.name,
-      author: newPost.isAnonymous ? "Anonymous" : (user?.username || "Current User"),
-      date: new Date(),
-      replies: 0,
-      isAnonymous: newPost.isAnonymous
-    };
-    
-    // Get all posts
-    const storedPosts = localStorage.getItem('soulsync_forum_posts');
-    let allPosts: ForumPost[] = storedPosts ? JSON.parse(storedPosts) : [];
-    
-    // Update posts
-    const updatedPosts = [post, ...allPosts];
-    localStorage.setItem('soulsync_forum_posts', JSON.stringify(updatedPosts));
-    
-    // Update current category's posts
-    setPosts([post, ...posts]);
-    
-    // Update category post count
-    const storedCategories = localStorage.getItem('soulsync_forum_categories');
-    if (storedCategories) {
-      const categories: ForumCategory[] = JSON.parse(storedCategories);
-      const updatedCategories = categories.map(c => 
-        c.id === category.id ? { ...c, posts: c.posts + 1 } : c
-      );
-      localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
-    }
-    
-    // Reset form and close dialog
-    setNewPost({
-      title: "",
-      content: "",
-      isAnonymous: false
-    });
-    setIsNewPostOpen(false);
-    
-    toast({
-      title: "Post created",
-      description: "Your post has been published to the community."
-    });
-  };
-  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[300px]">
@@ -190,7 +117,7 @@ export default function ForumCategoryPage() {
         </div>
       </header>
       
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -205,7 +132,7 @@ export default function ForumCategoryPage() {
           value={sortOrder}
           onValueChange={(value) => setSortOrder(value as 'recent' | 'popular')}
         >
-          <SelectTrigger className="w-full sm:w-[130px]">
+          <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
@@ -222,133 +149,58 @@ export default function ForumCategoryPage() {
             <span>Discussions</span>
           </h2>
           
-          <Button 
-            className="button-primary flex items-center gap-1"
-            onClick={() => setIsNewPostOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span>New Post</span>
-          </Button>
+          <Link to="/community">
+            <Button className="button-primary flex items-center gap-1">
+              <Plus className="h-4 w-4" />
+              <span>New Post</span>
+            </Button>
+          </Link>
         </div>
         
         {displayedPosts.length === 0 ? (
           <div className="card-primary p-5 text-center">
             <p className="text-muted-foreground">No discussions found in this category.</p>
-            <Button 
-              className="button-primary mt-3"
-              onClick={() => setIsNewPostOpen(true)}
-            >
-              Start the First Discussion
-            </Button>
+            <Link to="/community">
+              <button className="button-primary mt-3">
+                Start the First Discussion
+              </button>
+            </Link>
           </div>
         ) : (
           <div className="space-y-3">
             {displayedPosts.map((post) => (
-              <Card 
+              <a 
                 key={post.id}
-                className="hover:shadow-md transition-all"
+                href={`/community/post/${post.id}`}
+                className="card-primary block hover:shadow-md transition-all"
               >
-                <CardContent className="p-4">
-                  <Link to={`/community/post/${post.id}`}>
-                    <h3 className="font-medium hover:text-mindscape-primary transition-colors">
-                      {post.title}
-                    </h3>
-                  </Link>
-                  
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                    {post.content}
-                  </p>
-                  
-                  <div className="flex justify-between items-center mt-3 text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 text-mindscape-primary">
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        <span>{post.replies} replies</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>{formatRelativeTime(post.date)}</span>
+                <h3 className="font-medium">{post.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {post.content}
+                </p>
+                
+                <div className="flex justify-between items-center mt-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-mindscape-primary">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      <span>{post.replies} replies</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center mt-2 text-xs">
-                    {post.isAnonymous ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                          <span className="text-xs">?</span>
-                        </div>
-                        <span className="text-muted-foreground">Anonymous</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-muted-foreground">{post.author}</span>
-                      </div>
-                    )}
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{formatRelativeTime(post.date)}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                
+                <div className="text-xs mt-2 text-muted-foreground">
+                  Posted by {post.author}
+                </div>
+              </a>
             ))}
           </div>
         )}
       </div>
-      
-      {/* New Post Dialog */}
-      <Dialog open={isNewPostOpen} onOpenChange={setIsNewPostOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create Post in {category.name}</DialogTitle>
-            <DialogDescription>
-              Share your thoughts with the community
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="post-title">Title</Label>
-              <Input
-                id="post-title"
-                placeholder="What would you like to discuss?"
-                value={newPost.title}
-                onChange={(e) => setNewPost({...newPost, title: e.target.value})}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="post-content">Content</Label>
-              <Textarea
-                id="post-content"
-                placeholder="Share your thoughts, questions or experiences..."
-                value={newPost.content}
-                onChange={(e) => setNewPost({...newPost, content: e.target.value})}
-                className="min-h-[150px]"
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="anonymous-mode"
-                checked={newPost.isAnonymous}
-                onCheckedChange={(checked) => setNewPost({...newPost, isAnonymous: checked})}
-              />
-              <Label htmlFor="anonymous-mode">Post anonymously</Label>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewPostOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreatePost} className="button-primary">
-              Post
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
