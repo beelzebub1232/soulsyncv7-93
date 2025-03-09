@@ -109,9 +109,9 @@ export function MoodCalendar({ moods }: MoodCalendarProps) {
   ];
   
   return (
-    <Card>
+    <Card className="w-full h-full">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Calendar className="h-5 w-5 text-mindscape-primary" />
             Mood Calendar
@@ -231,7 +231,7 @@ export function MoodCalendar({ moods }: MoodCalendarProps) {
           })}
         </div>
         
-        <div className="mt-4 grid grid-cols-5 gap-1">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-green-400"></div>
             <span className="text-xs">Amazing</span>

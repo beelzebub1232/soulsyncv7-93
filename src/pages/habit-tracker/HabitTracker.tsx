@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, Plus, Calendar, BarChart, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useUser } from "@/contexts/UserContext";
 
 interface Habit {
   id: string;
@@ -27,48 +28,8 @@ const colorOptions = [
   { label: "Pink", value: "bg-mindscape-pink border-pink-300", textColor: "text-pink-800" },
 ];
 
-// Sample habits for demonstration
-const sampleHabits: Habit[] = [
-  {
-    id: "1",
-    title: "Meditation",
-    time: "8:00 AM",
-    completed: false,
-    color: "bg-mindscape-green border-green-300",
-    daysCompleted: 18,
-    totalDays: 21,
-  },
-  {
-    id: "2",
-    title: "Journaling",
-    time: "9:30 AM",
-    completed: true,
-    color: "bg-mindscape-blue border-blue-300",
-    daysCompleted: 7,
-    totalDays: 7,
-  },
-  {
-    id: "3",
-    title: "Take a walk",
-    time: "6:00 PM",
-    completed: false,
-    color: "bg-mindscape-peach border-orange-300",
-    daysCompleted: 12,
-    totalDays: 14,
-  },
-  {
-    id: "4",
-    title: "Read a book",
-    time: "9:00 PM",
-    completed: false,
-    color: "bg-mindscape-pink border-pink-300",
-    daysCompleted: 5,
-    totalDays: 10,
-  },
-];
-
 export default function HabitTracker() {
-  const [habits, setHabits] = useState<Habit[]>(sampleHabits);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [newHabitDialogOpen, setNewHabitDialogOpen] = useState(false);
   const [editHabitDialogOpen, setEditHabitDialogOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
@@ -78,24 +39,181 @@ export default function HabitTracker() {
     color: colorOptions[0].value,
   });
   const { toast } = useToast();
+  const { user } = useUser();
+
+  // Load habits from localStorage
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadHabits = () => {
+      const storageKey = `soulsync_habits_${user.id}`;
+      const storedHabits = localStorage.getItem(storageKey);
+      
+      if (storedHabits) {
+        try {
+          // Parse the habits from localStorage
+          const parsedHabits = JSON.parse(storedHabits);
+          
+          // Group habits by name to calculate completion stats
+          const habitGroups: Record<string, any[]> = {};
+          parsedHabits.forEach((habit: any) => {
+            if (!habitGroups[habit.name]) {
+              habitGroups[habit.name] = [];
+            }
+            habitGroups[habit.name].push(habit);
+          });
+          
+          // Get today's date
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayString = today.toISOString().split('T')[0];
+          
+          // Convert to the format expected by the UI
+          const formattedHabits: Habit[] = Object.entries(habitGroups).map(([name, entries]) => {
+            // Find today's entry if it exists
+            const todayEntry = entries.find((entry) => {
+              const entryDate = new Date(entry.date);
+              entryDate.setHours(0, 0, 0, 0);
+              return entryDate.toISOString().split('T')[0] === todayString;
+            });
+            
+            // Calculate days completed
+            const completedEntries = entries.filter(entry => entry.completed);
+            
+            // Get target days from a random entry (they should all have the same target)
+            const targetDays = entries[0]?.targetDays || 7;
+            
+            return {
+              id: todayEntry?.id || `${name}-${Date.now()}`,
+              title: name,
+              time: todayEntry?.time || "9:00 AM",
+              completed: todayEntry?.completed || false,
+              color: getColorForHabit(name),
+              daysCompleted: completedEntries.length,
+              totalDays: targetDays
+            };
+          });
+          
+          setHabits(formattedHabits);
+        } catch (error) {
+          console.error("Failed to parse habits:", error);
+          setHabits([]);
+        }
+      }
+    };
+    
+    loadHabits();
+    
+    // Listen for storage events to update in real-time
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `soulsync_habits_${user.id}`) {
+        loadHabits();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [user]);
+  
+  // Helper function to get color based on habit name
+  const getColorForHabit = (name: string) => {
+    const lowerName = name.toLowerCase();
+    
+    if (lowerName.includes("meditation") || lowerName.includes("yoga")) {
+      return "bg-mindscape-blue border-blue-300";
+    } else if (lowerName.includes("exercise") || lowerName.includes("workout")) {
+      return "bg-mindscape-green border-green-300";
+    } else if (lowerName.includes("read")) {
+      return "bg-mindscape-yellow border-yellow-300";
+    } else if (lowerName.includes("journal")) {
+      return "bg-mindscape-peach border-orange-300";
+    } else {
+      return "bg-mindscape-pink border-pink-300";
+    }
+  };
+  
+  const saveHabitToStorage = (updatedHabits: any[]) => {
+    if (!user) return;
+    
+    const storageKey = `soulsync_habits_${user.id}`;
+    localStorage.setItem(storageKey, JSON.stringify(updatedHabits));
+    
+    // Dispatch storage event for other components
+    const event = new StorageEvent('storage', {
+      key: storageKey,
+      newValue: JSON.stringify(updatedHabits),
+      storageArea: localStorage
+    });
+    window.dispatchEvent(event);
+  };
   
   const toggleHabit = (id: string) => {
-    setHabits(
-      habits.map((habit) => {
-        if (habit.id === id) {
-          const completed = !habit.completed;
-          return { 
-            ...habit, 
-            completed,
-            daysCompleted: completed ? habit.daysCompleted + 1 : habit.daysCompleted
-          };
+    if (!user) return;
+    
+    // Update UI state
+    const updatedHabits = habits.map((habit) => {
+      if (habit.id === id) {
+        const completed = !habit.completed;
+        return { 
+          ...habit, 
+          completed,
+          daysCompleted: completed ? habit.daysCompleted + 1 : Math.max(0, habit.daysCompleted - 1)
+        };
+      }
+      return habit;
+    });
+    
+    setHabits(updatedHabits);
+    
+    // Update localStorage
+    const storageKey = `soulsync_habits_${user.id}`;
+    const storedHabits = localStorage.getItem(storageKey);
+    
+    if (storedHabits) {
+      try {
+        const allHabits = JSON.parse(storedHabits);
+        const habitToUpdate = allHabits.find((h: any) => h.id === id);
+        
+        if (habitToUpdate) {
+          habitToUpdate.completed = !habitToUpdate.completed;
+          saveHabitToStorage(allHabits);
+          
+          // Show a toast
+          const targetHabit = updatedHabits.find(h => h.id === id);
+          if (targetHabit) {
+            toast({
+              title: targetHabit.completed ? "Habit completed!" : "Habit uncompleted",
+              description: targetHabit.completed 
+                ? `Great job completing your ${targetHabit.title} habit!`
+                : `You've marked ${targetHabit.title} as not completed.`,
+            });
+          }
         }
-        return habit;
-      })
-    );
+      } catch (error) {
+        console.error("Failed to update habits:", error);
+      }
+    } else {
+      // No habits stored yet, create new entry
+      const today = new Date().toISOString();
+      const habit = habits.find(h => h.id === id);
+      
+      if (habit) {
+        const newHabitEntry = [{
+          id,
+          name: habit.title,
+          date: today,
+          completed: habit.completed,
+          targetDays: habit.totalDays,
+          time: habit.time
+        }];
+        
+        saveHabitToStorage(newHabitEntry);
+      }
+    }
   };
   
   const addNewHabit = () => {
+    if (!user) return;
     if (!newHabit.title || !newHabit.time) {
       toast({
         variant: "destructive",
@@ -105,17 +223,47 @@ export default function HabitTracker() {
       return;
     }
     
+    const id = Date.now().toString();
+    const today = new Date().toISOString();
+    
+    // Add to UI state
     const habit: Habit = {
-      id: Date.now().toString(),
+      id,
       title: newHabit.title,
       time: newHabit.time,
       completed: false,
       color: newHabit.color,
       daysCompleted: 0,
-      totalDays: 0,
+      totalDays: 7, // Default to weekly goal
     };
     
     setHabits([...habits, habit]);
+    
+    // Add to localStorage
+    const storageKey = `soulsync_habits_${user.id}`;
+    const storedHabits = localStorage.getItem(storageKey);
+    
+    const newHabitEntry = {
+      id,
+      name: newHabit.title,
+      date: today,
+      completed: false,
+      targetDays: 7,
+      time: newHabit.time
+    };
+    
+    if (storedHabits) {
+      try {
+        const allHabits = JSON.parse(storedHabits);
+        saveHabitToStorage([...allHabits, newHabitEntry]);
+      } catch (error) {
+        console.error("Failed to parse existing habits:", error);
+        saveHabitToStorage([newHabitEntry]);
+      }
+    } else {
+      saveHabitToStorage([newHabitEntry]);
+    }
+    
     setNewHabit({
       title: "",
       time: "",
@@ -130,13 +278,40 @@ export default function HabitTracker() {
   };
   
   const updateHabit = () => {
-    if (!editingHabit) return;
+    if (!editingHabit || !user) return;
     
+    // Update UI state
     setHabits(
       habits.map((habit) => 
         habit.id === editingHabit.id ? editingHabit : habit
       )
     );
+    
+    // Update in localStorage
+    const storageKey = `soulsync_habits_${user.id}`;
+    const storedHabits = localStorage.getItem(storageKey);
+    
+    if (storedHabits) {
+      try {
+        const allHabits = JSON.parse(storedHabits);
+        
+        // Find any entries with this habit name and update them
+        const updatedHabits = allHabits.map((habit: any) => {
+          if (habit.id === editingHabit.id) {
+            return {
+              ...habit,
+              name: editingHabit.title,
+              time: editingHabit.time
+            };
+          }
+          return habit;
+        });
+        
+        saveHabitToStorage(updatedHabits);
+      } catch (error) {
+        console.error("Failed to update habit:", error);
+      }
+    }
     
     setEditHabitDialogOpen(false);
     
@@ -147,11 +322,38 @@ export default function HabitTracker() {
   };
   
   const deleteHabit = (id: string) => {
+    if (!user) return;
+    
+    // Get the habit title before removing
+    const habitToDelete = habits.find(habit => habit.id === id);
+    
+    // Update UI state
     setHabits(habits.filter(habit => habit.id !== id));
+    
+    // Update localStorage
+    const storageKey = `soulsync_habits_${user.id}`;
+    const storedHabits = localStorage.getItem(storageKey);
+    
+    if (storedHabits && habitToDelete) {
+      try {
+        const allHabits = JSON.parse(storedHabits);
+        
+        // Remove habit with this id and also any entries with the same name
+        const updatedHabits = allHabits.filter((habit: any) => 
+          habit.id !== id && habit.name !== habitToDelete.title
+        );
+        
+        saveHabitToStorage(updatedHabits);
+      } catch (error) {
+        console.error("Failed to delete habit:", error);
+      }
+    }
     
     toast({
       title: "Habit deleted",
-      description: "The habit has been removed from your list.",
+      description: habitToDelete 
+        ? `"${habitToDelete.title}" has been removed from your habits.`
+        : "The habit has been removed from your list.",
     });
   };
   
@@ -259,29 +461,31 @@ export default function HabitTracker() {
         )}
       </div>
       
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Streaks & Progress</h2>
-        
-        <div className="space-y-3">
-          {habits.map((habit) => (
-            <div key={habit.id} className="card-primary p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">{habit.title}</h3>
-                <span className="text-sm text-mindscape-primary font-medium">
-                  {habit.daysCompleted}/{habit.totalDays} days
-                </span>
+      {habits.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Streaks & Progress</h2>
+          
+          <div className="space-y-3">
+            {habits.map((habit) => (
+              <div key={habit.id} className="card-primary p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-medium">{habit.title}</h3>
+                  <span className="text-sm text-mindscape-primary font-medium">
+                    {habit.daysCompleted}/{habit.totalDays} days
+                  </span>
+                </div>
+                
+                <div className="w-full bg-mindscape-light rounded-full h-2.5">
+                  <div 
+                    className="bg-mindscape-primary h-2.5 rounded-full"
+                    style={{ width: `${(habit.daysCompleted / habit.totalDays) * 100}%` }}
+                  ></div>
+                </div>
               </div>
-              
-              <div className="w-full bg-mindscape-light rounded-full h-2.5">
-                <div 
-                  className="bg-mindscape-primary h-2.5 rounded-full"
-                  style={{ width: `${(habit.daysCompleted / habit.totalDays) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       
       {/* New Habit Dialog */}
       <Dialog open={newHabitDialogOpen} onOpenChange={setNewHabitDialogOpen}>

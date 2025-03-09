@@ -80,6 +80,7 @@ export function WeeklySummary({
   };
   
   const recommendation = getActionRecommendation();
+  const recommendationText = recommendation.text;
   
   return (
     <Card className="card-highlight">
@@ -120,10 +121,12 @@ export function WeeklySummary({
           
           <Button 
             variant="outline" 
-            className="w-full mt-2"
+            className="w-full mt-2 h-auto py-2 px-4 whitespace-normal text-center"
             onClick={recommendation.action}
           >
-            {recommendation.text}
+            {recommendationText.length > 30 
+              ? recommendationText.split(' ').slice(0, 4).join(' ') + '...' 
+              : recommendationText}
           </Button>
         </div>
       </CardContent>

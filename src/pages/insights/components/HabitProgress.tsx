@@ -21,16 +21,16 @@ export function HabitProgress({ habitProgress = [] }: HabitProgressProps) {
     percentage: Math.round((habit.completed / habit.total) * 100)
   }));
 
-  // Colors based on percentage
+  // Pastel Colors based on percentage
   const getBarColor = (percent: number) => {
-    if (percent >= 75) return '#22c55e'; // green-500
-    if (percent >= 50) return '#3b82f6'; // blue-500
-    if (percent >= 25) return '#f97316'; // orange-500
-    return '#ef4444'; // red-500
+    if (percent >= 75) return '#E5DEFF'; // soft purple
+    if (percent >= 50) return '#D3E4FD'; // soft blue
+    if (percent >= 25) return '#FEF7CD'; // soft yellow
+    return '#FFDEE2'; // soft pink
   };
   
   return (
-    <Card>
+    <Card className="w-full h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <BarChartIcon className="h-5 w-5 text-mindscape-primary" />
@@ -39,7 +39,7 @@ export function HabitProgress({ habitProgress = [] }: HabitProgressProps) {
       </CardHeader>
       <CardContent>
         {chartData.length > 0 ? (
-          <div className="h-[200px] mt-4">
+          <div className="h-[200px] mt-2 -ml-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} opacity={0.3} />
@@ -62,7 +62,7 @@ export function HabitProgress({ habitProgress = [] }: HabitProgressProps) {
                   barSize={16}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} />
+                    <Cell key={`cell-${index}`} fill={getBarColor(entry.percentage)} stroke="#9b87f5" strokeWidth={1} />
                   ))}
                 </Bar>
               </BarChart>

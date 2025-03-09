@@ -19,7 +19,7 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
   }));
   
   return (
-    <Card>
+    <Card className="w-full h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
@@ -32,7 +32,7 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px] mt-4">
+        <div className="h-[200px] mt-2 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
@@ -43,7 +43,11 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
               <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+              <YAxis 
+                allowDecimals={false} 
+                tick={{ fontSize: 12 }} 
+                tickFormatter={(value) => value === 0 ? '' : value.toString()}
+              />
               <Tooltip 
                 formatter={(value) => [`${value} entries`, 'Count']}
                 contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}

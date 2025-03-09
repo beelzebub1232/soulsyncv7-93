@@ -78,44 +78,80 @@ export function UpcomingHabits() {
         try {
           const allHabits = JSON.parse(storedHabits);
           
-          // Group by name and get today's habits
+          // Group habits by name
+          const habitGroups: Record<string, any[]> = {};
+          allHabits.forEach((habit: any) => {
+            if (!habitGroups[habit.name]) {
+              habitGroups[habit.name] = [];
+            }
+            habitGroups[habit.name].push(habit);
+          });
+          
+          // Get today's date
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
           const todayString = today.toISOString().split('T')[0];
           
-          const habitsForToday = allHabits
-            .filter((habit: any) => {
-              const habitDate = new Date(habit.date);
-              habitDate.setHours(0, 0, 0, 0);
-              return habitDate.toISOString().split('T')[0] === todayString;
-            })
-            .map((habit: any) => {
-              const { icon, color } = getHabitDisplayProps(habit.name);
-              
-              // Generate a time based on habit name
-              let time = '';
-              if (habit.name.toLowerCase().includes('morning') || habit.name.toLowerCase().includes('wake')) {
-                time = '8:00 AM';
-              } else if (habit.name.toLowerCase().includes('evening') || habit.name.toLowerCase().includes('night')) {
-                time = '7:00 PM';
-              } else if (habit.name.toLowerCase().includes('lunch') || habit.name.toLowerCase().includes('noon')) {
-                time = '12:00 PM';
-              } else {
-                // Random time between 8 AM and 8 PM
-                const hour = Math.floor(Math.random() * 12) + 8;
-                time = `${hour > 12 ? hour - 12 : hour}:${Math.random() > 0.5 ? '00' : '30'} ${hour >= 12 ? 'PM' : 'AM'}`;
-              }
-              
-              return {
-                ...habit,
-                icon,
-                color,
-                time
-              };
-            });
+          // Get or create today's habits
+          const todaysHabits: Habit[] = [];
           
-          setHabits(habitsForToday);
+          Object.entries(habitGroups).forEach(([name, entries]) => {
+            // Find today's entry if it exists
+            const todayEntry = entries.find((entry) => {
+              const entryDate = new Date(entry.date);
+              entryDate.setHours(0, 0, 0, 0);
+              return entryDate.toISOString().split('T')[0] === todayString;
+            });
+            
+            // If today's entry exists, use it; otherwise create a placeholder
+            const { icon, color } = getHabitDisplayProps(name);
+            
+            if (todayEntry) {
+              todaysHabits.push({
+                id: todayEntry.id,
+                name: todayEntry.name,
+                time: todayEntry.time || '9:00 AM',
+                completed: todayEntry.completed,
+                color,
+                icon,
+                date: todayEntry.date,
+                targetDays: todayEntry.targetDays || 7
+              });
+            } else {
+              // If we have any entries for this habit at all, create a today entry
+              const latestEntry = entries[entries.length - 1];
+              if (latestEntry) {
+                // Generate a time based on habit name or use previous time
+                let time = latestEntry.time || '';
+                if (!time) {
+                  if (name.toLowerCase().includes('morning') || name.toLowerCase().includes('wake')) {
+                    time = '8:00 AM';
+                  } else if (name.toLowerCase().includes('evening') || name.toLowerCase().includes('night')) {
+                    time = '7:00 PM';
+                  } else if (name.toLowerCase().includes('lunch') || name.toLowerCase().includes('noon')) {
+                    time = '12:00 PM';
+                  } else {
+                    const hour = Math.floor(Math.random() * 12) + 8;
+                    time = `${hour > 12 ? hour - 12 : hour}:${Math.random() > 0.5 ? '00' : '30'} ${hour >= 12 ? 'PM' : 'AM'}`;
+                  }
+                }
+                
+                const newId = `${name}-${Date.now()}`;
+                todaysHabits.push({
+                  id: newId,
+                  name,
+                  time,
+                  completed: false,
+                  color,
+                  icon,
+                  date: new Date().toISOString(),
+                  targetDays: latestEntry.targetDays || 7
+                });
+              }
+            }
+          });
+          
+          setHabits(todaysHabits);
         } catch (error) {
           console.error("Failed to parse habits:", error);
           setHabits([]);
@@ -152,16 +188,33 @@ export function UpcomingHabits() {
     if (storedHabits) {
       try {
         const allHabits = JSON.parse(storedHabits);
-        const updated = allHabits.map((habit: any) => 
-          habit.id === id ? { ...habit, completed: !habit.completed } : habit
-        );
+        const habitToUpdate = allHabits.find((h: any) => h.id === id);
         
-        localStorage.setItem(storageKey, JSON.stringify(updated));
+        if (habitToUpdate) {
+          // Update the existing habit
+          habitToUpdate.completed = !habitToUpdate.completed;
+          localStorage.setItem(storageKey, JSON.stringify(allHabits));
+        } else {
+          // This is a newly created habit (for today)
+          const newHabit = habits.find(h => h.id === id);
+          if (newHabit) {
+            const newHabitEntry = {
+              id,
+              name: newHabit.name,
+              date: newHabit.date,
+              completed: !newHabit.completed,
+              targetDays: newHabit.targetDays,
+              time: newHabit.time
+            };
+            
+            localStorage.setItem(storageKey, JSON.stringify([...allHabits, newHabitEntry]));
+          }
+        }
         
         // Dispatch a storage event for other components
         const event = new StorageEvent('storage', {
           key: storageKey,
-          newValue: JSON.stringify(updated),
+          newValue: localStorage.getItem(storageKey),
           oldValue: storedHabits,
           storageArea: localStorage
         });
@@ -179,6 +232,30 @@ export function UpcomingHabits() {
         }
       } catch (error) {
         console.error("Failed to update habits:", error);
+      }
+    } else {
+      // No habits stored yet, create new
+      const habitToSave = habits.find(h => h.id === id);
+      if (habitToSave) {
+        const newHabitEntry = [{
+          id,
+          name: habitToSave.name,
+          date: habitToSave.date,
+          completed: !habitToSave.completed,
+          targetDays: habitToSave.targetDays,
+          time: habitToSave.time
+        }];
+        
+        localStorage.setItem(storageKey, JSON.stringify(newHabitEntry));
+        
+        // Dispatch storage event
+        const event = new StorageEvent('storage', {
+          key: storageKey,
+          newValue: JSON.stringify(newHabitEntry),
+          oldValue: null,
+          storageArea: localStorage
+        });
+        window.dispatchEvent(event);
       }
     }
   };

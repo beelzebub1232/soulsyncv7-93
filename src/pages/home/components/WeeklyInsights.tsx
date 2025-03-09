@@ -86,15 +86,12 @@ export function WeeklyInsights() {
           // Process habit data
           let habitStreaks = 0;
           let activityLevel = 0;
-          let habitDataExists = false;
           
           if (storedHabits) {
             const habitEntries = JSON.parse(storedHabits);
             
-            // Only process habits if there are any
+            // Calculate habit streaks
             if (habitEntries.length > 0) {
-              habitDataExists = true;
-              
               // Group habits by name
               const habitGroups: Record<string, any[]> = {};
               habitEntries.forEach((entry: any) => {
@@ -136,26 +133,36 @@ export function WeeklyInsights() {
                 ? Math.round(habitStreakValues.reduce((sum, val) => sum + val, 0) / habitStreakValues.length)
                 : 0;
                 
-              const completedThisWeek = habitEntries.filter((entry: any) => 
-                new Date(entry.date) >= oneWeekAgo && entry.completed
-              ).length;
-              
-              // Calculate total possible habits this week
-              const totalHabitsThisWeek = habitEntries.filter((entry: any) => 
+              // Calculate actual activity level from habit completions this week
+              const thisWeekHabits = habitEntries.filter((entry: any) => 
                 new Date(entry.date) >= oneWeekAgo
-              ).length;
+              );
               
-              const completionRate = totalHabitsThisWeek > 0 
+              const completedThisWeek = thisWeekHabits.filter((entry: any) => entry.completed).length;
+              const totalHabitsThisWeek = thisWeekHabits.length;
+              
+              const habitCompletionRate = totalHabitsThisWeek > 0 
                 ? Math.round((completedThisWeek / totalHabitsThisWeek) * 100)
                 : 0;
-                
-              // Activity level is average of mood trend, journal consistency and habit completion
-              activityLevel = Math.round((Math.abs(moodTrend) + journalConsistency + completionRate) / 3);
+              
+              // Journal activity
+              const journalActivityRate = journalConsistency;
+              
+              // Mood engagement (percentage of days with mood entries)
+              const daysWithMoods = new Set(
+                recentMoods.map((entry: any) => new Date(entry.date).toDateString())
+              ).size;
+              const moodEngagementRate = Math.round((daysWithMoods / 7) * 100);
+              
+              // Calculate overall activity level as weighted average
+              activityLevel = Math.round(
+                (habitCompletionRate * 0.5) + (journalActivityRate * 0.3) + (moodEngagementRate * 0.2)
+              );
             }
           }
           
-          if (!habitDataExists) {
-            // Fallback to mood-based estimates if no habit data
+          // If no data exists, fallback to defaults
+          if (!storedHabits || JSON.parse(storedHabits).length === 0) {
             habitStreaks = Math.min(100, recentMoods.length * 15);
             activityLevel = Math.min(100, Math.max(30, recentMoods.length * 20));
           }
@@ -254,7 +261,7 @@ export function WeeklyInsights() {
             <h3 className="text-sm font-medium">Habit Streaks</h3>
             <TrendingUp className="h-4 w-4 text-blue-500" />
           </div>
-          <div className="flex items-end gap-1 mt-2">
+          <div className="flex items-end gap-1 mt-2 h-16 mb-4">
             {Array.from({ length: 7 }).map((_, i) => {
               // Create a dynamic bar chart visualization
               const percentage = Math.min(100, (insights.habitStreaks / 100) * (i + 1) * 14);
@@ -273,7 +280,7 @@ export function WeeklyInsights() {
               );
             })}
           </div>
-          <div className="mt-2 text-xs text-center text-muted-foreground">
+          <div className="text-xs text-center text-muted-foreground">
             {insights.habitStreaks}% consistency
           </div>
         </CardContent>

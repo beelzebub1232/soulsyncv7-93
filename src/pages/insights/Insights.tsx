@@ -36,28 +36,105 @@ export default function Insights() {
     });
     
     try {
-      const canvas = await html2canvas(insightsRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
+      // Create a new PDF document
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
       
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = canvas.height * imgWidth / canvas.width;
+      // Add title to the PDF
+      pdf.setFontSize(20);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text('Mindscape Insights Report', 20, 20);
+      pdf.setFontSize(12);
+      pdf.text(`Generated on ${format(new Date(), 'MMMM d, yyyy')}`, 20, 30);
       
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Add a line separator
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(20, 35, 190, 35);
+      
+      // Add weekly summary section
+      pdf.setFontSize(16);
+      pdf.setTextColor(60, 60, 60);
+      pdf.text('Weekly Summary', 20, 45);
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(`Mood Average: ${data.weeklySummary.moodAverage}`, 25, 55);
+      pdf.text(`Journal Entries: ${data.weeklySummary.journalEntries}`, 25, 62);
+      pdf.text(`Completed Habits: ${data.weeklySummary.completedHabits}`, 25, 69);
+      pdf.text(`Mindfulness Minutes: ${data.weeklySummary.mindfulnessMinutes}`, 25, 76);
+      
+      // Add mood distribution section
+      pdf.setFontSize(16);
+      pdf.text('Mood Distribution', 20, 90);
+      
+      let y = 100;
+      Object.entries(data.moodDistribution).forEach(([mood, count], index) => {
+        pdf.setFontSize(12);
+        pdf.text(`${mood}: ${count} entries`, 25, y);
+        y += 7;
+      });
+      
+      // Add habit progress section
+      pdf.setFontSize(16);
+      pdf.text('Habit Progress', 20, y + 10);
+      
+      y += 20;
+      data.habitProgress.forEach((habit) => {
+        const percentage = Math.round((habit.completed / habit.total) * 100);
+        pdf.setFontSize(12);
+        pdf.text(`${habit.name}: ${habit.completed}/${habit.total} days (${percentage}%)`, 25, y);
+        y += 7;
+      });
+      
+      // Add weekly mood counts
+      pdf.setFontSize(16);
+      pdf.text('Weekly Mood Entries', 20, y + 10);
+      
+      y += 20;
+      Object.entries(data.weeklyMoodCounts).forEach(([day, count]) => {
+        pdf.setFontSize(12);
+        pdf.text(`${day}: ${count} entries`, 25, y);
+        y += 7;
+      });
+      
+      // Add insights section
+      pdf.setFontSize(16);
+      pdf.text('Insights', 20, y + 10);
+      
+      // Generate insight text based on mood data
+      const getInsight = (mood: string): string => {
+        switch(mood.toLowerCase()) {
+          case 'amazing':
+            return 'Your mood has been excellent this week! Keep up with whatever you\'re doing.';
+          case 'good':
+            return 'Your mood tends to improve on days you complete your morning meditation habit.';
+          case 'okay':
+            return 'Try increasing your mindfulness minutes to help improve your mood.';
+          case 'sad':
+            return 'Consider adding more physical activity to your routine to help boost your mood.';
+          case 'awful':
+            return 'Remember to be kind to yourself during difficult times. Consider reaching out to a friend or professional.';
+          default:
+            return 'Start tracking your mood regularly to get personalized insights.';
+        }
+      };
+      
+      const insightText = getInsight(data.weeklySummary.moodAverage);
+      pdf.setFontSize(12);
+      
+      // Split long text into multiple lines
+      const splitText = pdf.splitTextToSize(insightText, 160);
+      pdf.text(splitText, 25, y + 20);
+      
+      // Save the PDF
       pdf.save(`mindscape_insights_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
       
       toast({
         title: "Report generated",
-        description: "Your insights report has been downloaded.",
+        description: "Your detailed insights report has been downloaded.",
       });
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -125,7 +202,7 @@ export default function Insights() {
         )}
       </div>
       
-      <div className="text-center">
+      <div className="flex justify-center">
         <Button 
           variant="outline" 
           className="button-secondary flex items-center gap-2"

@@ -36,9 +36,35 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
   
   // Calculate total entries
   const totalEntries = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Custom label renderer to place text outside the chart
+  const renderCustomizedLabel = ({
+    cx, cy, midAngle, outerRadius, percent, index, name
+  }: any) => {
+    // Don't render label if percentage is too small
+    if (percent < 0.05) return null;
+    
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 10;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#888888"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        fontSize={12}
+      >
+        {`${name} ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
   
   return (
-    <Card>
+    <Card className="w-full h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <PieChartIcon className="h-5 w-5 text-mindscape-primary" />
@@ -47,7 +73,7 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
       </CardHeader>
       <CardContent>
         {totalEntries > 0 ? (
-          <div className="h-[200px] mt-4">
+          <div className="h-[210px] mt-2">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -55,17 +81,20 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
                   cx="50%"
                   cy="50%"
                   innerRadius={40}
-                  outerRadius={80}
+                  outerRadius={70}
                   paddingAngle={2}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   labelLine={false}
+                  label={renderCustomizedLabel}
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value} entries`, 'Count']} />
+                <Tooltip 
+                  formatter={(value, name) => [`${value} entries`, name]}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
