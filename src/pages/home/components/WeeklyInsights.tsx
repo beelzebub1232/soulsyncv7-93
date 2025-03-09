@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowUp, ArrowDown, Activity, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUser } from "@/contexts/UserContext";
+import { Progress } from "@/components/ui/progress";
 
 export function WeeklyInsights() {
   const { user } = useUser();
@@ -213,15 +214,13 @@ export function WeeklyInsights() {
               ? "Your mood has been improving" 
               : "Your mood has been declining"}
           </p>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className={`h-full ${insights.moodTrend >= 0 
-                ? 'bg-gradient-to-r from-green-300 to-green-500' 
-                : 'bg-gradient-to-r from-orange-300 to-red-400'} 
-                rounded-full`}
-              style={{ width: `${Math.min(100, Math.max(30, Math.abs(insights.moodTrend) + 50))}%` }}
-            ></div>
-          </div>
+          <Progress 
+            className="h-2"
+            value={Math.min(100, Math.max(30, Math.abs(insights.moodTrend) + 50))}
+            indicatorClassName={insights.moodTrend >= 0 
+              ? "bg-gradient-to-r from-green-300 to-green-500" 
+              : "bg-gradient-to-r from-orange-300 to-red-400"}
+          />
         </CardContent>
       </Card>
       
@@ -243,15 +242,13 @@ export function WeeklyInsights() {
               ? "Good journaling habits this week" 
               : "Try to journal more regularly"}
           </p>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className={`h-full ${insights.journalConsistency >= 50 
-                ? 'bg-gradient-to-r from-blue-300 to-blue-500' 
-                : 'bg-gradient-to-r from-orange-300 to-red-400'} 
-                rounded-full`}
-              style={{ width: `${insights.journalConsistency}%` }}
-            ></div>
-          </div>
+          <Progress 
+            className="h-2"
+            value={insights.journalConsistency}
+            indicatorClassName={insights.journalConsistency >= 50 
+              ? "bg-gradient-to-r from-blue-300 to-blue-500" 
+              : "bg-gradient-to-r from-orange-300 to-red-400"}
+          />
         </CardContent>
       </Card>
       
@@ -261,26 +258,17 @@ export function WeeklyInsights() {
             <h3 className="text-sm font-medium">Habit Streaks</h3>
             <TrendingUp className="h-4 w-4 text-blue-500" />
           </div>
-          <div className="flex items-end gap-1 mt-2 h-16 mb-4">
-            {Array.from({ length: 7 }).map((_, i) => {
-              // Create a dynamic bar chart visualization
-              const percentage = Math.min(100, (insights.habitStreaks / 100) * (i + 1) * 14);
-              const height = Math.max(4, percentage / 8); // 4-12px height range
-              
-              return (
-                <div 
-                  key={i} 
-                  className="bg-blue-400 rounded-t transition-all"
-                  style={{ 
-                    height: `${height}px`, 
-                    width: '8px',
-                    opacity: 0.4 + (i * 0.1)
-                  }}
-                ></div>
-              );
-            })}
-          </div>
-          <div className="text-xs text-center text-muted-foreground">
+          <p className="text-xs text-muted-foreground mb-2">
+            {insights.habitStreaks >= 50 
+              ? "You're building good habits" 
+              : "Keep working on your habits"}
+          </p>
+          <Progress 
+            className="h-2"
+            value={insights.habitStreaks}
+            indicatorClassName="bg-gradient-to-r from-indigo-300 to-indigo-500"
+          />
+          <div className="text-xs mt-1 text-right text-muted-foreground">
             {insights.habitStreaks}% consistency
           </div>
         </CardContent>
@@ -292,10 +280,14 @@ export function WeeklyInsights() {
             <h3 className="text-sm font-medium">Activity Level</h3>
             <Activity className="h-4 w-4 text-purple-500" />
           </div>
-          <p className="text-xs text-muted-foreground mb-1">Weekly progress</p>
-          <div className="flex items-center gap-1 text-lg font-medium">
-            <span className="text-purple-600">{insights.activityLevel}%</span>
-            <span className="text-xs text-muted-foreground">of your goal</span>
+          <p className="text-xs text-muted-foreground mb-2">Weekly progress</p>
+          <Progress 
+            className="h-2"
+            value={insights.activityLevel}
+            indicatorClassName="bg-gradient-to-r from-purple-300 to-purple-500"
+          />
+          <div className="text-xs mt-1 text-right text-muted-foreground">
+            {insights.activityLevel}% of your goal
           </div>
         </CardContent>
       </Card>

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useUser } from "@/contexts/UserContext";
+import { Progress } from "@/components/ui/progress";
+import { useNavigate } from "react-router-dom";
 
 interface Habit {
   id: string;
@@ -33,6 +35,8 @@ export default function HabitTracker() {
   const [newHabitDialogOpen, setNewHabitDialogOpen] = useState(false);
   const [editHabitDialogOpen, setEditHabitDialogOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [calendarViewOpen, setCalendarViewOpen] = useState(false);
+  const [statsViewOpen, setStatsViewOpen] = useState(false);
   const [newHabit, setNewHabit] = useState({
     title: "",
     time: "",
@@ -40,6 +44,7 @@ export default function HabitTracker() {
   });
   const { toast } = useToast();
   const { user } = useUser();
+  const navigate = useNavigate();
 
   // Load habits from localStorage
   useEffect(() => {
@@ -80,6 +85,9 @@ export default function HabitTracker() {
             // Calculate days completed
             const completedEntries = entries.filter(entry => entry.completed);
             
+            // Find a color from existing entries or assign default
+            const habitColor = entries.find(entry => entry.color)?.color || getColorForHabit(name);
+            
             // Get target days from a random entry (they should all have the same target)
             const targetDays = entries[0]?.targetDays || 7;
             
@@ -88,7 +96,7 @@ export default function HabitTracker() {
               title: name,
               time: todayEntry?.time || "9:00 AM",
               completed: todayEntry?.completed || false,
-              color: getColorForHabit(name),
+              color: habitColor,
               daysCompleted: completedEntries.length,
               totalDays: targetDays
             };
@@ -204,7 +212,8 @@ export default function HabitTracker() {
           date: today,
           completed: habit.completed,
           targetDays: habit.totalDays,
-          time: habit.time
+          time: habit.time,
+          color: habit.color
         }];
         
         saveHabitToStorage(newHabitEntry);
@@ -249,7 +258,8 @@ export default function HabitTracker() {
       date: today,
       completed: false,
       targetDays: 7,
-      time: newHabit.time
+      time: newHabit.time,
+      color: newHabit.color
     };
     
     if (storedHabits) {
@@ -301,7 +311,8 @@ export default function HabitTracker() {
             return {
               ...habit,
               name: editingHabit.title,
-              time: editingHabit.time
+              time: editingHabit.time,
+              color: editingHabit.color
             };
           }
           return habit;
@@ -362,6 +373,22 @@ export default function HabitTracker() {
     setEditHabitDialogOpen(true);
   };
   
+  const openCalendarView = () => {
+    navigate('/insights');
+    toast({
+      title: "Calendar View",
+      description: "Viewing your habits in the Insights section",
+    });
+  };
+  
+  const openStatsView = () => {
+    navigate('/insights');
+    toast({
+      title: "Statistics View",
+      description: "Viewing your habit statistics in the Insights section",
+    });
+  };
+  
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
@@ -374,6 +401,7 @@ export default function HabitTracker() {
           <button 
             className="w-10 h-10 rounded-full flex items-center justify-center bg-mindscape-light text-mindscape-primary hover:bg-mindscape-light/80 transition-all"
             aria-label="View calendar"
+            onClick={openCalendarView}
           >
             <Calendar className="h-5 w-5" />
           </button>
@@ -381,6 +409,7 @@ export default function HabitTracker() {
           <button 
             className="w-10 h-10 rounded-full flex items-center justify-center bg-mindscape-light text-mindscape-primary hover:bg-mindscape-light/80 transition-all"
             aria-label="View statistics"
+            onClick={openStatsView}
           >
             <BarChart className="h-5 w-5" />
           </button>
@@ -475,12 +504,15 @@ export default function HabitTracker() {
                   </span>
                 </div>
                 
-                <div className="w-full bg-mindscape-light rounded-full h-2.5">
-                  <div 
-                    className="bg-mindscape-primary h-2.5 rounded-full"
-                    style={{ width: `${(habit.daysCompleted / habit.totalDays) * 100}%` }}
-                  ></div>
-                </div>
+                <Progress 
+                  value={(habit.daysCompleted / habit.totalDays) * 100} 
+                  className="h-2.5"
+                  indicatorClassName={habit.color.includes("green") ? "bg-green-500" :
+                                    habit.color.includes("blue") ? "bg-blue-500" :
+                                    habit.color.includes("yellow") ? "bg-yellow-500" :
+                                    habit.color.includes("orange") ? "bg-orange-500" :
+                                    "bg-pink-500"}
+                />
               </div>
             ))}
           </div>

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 
-// Sample quotes for demonstration
+// Expanded quotes collection for more variety
 const quotes = [
   {
     text: "The greatest glory in living lies not in never falling, but in rising every time we fall.",
@@ -31,12 +31,45 @@ const quotes = [
   {
     text: "The greatest discovery of all time is that a person can change his future by merely changing his attitude.",
     author: "Oprah Winfrey"
+  },
+  {
+    text: "The future belongs to those who believe in the beauty of their dreams.",
+    author: "Eleanor Roosevelt"
+  },
+  {
+    text: "Life is what happens when you're busy making other plans.",
+    author: "John Lennon"
+  },
+  {
+    text: "The purpose of our lives is to be happy.",
+    author: "Dalai Lama"
+  },
+  {
+    text: "You only live once, but if you do it right, once is enough.",
+    author: "Mae West"
+  },
+  {
+    text: "Many of life's failures are people who did not realize how close they were to success when they gave up.",
+    author: "Thomas A. Edison"
+  },
+  {
+    text: "The mind is everything. What you think you become.",
+    author: "Buddha"
+  },
+  {
+    text: "The best time to plant a tree was 20 years ago. The second best time is now.",
+    author: "Chinese Proverb"
+  },
+  {
+    text: "Your time is limited, don't waste it living someone else's life.",
+    author: "Steve Jobs"
   }
 ];
 
 export function DailyMotivation() {
   const [quote, setQuote] = useState<typeof quotes[0] | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [animation, setAnimation] = useState("");
   
   const fetchRandomQuote = () => {
     const randomIndex = Math.floor(Math.random() * quotes.length);
@@ -45,14 +78,21 @@ export function DailyMotivation() {
   
   const refreshQuote = () => {
     setRefreshing(true);
+    setAnimation("animate-fade-out");
+    
     setTimeout(() => {
       setQuote(fetchRandomQuote());
-      setRefreshing(false);
-    }, 600);
+      setAnimation("animate-fade-in");
+      
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 300);
+    }, 300);
   };
   
   useEffect(() => {
     setQuote(fetchRandomQuote());
+    setAnimation("animate-fade-in");
   }, []);
   
   if (!quote) return null;
@@ -76,7 +116,7 @@ export function DailyMotivation() {
         </button>
       </div>
       
-      <blockquote className="mt-2">
+      <blockquote className={`mt-2 ${animation}`}>
         <p className="text-base italic">"{quote.text}"</p>
         <footer className="mt-2 text-sm text-muted-foreground">— {quote.author}</footer>
       </blockquote>

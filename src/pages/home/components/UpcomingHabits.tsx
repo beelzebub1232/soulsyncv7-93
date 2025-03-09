@@ -13,7 +13,6 @@ interface Habit {
   time?: string;
   completed: boolean;
   color: string;
-  icon: string;
   date: string;
   targetDays: number;
 }
@@ -23,19 +22,6 @@ export function UpcomingHabits() {
   const { user } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Icons for different habit types
-  const habitIcons: Record<string, string> = {
-    "meditation": "🧘‍♀️",
-    "exercise": "🏃‍♂️",
-    "reading": "📚",
-    "journaling": "📔",
-    "water": "💧",
-    "walking": "🚶",
-    "sleep": "😴",
-    "stretching": "🤸‍♂️",
-    "vitamins": "💊"
-  };
   
   // Colors for different habit types
   const habitColors: Record<string, string> = {
@@ -50,21 +36,21 @@ export function UpcomingHabits() {
     "vitamins": "border-pink-400 bg-pink-50/50"
   };
   
-  // Get a color and icon for a habit
-  const getHabitDisplayProps = (name: string) => {
+  // Get a color for a habit
+  const getHabitColor = (name: string, colorValue?: string) => {
+    if (colorValue) return colorValue;
+    
     const lowerName = name.toLowerCase();
-    let icon = "✨";
     let color = "border-gray-400 bg-gray-50/50";
     
-    // Find matching icons and colors
-    Object.keys(habitIcons).forEach(key => {
+    // Find matching colors
+    Object.keys(habitColors).forEach(key => {
       if (lowerName.includes(key)) {
-        icon = habitIcons[key];
         color = habitColors[key];
       }
     });
     
-    return { icon, color };
+    return color;
   };
   
   useEffect(() => {
@@ -104,16 +90,13 @@ export function UpcomingHabits() {
             });
             
             // If today's entry exists, use it; otherwise create a placeholder
-            const { icon, color } = getHabitDisplayProps(name);
-            
             if (todayEntry) {
               todaysHabits.push({
                 id: todayEntry.id,
                 name: todayEntry.name,
                 time: todayEntry.time || '9:00 AM',
                 completed: todayEntry.completed,
-                color,
-                icon,
+                color: getHabitColor(todayEntry.name, todayEntry.color),
                 date: todayEntry.date,
                 targetDays: todayEntry.targetDays || 7
               });
@@ -142,8 +125,7 @@ export function UpcomingHabits() {
                   name,
                   time,
                   completed: false,
-                  color,
-                  icon,
+                  color: getHabitColor(name, latestEntry.color),
                   date: new Date().toISOString(),
                   targetDays: latestEntry.targetDays || 7
                 });
@@ -204,7 +186,8 @@ export function UpcomingHabits() {
               date: newHabit.date,
               completed: !newHabit.completed,
               targetDays: newHabit.targetDays,
-              time: newHabit.time
+              time: newHabit.time,
+              color: newHabit.color
             };
             
             localStorage.setItem(storageKey, JSON.stringify([...allHabits, newHabitEntry]));
@@ -243,7 +226,8 @@ export function UpcomingHabits() {
           date: habitToSave.date,
           completed: !habitToSave.completed,
           targetDays: habitToSave.targetDays,
-          time: habitToSave.time
+          time: habitToSave.time,
+          color: habitToSave.color
         }];
         
         localStorage.setItem(storageKey, JSON.stringify(newHabitEntry));
@@ -295,15 +279,12 @@ export function UpcomingHabits() {
           </button>
           
           <div className="flex-1">
-            <div className="flex items-center">
-              <span className="mr-2 text-lg">{habit.icon}</span>
-              <h3 className={cn(
-                "font-medium transition-all",
-                habit.completed ? "line-through text-muted-foreground" : ""
-              )}>
-                {habit.name}
-              </h3>
-            </div>
+            <h3 className={cn(
+              "font-medium transition-all",
+              habit.completed ? "line-through text-muted-foreground" : ""
+            )}>
+              {habit.name}
+            </h3>
             {habit.time && (
               <p className="text-xs text-muted-foreground mt-1">{habit.time}</p>
             )}
