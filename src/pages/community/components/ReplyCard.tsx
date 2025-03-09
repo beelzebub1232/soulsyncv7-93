@@ -48,7 +48,7 @@ export const ReplyCard: React.FC<ReplyCardProps> = ({ reply, onLike }) => {
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => onLike?.(reply.id)}
+            onClick={() => onLike && onLike(reply.id)}
             className="text-xs flex items-center gap-1 text-muted-foreground hover:text-mindscape-primary"
           >
             <ThumbsUp className="h-3.5 w-3.5" />

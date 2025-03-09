@@ -16,6 +16,11 @@ export function useForumPost(postId: string | undefined) {
   useEffect(() => {
     const loadPostData = () => {
       try {
+        if (!postId) {
+          setIsLoading(false);
+          return;
+        }
+        
         // Load post data
         const storedPosts = localStorage.getItem('soulsync_forum_posts');
         if (storedPosts) {
@@ -75,38 +80,47 @@ export function useForumPost(postId: string | undefined) {
       likes: 0
     };
     
-    // Get all replies
-    const storedReplies = localStorage.getItem('soulsync_forum_replies');
-    let allReplies: ForumReply[] = storedReplies ? JSON.parse(storedReplies) : [];
-    
-    // Update replies
-    const updatedReplies = [newReply, ...allReplies];
-    localStorage.setItem('soulsync_forum_replies', JSON.stringify(updatedReplies));
-    
-    // Update current post's replies
-    setReplies([newReply, ...replies]);
-    
-    // Update post reply count
-    const storedPosts = localStorage.getItem('soulsync_forum_posts');
-    if (storedPosts) {
-      const allPosts: ForumPost[] = JSON.parse(storedPosts);
-      const updatedPosts = allPosts.map(p => 
-        p.id === post.id ? { ...p, replies: p.replies + 1 } : p
-      );
-      localStorage.setItem('soulsync_forum_posts', JSON.stringify(updatedPosts));
+    try {
+      // Get all replies
+      const storedReplies = localStorage.getItem('soulsync_forum_replies');
+      let allReplies: ForumReply[] = storedReplies ? JSON.parse(storedReplies) : [];
       
-      // Update current post
-      setPost({...post, replies: post.replies + 1});
+      // Update replies
+      const updatedReplies = [newReply, ...allReplies];
+      localStorage.setItem('soulsync_forum_replies', JSON.stringify(updatedReplies));
+      
+      // Update current post's replies
+      setReplies([newReply, ...replies]);
+      
+      // Update post reply count
+      const storedPosts = localStorage.getItem('soulsync_forum_posts');
+      if (storedPosts) {
+        const allPosts: ForumPost[] = JSON.parse(storedPosts);
+        const updatedPosts = allPosts.map(p => 
+          p.id === post.id ? { ...p, replies: p.replies + 1 } : p
+        );
+        localStorage.setItem('soulsync_forum_posts', JSON.stringify(updatedPosts));
+        
+        // Update current post
+        setPost({...post, replies: post.replies + 1});
+      }
+      
+      // Reset form
+      setReplyContent("");
+      setIsAnonymous(false);
+      
+      toast({
+        title: "Reply posted",
+        description: "Your reply has been added to the discussion."
+      });
+    } catch (error) {
+      console.error("Error submitting reply:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to submit your reply. Please try again."
+      });
     }
-    
-    // Reset form
-    setReplyContent("");
-    setIsAnonymous(false);
-    
-    toast({
-      title: "Reply posted",
-      description: "Your reply has been added to the discussion."
-    });
   };
 
   return {

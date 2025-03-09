@@ -11,6 +11,7 @@ interface ReplyFormProps {
   isAnonymous: boolean;
   setIsAnonymous: (anonymous: boolean) => void;
   onSubmit: () => void;
+  disabled?: boolean;
 }
 
 export const ReplyForm: React.FC<ReplyFormProps> = ({
@@ -18,7 +19,8 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
   setReplyContent,
   isAnonymous,
   setIsAnonymous,
-  onSubmit
+  onSubmit,
+  disabled = false
 }) => {
   return (
     <Card className="border-mindscape-light mt-6">
@@ -30,6 +32,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
           value={replyContent}
           onChange={(e) => setReplyContent(e.target.value)}
           className="min-h-[120px] border-mindscape-light focus:border-mindscape-primary"
+          disabled={disabled}
         />
         
         <div className="flex items-center justify-between mt-3">
@@ -38,6 +41,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
               id="anonymous" 
               checked={isAnonymous}
               onCheckedChange={(checked) => setIsAnonymous(checked === true)}
+              disabled={disabled}
             />
             <label 
               htmlFor="anonymous" 
@@ -50,6 +54,7 @@ export const ReplyForm: React.FC<ReplyFormProps> = ({
           <Button 
             onClick={onSubmit}
             className="button-primary"
+            disabled={disabled}
           >
             Submit Reply
           </Button>
