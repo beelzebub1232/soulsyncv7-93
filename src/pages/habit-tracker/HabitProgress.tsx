@@ -2,12 +2,20 @@
 import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { Habit } from "./types";
+import { useUser } from "@/contexts/UserContext";
 
 interface HabitProgressProps {
   habit: Habit;
 }
 
 export function HabitProgress({ habit }: HabitProgressProps) {
+  const { user } = useUser();
+  
+  // Ensure we only display data for the current user
+  if (!user) {
+    return null;
+  }
+  
   const getProgressColor = (colorString: string) => {
     if (colorString.includes("green")) return "bg-green-500";
     if (colorString.includes("blue")) return "bg-blue-500";
