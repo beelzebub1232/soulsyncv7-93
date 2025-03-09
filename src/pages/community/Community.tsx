@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Users, Plus, Filter, Search } from "lucide-react";
+import { MessageSquare, Users, Plus, Filter, Search, Clock, ArrowUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ForumPost, ForumCategory } from "@/types/community";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ForumPost, ForumCategory, ForumReply } from "@/types/community";
+import { Card, CardContent } from "@/components/ui/card";
+import { useUser } from "@/contexts/UserContext";
+import { Link } from "react-router-dom";
 
 export default function Community() {
   const [isNewPostOpen, setIsNewPostOpen] = useState(false);
@@ -19,6 +22,8 @@ export default function Community() {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>([]);
+  const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [newPost, setNewPost] = useState({
     title: "",
     content: "",
@@ -26,6 +31,7 @@ export default function Community() {
     isAnonymous: false
   });
   const { toast } = useToast();
+  const { user } = useUser();
   
   // Initialize default categories and posts
   useEffect(() => {
@@ -74,30 +80,150 @@ export default function Community() {
       localStorage.setItem('soulsync_forum_categories', JSON.stringify(defaultCategories));
     }
     
-    // Load posts from storage
+    // Load posts from storage or create sample posts if none exist
     const storedPosts = localStorage.getItem('soulsync_forum_posts');
     if (storedPosts) {
       const parsedPosts = JSON.parse(storedPosts);
       setPosts(parsedPosts);
       setFilteredPosts(parsedPosts);
+    } else {
+      // Create sample posts for each category
+      const samplePosts: ForumPost[] = generateSamplePosts(defaultCategories);
+      setPosts(samplePosts);
+      setFilteredPosts(samplePosts);
+      localStorage.setItem('soulsync_forum_posts', JSON.stringify(samplePosts));
     }
   }, []);
   
-  // Filter posts when search query changes
+  // Generate sample posts for categories
+  const generateSamplePosts = (categories: ForumCategory[]): ForumPost[] => {
+    const samplePosts: ForumPost[] = [];
+    
+    // Sample content for different categories
+    const sampleContent = {
+      anxiety: [
+        {
+          title: "Techniques for managing panic attacks",
+          content: "I've been struggling with panic attacks recently. What techniques have helped you manage them in the moment?"
+        },
+        {
+          title: "Social anxiety at work",
+          content: "Does anyone have tips for managing social anxiety in workplace meetings? I find myself freezing up when I need to speak."
+        },
+        {
+          title: "Physical symptoms of anxiety",
+          content: "Lately I've been experiencing heart palpitations and shortness of breath. Does anyone else have physical symptoms with their anxiety?"
+        }
+      ],
+      depression: [
+        {
+          title: "Getting out of bed on bad days",
+          content: "Some days I can barely get out of bed. What small steps help you when depression is overwhelming?"
+        },
+        {
+          title: "Depression and losing interest in hobbies",
+          content: "I used to love painting but now I feel nothing when I try. Has anyone found a way to reconnect with their passions?"
+        },
+        {
+          title: "Supporting a partner with depression",
+          content: "My partner was recently diagnosed with depression. How can I best support them through this?"
+        }
+      ],
+      mindfulness: [
+        {
+          title: "Beginning meditation practice",
+          content: "I'm new to meditation and finding it difficult to quiet my mind. Any tips for beginners?"
+        },
+        {
+          title: "Mindfulness exercises for work breaks",
+          content: "Looking for quick mindfulness exercises I can do during short breaks at work. What works for you?"
+        },
+        {
+          title: "Connecting mindfulness to daily activities",
+          content: "How do you incorporate mindfulness into everyday tasks like cooking or cleaning?"
+        }
+      ],
+      general: [
+        {
+          title: "Sleep hygiene tips",
+          content: "I've been having trouble sleeping. What sleep hygiene practices have helped improve your sleep quality?"
+        },
+        {
+          title: "Finding a therapist",
+          content: "I'm ready to start therapy but unsure how to find the right therapist. What should I look for?"
+        },
+        {
+          title: "Managing stress during major life changes",
+          content: "I'm going through several big life changes at once. How do you manage stress during transitions?"
+        }
+      ]
+    };
+    
+    // Generate 3 sample posts for each category
+    const now = new Date();
+    let postId = 1;
+    
+    categories.forEach(category => {
+      const categorySamples = sampleContent[category.id as keyof typeof sampleContent] || [];
+      
+      categorySamples.forEach((sample, index) => {
+        // Create post with varying dates (some recent, some older)
+        const daysAgo = Math.floor(Math.random() * 14); // Random between 0-14 days ago
+        const postDate = new Date(now);
+        postDate.setDate(postDate.getDate() - daysAgo);
+        
+        const isAnonymous = index % 3 === 0; // Make some posts anonymous
+        const replies = Math.floor(Math.random() * 15); // Random number of replies
+        
+        samplePosts.push({
+          id: `sample-${postId++}`,
+          title: sample.title,
+          content: sample.content,
+          categoryId: category.id,
+          categoryName: category.name,
+          author: isAnonymous ? "Anonymous" : `Community Member ${postId % 5 + 1}`,
+          date: postDate,
+          replies: replies,
+          isAnonymous: isAnonymous
+        });
+      });
+    });
+    
+    // Sort by date (newest first)
+    return samplePosts.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  };
+  
+  // Filter and sort posts when search query, sort order, or category filter changes
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredPosts(posts);
-      return;
+    let filtered = posts;
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.title.toLowerCase().includes(lowerQuery) || 
+        post.content.toLowerCase().includes(lowerQuery)
+      );
     }
     
-    const lowerQuery = searchQuery.toLowerCase();
-    const filtered = posts.filter(post => 
-      post.title.toLowerCase().includes(lowerQuery) || 
-      post.content.toLowerCase().includes(lowerQuery)
-    );
+    // Apply category filter
+    if (selectedCategory) {
+      filtered = filtered.filter(post => post.categoryId === selectedCategory);
+    }
+    
+    // Apply sorting
+    if (sortOrder === 'recent') {
+      filtered = [...filtered].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+    } else if (sortOrder === 'popular') {
+      filtered = [...filtered].sort((a, b) => b.replies - a.replies);
+    }
     
     setFilteredPosts(filtered);
-  }, [searchQuery, posts]);
+  }, [searchQuery, posts, sortOrder, selectedCategory]);
   
   const handleCreatePost = () => {
     if (!newPost.title || !newPost.content || !newPost.categoryId) {
@@ -118,7 +244,7 @@ export default function Community() {
       content: newPost.content,
       categoryId: newPost.categoryId,
       categoryName: category.name,
-      author: newPost.isAnonymous ? "Anonymous" : "Current User",
+      author: newPost.isAnonymous ? "Anonymous" : (user?.username || "Current User"),
       date: new Date(),
       replies: 0,
       isAnonymous: newPost.isAnonymous
@@ -151,6 +277,12 @@ export default function Community() {
     });
   };
   
+  // Function to open post dialog with pre-selected category
+  const openNewPostWithCategory = (categoryId: string) => {
+    setNewPost({...newPost, categoryId});
+    setIsNewPostOpen(true);
+  };
+  
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
@@ -168,7 +300,7 @@ export default function Community() {
         </button>
       </header>
       
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -179,12 +311,35 @@ export default function Community() {
           />
         </div>
         
-        <button 
-          className="w-10 h-10 rounded-lg border border-input bg-background hover:bg-accent flex items-center justify-center"
-          aria-label="Filter"
+        <Select 
+          value={selectedCategory}
+          onValueChange={setSelectedCategory}
         >
-          <Filter className="h-4 w-4" />
-        </button>
+          <SelectTrigger className="w-full sm:w-40">
+            <SelectValue placeholder="All categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All categories</SelectItem>
+            {categories.map(category => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        <Select 
+          value={sortOrder}
+          onValueChange={(value) => setSortOrder(value as 'recent' | 'popular')}
+        >
+          <SelectTrigger className="w-full sm:w-40">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Most Recent</SelectItem>
+            <SelectItem value="popular">Most Popular</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <Tabs defaultValue="forums" className="w-full">
@@ -203,24 +358,41 @@ export default function Community() {
           
           <div className="space-y-3">
             {categories.map((category) => (
-              <a 
+              <Card 
                 key={category.id}
-                href={`/community/${category.id}`}
-                className={`card-primary block hover:shadow-md transition-all border-l-4 ${category.color}`}
+                className={`hover:shadow-md transition-all border-l-4 ${category.color}`}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-mindscape-light flex items-center justify-center text-xl">
-                    {category.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium">{category.name}</h3>
-                    <p className="text-sm text-muted-foreground">{category.description}</p>
-                    <div className="mt-1 text-xs text-mindscape-primary">
-                      {category.posts} posts
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-mindscape-light flex items-center justify-center text-xl">
+                      {category.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{category.name}</h3>
+                      <p className="text-sm text-muted-foreground">{category.description}</p>
+                      <div className="mt-1 text-xs text-mindscape-primary">
+                        {category.posts} posts
+                      </div>
                     </div>
                   </div>
-                </div>
-              </a>
+                  <div className="mt-3 flex justify-between items-center">
+                    <Link 
+                      to={`/community/${category.id}`}
+                      className="text-sm text-mindscape-primary hover:underline"
+                    >
+                      View discussions
+                    </Link>
+                    <Button 
+                      size="sm" 
+                      onClick={() => openNewPostWithCategory(category.id)}
+                      className="button-primary"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      New Post
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </TabsContent>
@@ -231,23 +403,6 @@ export default function Community() {
               <MessageSquare className="h-5 w-5 text-mindscape-primary" />
               <span>Recent Discussions</span>
             </h2>
-            
-            <Select 
-              defaultValue="recent"
-              onValueChange={(value) => {
-                // Sort functionality would go here
-                console.log("Sort by:", value);
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Recent</SelectItem>
-                <SelectItem value="popular">Popular</SelectItem>
-                <SelectItem value="replies">Most Replies</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           
           <div className="space-y-3">
@@ -263,24 +418,56 @@ export default function Community() {
               </div>
             ) : (
               filteredPosts.map((post) => (
-                <a 
+                <Card 
                   key={post.id}
-                  href={`/community/post/${post.id}`}
-                  className="card-primary block hover:shadow-md transition-all"
+                  className="hover:shadow-md transition-all"
                 >
-                  <h3 className="font-medium">{post.title}</h3>
-                  
-                  <div className="flex justify-between items-center mt-2 text-xs">
-                    <span className="text-mindscape-primary">{post.categoryName}</span>
-                    <div className="text-muted-foreground">
-                      Posted by {post.author} · {formatRelativeTime(post.date)}
+                  <CardContent className="p-4">
+                    <Link to={`/community/post/${post.id}`}>
+                      <h3 className="font-medium hover:text-mindscape-primary transition-colors">{post.title}</h3>
+                    </Link>
+                    
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                      {post.content}
+                    </p>
+                    
+                    <div className="flex justify-between items-center mt-3 text-xs">
+                      <div className="flex items-center gap-4">
+                        <span className="text-mindscape-primary border border-mindscape-light rounded-full px-2 py-0.5">
+                          {post.categoryName}
+                        </span>
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          {post.replies} replies
+                        </span>
+                      </div>
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatRelativeTime(post.date)}
+                      </span>
                     </div>
-                  </div>
-                  
-                  <div className="mt-2 text-xs">
-                    <span className="text-muted-foreground">{post.replies} replies</span>
-                  </div>
-                </a>
+                    
+                    <div className="mt-2 flex items-center text-xs">
+                      <div className="flex items-center gap-2">
+                        {post.isAnonymous ? (
+                          <>
+                            <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                              <span className="text-xs">?</span>
+                            </div>
+                            <span className="text-muted-foreground">Anonymous</span>
+                          </>
+                        ) : (
+                          <>
+                            <Avatar className="w-6 h-6">
+                              <AvatarFallback>{post.author.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-muted-foreground">{post.author}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))
             )}
           </div>
@@ -358,15 +545,6 @@ export default function Community() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <div className="text-center pt-4">
-        <button 
-          onClick={() => setIsNewPostOpen(true)}
-          className="button-primary"
-        >
-          Start a Discussion
-        </button>
-      </div>
     </div>
   );
 }
