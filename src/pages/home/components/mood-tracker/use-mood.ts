@@ -41,7 +41,17 @@ export function useMood() {
       moods.push(newMoodEntry);
     }
     
+    // Save the updated moods
     localStorage.setItem('soulsync_moods', JSON.stringify(moods));
+    
+    // Dispatch a storage event so other components can update
+    const event = new StorageEvent('storage', {
+      key: 'soulsync_moods',
+      newValue: JSON.stringify(moods),
+      oldValue: storedMoods || null,
+      storageArea: localStorage
+    });
+    window.dispatchEvent(event);
   };
   
   // Load today's mood when component mounts

@@ -82,7 +82,17 @@ export function useJournalEntries() {
     setEntries(updatedEntries);
     
     const storageKey = `soulsync_journal_${user.id}`;
+    const previousValue = localStorage.getItem(storageKey);
     localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
+    
+    // Dispatch storage event for cross-component updates
+    const event = new StorageEvent('storage', {
+      key: storageKey,
+      newValue: JSON.stringify(updatedEntries),
+      oldValue: previousValue || null,
+      storageArea: localStorage
+    });
+    window.dispatchEvent(event);
     
     toast({
       title: "Journal entry saved",
@@ -103,7 +113,17 @@ export function useJournalEntries() {
     setEntries(updatedEntries);
     
     const storageKey = `soulsync_journal_${user.id}`;
+    const previousValue = localStorage.getItem(storageKey);
     localStorage.setItem(storageKey, JSON.stringify(updatedEntries));
+    
+    // Dispatch storage event
+    const event = new StorageEvent('storage', {
+      key: storageKey,
+      newValue: JSON.stringify(updatedEntries),
+      oldValue: previousValue || null,
+      storageArea: localStorage
+    });
+    window.dispatchEvent(event);
   };
   
   // Toggle sort order

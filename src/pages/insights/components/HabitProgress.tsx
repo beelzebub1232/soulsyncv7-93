@@ -6,19 +6,17 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 
-export function HabitProgress() {
-  // This would normally come from habit tracking data
-  // For now, let's provide sample data
-  const habitData = [
-    { name: 'Meditation', completed: 5, total: 7 },
-    { name: 'Exercise', completed: 4, total: 7 },
-    { name: 'Journaling', completed: 6, total: 7 },
-    { name: 'Reading', completed: 3, total: 7 },
-    { name: 'Water', completed: 7, total: 7 }
-  ];
-  
+interface HabitProgressProps {
+  habitProgress: {
+    name: string;
+    completed: number;
+    total: number;
+  }[];
+}
+
+export function HabitProgress({ habitProgress = [] }: HabitProgressProps) {
   // Calculate completion percentage
-  const chartData = habitData.map(habit => ({
+  const chartData = habitProgress.map(habit => ({
     name: habit.name,
     percentage: Math.round((habit.completed / habit.total) * 100)
   }));
@@ -32,22 +30,28 @@ export function HabitProgress() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px] mt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-              <XAxis type="number" domain={[0, 100]} unit="%" />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={80} />
-              <Tooltip formatter={(value) => [`${value}%`, 'Completion']} />
-              <Bar 
-                dataKey="percentage" 
-                fill="#9b87f5"
-                radius={[0, 4, 4, 0]}
-                barSize={16}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        {chartData.length > 0 ? (
+          <div className="h-[200px] mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                <XAxis type="number" domain={[0, 100]} unit="%" />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={80} />
+                <Tooltip formatter={(value) => [`${value}%`, 'Completion']} />
+                <Bar 
+                  dataKey="percentage" 
+                  fill="#9b87f5"
+                  radius={[0, 4, 4, 0]}
+                  barSize={16}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-[200px] flex items-center justify-center">
+            <p className="text-muted-foreground">No habit data available</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

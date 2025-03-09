@@ -48,7 +48,7 @@ export default function Insights() {
               moodTrend={data.moodTrend} 
             />
             <EmotionAnalysis moodDistribution={data.moodDistribution} />
-            <HabitProgress />
+            <HabitProgress habitProgress={data.habitProgress} />
           </>
         ) : (
           <div className="md:col-span-2 p-6 text-center">

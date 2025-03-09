@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface WeeklySummaryProps {
   moodAverage: string;
@@ -15,6 +17,7 @@ export function WeeklySummary({
   completedHabits, 
   mindfulnessMinutes 
 }: WeeklySummaryProps) {
+  const navigate = useNavigate();
   
   // Map mood to emoji
   const getMoodEmoji = (mood: string): string => {
@@ -45,6 +48,38 @@ export function WeeklySummary({
         return 'Start tracking your mood regularly to get personalized insights.';
     }
   };
+  
+  // Generate action recommendations
+  const getActionRecommendation = () => {
+    if (journalEntries < 3) {
+      return {
+        text: "Try writing in your journal more often",
+        action: () => navigate('/journal')
+      };
+    }
+    
+    if (mindfulnessMinutes < 30) {
+      return {
+        text: "Add more mindfulness sessions to your week",
+        action: () => navigate('/mindful')
+      };
+    }
+    
+    const [completed, total] = completedHabits.split('/').map(Number);
+    if (completed / total < 0.6) {
+      return {
+        text: "Focus on completing more of your habits",
+        action: () => navigate('/habit-tracker')
+      };
+    }
+    
+    return {
+      text: "Keep up the good work!",
+      action: () => {}
+    };
+  };
+  
+  const recommendation = getActionRecommendation();
   
   return (
     <Card className="card-highlight">
@@ -79,9 +114,17 @@ export function WeeklySummary({
         
         <div className="mt-4 pt-4 border-t border-mindscape-primary/20">
           <h3 className="font-medium mb-2">This Week's Insight</h3>
-          <p className="text-sm">
+          <p className="text-sm mb-4">
             {getInsight(moodAverage)}
           </p>
+          
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={recommendation.action}
+          >
+            {recommendation.text}
+          </Button>
         </div>
       </CardContent>
     </Card>
