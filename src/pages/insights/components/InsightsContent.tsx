@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MoodCalendar } from './MoodCalendar';
+import { MoodCalendar } from './mood-calendar';
 import { MoodTrends } from './MoodTrends';
 import { EmotionAnalysis } from './EmotionAnalysis';
 import { HabitProgress } from './HabitProgress';
