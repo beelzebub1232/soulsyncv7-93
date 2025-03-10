@@ -3,7 +3,7 @@ import React from 'react';
 import { PieChartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip 
 } from 'recharts';
 
 interface EmotionAnalysisProps {
@@ -37,28 +37,6 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
   // Calculate total entries
   const totalEntries = chartData.reduce((sum, item) => sum + item.value, 0);
 
-  // Custom legend renderer to show colored squares with percentages
-  const renderLegend = () => {
-    return (
-      <div className="mt-3 flex flex-wrap justify-center gap-3">
-        {chartData.map((entry, index) => {
-          const percent = Math.round((entry.value / totalEntries) * 100);
-          return (
-            <div key={`legend-${index}`} className="flex items-center gap-1">
-              <div 
-                className="w-3 h-3 rounded-sm" 
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-xs">
-                {entry.name} ({percent}%)
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-  
   return (
     <Card className="w-full h-full">
       <CardHeader className="pb-2">
@@ -70,6 +48,24 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
       <CardContent>
         {totalEntries > 0 ? (
           <div className="flex flex-col items-center">
+            {/* Mood type indicators at the top */}
+            <div className="flex flex-wrap justify-center gap-3 mb-2 w-full">
+              {chartData.map((entry, index) => {
+                const percent = Math.round((entry.value / totalEntries) * 100);
+                return (
+                  <div key={`legend-${index}`} className="flex items-center gap-1">
+                    <div 
+                      className="w-3 h-3 rounded-sm" 
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="text-xs">
+                      {entry.name} ({percent}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            
             <div className="h-[160px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -93,7 +89,6 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            {renderLegend()}
           </div>
         ) : (
           <div className="h-[200px] flex items-center justify-center">

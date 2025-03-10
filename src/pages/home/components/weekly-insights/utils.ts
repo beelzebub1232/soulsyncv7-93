@@ -1,8 +1,20 @@
 
 export const calculateMoodTrend = (recentAvg: number, prevAvg: number): number => {
-  return prevAvg > 0 
-    ? Math.round(((recentAvg - prevAvg) / prevAvg) * 100) 
-    : (recentAvg > 0 ? 100 : 0);
+  // If there's no previous data to compare with
+  if (prevAvg === 0) {
+    return recentAvg > 0 ? 15 : 0; // Return modest positive if we have recent data
+  }
+  
+  // If there's no recent data but we had previous data
+  if (recentAvg === 0 && prevAvg > 0) {
+    return -10; // Show slight decline
+  }
+  
+  // Calculate percentage change with more reasonable limits
+  const percentChange = Math.round(((recentAvg - prevAvg) / prevAvg) * 100);
+  
+  // Limit the percentage change to more reasonable values
+  return Math.max(-40, Math.min(40, percentChange));
 };
 
 export const getMoodScores = (): Record<string, number> => {

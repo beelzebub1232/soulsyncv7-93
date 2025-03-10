@@ -18,8 +18,9 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
     count: count || 0 // Ensure we have at least 0
   }));
   
-  // Adjust trend display to be more reasonable
-  const displayTrend = Math.min(Math.max(-50, moodTrend), 50); // Cap between -50 and 50
+  // Ensure trend display is more reasonable
+  const displayTrend = Math.min(Math.max(-50, moodTrend), 50);
+  const trendColor = displayTrend >= 0 ? 'text-green-500' : 'text-red-500';
   
   return (
     <Card className="w-full h-full">
@@ -29,7 +30,7 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
             <LineChartIcon className="h-5 w-5 text-mindscape-primary" />
             Mood Trends
           </CardTitle>
-          <div className={`text-sm font-medium flex items-center gap-1 ${displayTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+          <div className={`text-sm font-medium flex items-center gap-1 ${trendColor}`}>
             {displayTrend >= 0 ? '+' : ''}{displayTrend}%
           </div>
         </div>

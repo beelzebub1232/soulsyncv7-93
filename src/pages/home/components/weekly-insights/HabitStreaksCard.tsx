@@ -22,6 +22,7 @@ export function HabitStreaksCard({ habitStreaks }: HabitStreaksCardProps) {
               : "Keep working on your daily habits"}
           </p>
         </div>
+        
         <Progress 
           className="h-2 mt-3"
           value={habitStreaks}

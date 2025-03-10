@@ -67,7 +67,7 @@ export function calculateMoodTrend(
   // If there's no data from last week, but we have data this week
   if (lastWeekAvg === 0 && thisWeekAvg > 0) {
     // Instead of a dramatic 100% jump, provide a modest positive trend
-    return 20; 
+    return 15; 
   }
   
   // If there's data last week but none this week, show a slight decline
@@ -75,9 +75,13 @@ export function calculateMoodTrend(
     return -10;
   }
   
-  // Calculate a more realistic percent change (capping at +/-50% to avoid extreme swings)
-  const percentChange = Math.round(((thisWeekAvg - lastWeekAvg) / Math.max(1, lastWeekAvg)) * 100);
-  return Math.max(-50, Math.min(50, percentChange));
+  // Calculate a more realistic percent change (capping at +/-35% to avoid extreme swings)
+  if (lastWeekAvg > 0) {
+    const percentChange = Math.round(((thisWeekAvg - lastWeekAvg) / Math.max(1, lastWeekAvg)) * 100);
+    return Math.max(-35, Math.min(35, percentChange));
+  }
+  
+  return 0;
 }
 
 export function getMoodAverageLabel(moods: MoodEntry[]): string {

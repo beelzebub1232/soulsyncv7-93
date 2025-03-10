@@ -22,6 +22,7 @@ export function ActivityLevelCard({ activityLevel }: ActivityLevelCardProps) {
               : "Continue building healthy routines this week"}
           </p>
         </div>
+        
         <Progress 
           className="h-2 mt-3"
           value={activityLevel}

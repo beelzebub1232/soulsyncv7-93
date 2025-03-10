@@ -76,9 +76,11 @@ export function useMood() {
     };
     
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('soulsync_data_updated', loadTodaysMood);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('soulsync_data_updated', loadTodaysMood);
     };
   }, []);
 
