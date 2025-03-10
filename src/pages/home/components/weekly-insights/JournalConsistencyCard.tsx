@@ -1,5 +1,5 @@
 
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
@@ -13,14 +13,7 @@ export function JournalConsistencyCard({ journalConsistency }: JournalConsistenc
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-sm font-medium">Journal Consistency</h3>
-          <div className={`flex items-center gap-1 ${journalConsistency >= 50 ? 'text-green-500' : 'text-red-500'} text-xs`}>
-            {journalConsistency >= 50 ? (
-              <ArrowUp className="h-3 w-3" />
-            ) : (
-              <ArrowDown className="h-3 w-3" />
-            )}
-            <span>{journalConsistency}%</span>
-          </div>
+          <BookOpen className={`h-4 w-4 ${journalConsistency >= 50 ? 'text-blue-500' : 'text-orange-400'}`} />
         </div>
         <p className="text-xs text-muted-foreground mb-2">
           {journalConsistency >= 50 

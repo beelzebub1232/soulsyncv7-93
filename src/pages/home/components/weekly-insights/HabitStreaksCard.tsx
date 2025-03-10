@@ -20,14 +20,14 @@ export function HabitStreaksCard({ habitStreaks }: HabitStreaksCardProps) {
             ? "You're building good habits" 
             : "Keep working on your habits"}
         </p>
+        <p className="text-xs text-right text-muted-foreground mb-1">
+          {habitStreaks}% consistency
+        </p>
         <Progress 
           className="h-2"
           value={habitStreaks}
           indicatorClassName="bg-gradient-to-r from-indigo-300 to-indigo-500"
         />
-        <div className="text-xs mt-1 text-right text-muted-foreground">
-          {habitStreaks}% consistency
-        </div>
       </CardContent>
     </Card>
   );

@@ -16,14 +16,14 @@ export function ActivityLevelCard({ activityLevel }: ActivityLevelCardProps) {
           <Activity className="h-4 w-4 text-purple-500" />
         </div>
         <p className="text-xs text-muted-foreground mb-2">Weekly progress</p>
+        <p className="text-xs text-right text-muted-foreground mb-1">
+          {activityLevel}% of your goal
+        </p>
         <Progress 
           className="h-2"
           value={activityLevel}
           indicatorClassName="bg-gradient-to-r from-purple-300 to-purple-500"
         />
-        <div className="text-xs mt-1 text-right text-muted-foreground">
-          {activityLevel}% of your goal
-        </div>
       </CardContent>
     </Card>
   );
