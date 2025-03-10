@@ -47,14 +47,6 @@ export function MoodCalendar({ moods }: MoodCalendarProps) {
             <Calendar className="h-5 w-5 text-mindscape-primary" />
             Mood Calendar
           </CardTitle>
-          
-          <MonthNavigator 
-            currentDate={currentDate}
-            onPreviousMonth={goToPreviousMonth}
-            onNextMonth={goToNextMonth}
-            onMonthChange={handleMonthChange}
-            onYearChange={handleYearChange}
-          />
         </div>
       </CardHeader>
       <CardContent>
