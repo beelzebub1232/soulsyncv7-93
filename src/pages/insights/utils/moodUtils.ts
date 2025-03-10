@@ -59,9 +59,18 @@ export function calculateMoodTrend(
     ? thisWeekMoods.reduce((sum, entry) => sum + MOOD_SCORES[entry.value], 0) / thisWeekMoods.length 
     : 0;
   
-  return lastWeekAvg > 0 
-    ? Math.round(((thisWeekAvg - lastWeekAvg) / lastWeekAvg) * 100) 
-    : 0;
+  // If there's no data from last week, but we have data this week, show 100% improvement
+  if (lastWeekAvg === 0 && thisWeekAvg > 0) {
+    return 100;
+  }
+  
+  // If there's no data for either week, return 0
+  if (lastWeekAvg === 0 || thisWeekAvg === 0) {
+    return 0;
+  }
+  
+  // Calculate the percent change
+  return Math.round(((thisWeekAvg - lastWeekAvg) / lastWeekAvg) * 100);
 }
 
 export function getMoodAverageLabel(moods: MoodEntry[]): string {
