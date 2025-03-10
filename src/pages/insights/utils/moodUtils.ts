@@ -1,7 +1,7 @@
 
 import { MoodEntry } from '@/pages/home/components/mood-tracker/types';
 import { MOOD_SCORES } from '../types';
-import { isWithinInterval } from 'date-fns';
+import { isWithinInterval, format, eachDayOfInterval } from 'date-fns';
 
 export function calculateMoodDistribution(moods: MoodEntry[]): Record<string, number> {
   const distribution: Record<string, number> = {};
@@ -75,5 +75,3 @@ export function getMoodAverageLabel(moods: MoodEntry[]): string {
   if (avgScore >= 1.5) return "Sad";
   return "Awful";
 }
-
-import { format } from 'date-fns';
