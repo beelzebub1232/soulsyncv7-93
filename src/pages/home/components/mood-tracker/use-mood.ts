@@ -44,23 +44,42 @@ export function useMood() {
     // Save the updated moods
     localStorage.setItem('soulsync_moods', JSON.stringify(moods));
     
-    // Dispatch a storage event so other components can update
-    const event = new StorageEvent('storage', {
+    // Dispatch both a standard storage event and a custom event
+    window.dispatchEvent(new StorageEvent('storage', {
       key: 'soulsync_moods',
       newValue: JSON.stringify(moods),
       oldValue: storedMoods || null,
       storageArea: localStorage
-    });
-    window.dispatchEvent(event);
+    }));
+    
+    // Dispatch a custom event that can be listened for
+    window.dispatchEvent(new CustomEvent('soulsync_data_updated'));
   };
   
   // Load today's mood when component mounts
   useEffect(() => {
-    const todaysMood = getTodaysMood();
-    if (todaysMood) {
-      setSelectedMood(todaysMood.value);
-      setMoodNote(todaysMood.note || "");
-    }
+    const loadTodaysMood = () => {
+      const todaysMood = getTodaysMood();
+      if (todaysMood) {
+        setSelectedMood(todaysMood.value);
+        setMoodNote(todaysMood.note || "");
+      }
+    };
+    
+    loadTodaysMood();
+    
+    // Also set up listener for storage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'soulsync_moods') {
+        loadTodaysMood();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   return {

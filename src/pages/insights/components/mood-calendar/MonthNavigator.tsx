@@ -32,8 +32,8 @@ export function MonthNavigator({
 
   return (
     <>
-      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 mx-[30px]">
+      <div className="flex flex-col items-center gap-2 mb-4">
+        <div className="flex items-center gap-2">
           <Select value={currentDate.getMonth().toString()} onValueChange={onMonthChange}>
             <SelectTrigger className="w-[120px] h-8 text-sm">
               <SelectValue placeholder="Month" />

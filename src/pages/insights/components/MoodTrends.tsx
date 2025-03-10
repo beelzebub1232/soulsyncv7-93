@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LineChart as LineChartIcon } from 'lucide-react';
+import { LineChartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
@@ -15,8 +15,11 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
   // Convert data to format expected by recharts
   const chartData = Object.entries(weeklyMoodCounts).map(([day, count]) => ({
     day,
-    count
+    count: count || 0 // Ensure we have at least 0
   }));
+  
+  // Adjust trend display to be more reasonable
+  const displayTrend = Math.min(Math.max(-50, moodTrend), 50); // Cap between -50 and 50
   
   return (
     <Card className="w-full h-full">
@@ -26,8 +29,8 @@ export function MoodTrends({ weeklyMoodCounts, moodTrend }: MoodTrendsProps) {
             <LineChartIcon className="h-5 w-5 text-mindscape-primary" />
             Mood Trends
           </CardTitle>
-          <div className={`text-sm font-medium flex items-center gap-1 ${moodTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {moodTrend >= 0 ? '+' : ''}{moodTrend}%
+          <div className={`text-sm font-medium flex items-center gap-1 ${displayTrend >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {displayTrend >= 0 ? '+' : ''}{displayTrend}%
           </div>
         </div>
       </CardHeader>

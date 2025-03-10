@@ -2,7 +2,7 @@
 import React from 'react';
 import { MoodEntry } from '@/pages/home/components/mood-tracker/types';
 import { CalendarDay } from './CalendarDay';
-import { weekDays, getMonthDays, getPreviousMonthDays, getNextMonthDays } from './calendarUtils';
+import { weekDays, getMonthDays } from './calendarUtils';
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -11,9 +11,11 @@ interface CalendarGridProps {
 
 export function CalendarGrid({ currentDate, moods }: CalendarGridProps) {
   const days = getMonthDays(currentDate);
-  const prevMonthDays = getPreviousMonthDays(currentDate);
-  const nextMonthDays = getNextMonthDays([...prevMonthDays, ...days]);
-
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+  
+  // Create empty cells for the first row before the first day of the month
+  const emptyCells = Array(firstDayOfMonth).fill(null);
+  
   return (
     <>
       <div className="grid grid-cols-7 gap-1 mb-1">
@@ -25,14 +27,9 @@ export function CalendarGrid({ currentDate, moods }: CalendarGridProps) {
       </div>
       
       <div className="grid grid-cols-7 gap-1">
-        {/* Previous month days */}
-        {prevMonthDays.map((day, index) => (
-          <CalendarDay 
-            key={`prev-${index}`} 
-            day={day} 
-            moods={moods} 
-            isCurrentMonth={false} 
-          />
+        {/* Empty cells before the first day of the month */}
+        {emptyCells.map((_, index) => (
+          <div key={`empty-${index}`} className="aspect-square"></div>
         ))}
         
         {/* Current month days */}
@@ -41,16 +38,6 @@ export function CalendarGrid({ currentDate, moods }: CalendarGridProps) {
             key={`current-${index}`} 
             day={day} 
             moods={moods} 
-          />
-        ))}
-        
-        {/* Next month days */}
-        {nextMonthDays.map((day, index) => (
-          <CalendarDay 
-            key={`next-${index}`} 
-            day={day} 
-            moods={moods} 
-            isCurrentMonth={false} 
           />
         ))}
       </div>

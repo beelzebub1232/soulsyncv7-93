@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PieChart as PieChartIcon } from 'lucide-react';
+import { PieChartIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip 
@@ -37,29 +37,25 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
   // Calculate total entries
   const totalEntries = chartData.reduce((sum, item) => sum + item.value, 0);
 
-  // Custom label renderer to place text outside the chart
-  const renderCustomizedLabel = ({
-    cx, cy, midAngle, outerRadius, percent, index, name
-  }: any) => {
-    // Don't render label if percentage is too small
-    if (percent < 0.05) return null;
-    
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 10;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    
+  // Custom legend renderer to show colored squares with percentages
+  const renderLegend = () => {
     return (
-      <text
-        x={x}
-        y={y}
-        fill="#888888"
-        textAnchor={x > cx ? 'start' : 'end'}
-        dominantBaseline="central"
-        fontSize={12}
-      >
-        {`${name} ${(percent * 100).toFixed(0)}%`}
-      </text>
+      <div className="mt-3 flex flex-wrap justify-center gap-3">
+        {chartData.map((entry, index) => {
+          const percent = Math.round((entry.value / totalEntries) * 100);
+          return (
+            <div key={`legend-${index}`} className="flex items-center gap-1">
+              <div 
+                className="w-3 h-3 rounded-sm" 
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-xs">
+                {entry.name} ({percent}%)
+              </span>
+            </div>
+          );
+        })}
+      </div>
     );
   };
   
@@ -73,30 +69,31 @@ export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
       </CardHeader>
       <CardContent>
         {totalEntries > 0 ? (
-          <div className="h-[210px] mt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={70}
-                  paddingAngle={2}
-                  dataKey="value"
-                  labelLine={false}
-                  label={renderCustomizedLabel}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value, name) => [`${value} entries`, name]}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="flex flex-col items-center">
+            <div className="h-[160px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={70}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value, name) => [`${value} entries (${Math.round((Number(value) / totalEntries) * 100)}%)`, name]}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {renderLegend()}
           </div>
         ) : (
           <div className="h-[200px] flex items-center justify-center">
