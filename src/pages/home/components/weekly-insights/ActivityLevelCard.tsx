@@ -11,7 +11,7 @@ export function ActivityLevelCard({ activityLevel }: ActivityLevelCardProps) {
   const hasActivityData = activityLevel !== null && activityLevel > 0;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-full">
       <CardContent className="p-4 flex flex-col justify-between h-full">
         <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
