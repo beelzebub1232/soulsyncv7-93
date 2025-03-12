@@ -14,7 +14,7 @@ export function HabitStreaksCard({ habitStreaks }: HabitStreaksCardProps) {
         <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Habit Streaks</h3>
-            <TrendingUp className="h-5 w-5 text-blue-500" />
+            <TrendingUp className="h-4 w-4 text-blue-500" />
           </div>
           <p className="text-xs text-muted-foreground">
             {habitStreaks >= 50 

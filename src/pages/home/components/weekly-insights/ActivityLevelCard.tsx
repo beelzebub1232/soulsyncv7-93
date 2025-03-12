@@ -14,7 +14,7 @@ export function ActivityLevelCard({ activityLevel }: ActivityLevelCardProps) {
         <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Activity Level</h3>
-            <Activity className="h-5 w-5 text-purple-500" />
+            <Activity className="h-4 w-4 text-purple-500" />
           </div>
           <p className="text-xs text-muted-foreground">
             {activityLevel >= 60
