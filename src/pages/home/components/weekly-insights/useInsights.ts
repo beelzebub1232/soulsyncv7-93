@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { InsightData } from "./types";
 import { calculateMoodTrend, getMoodScores } from "./utils";
@@ -25,10 +24,14 @@ export function useInsights(userId?: string) {
       const storedHabits = localStorage.getItem(habitsStorageKey);
       
       try {
-        // Process mood data for trend
+        // Initialize values to 0 for new users
         let moodTrend = 0;
+        let journalConsistency = 0;
+        let habitStreaks = 0;
+        let activityLevel = 0;
         
-        if (storedMoods) {
+        // Calculate mood trend only if mood data exists
+        if (storedMoods && JSON.parse(storedMoods).length > 0) {
           const moodEntries = JSON.parse(storedMoods);
           
           // Map mood values to numeric scores
@@ -60,12 +63,16 @@ export function useInsights(userId?: string) {
             : 0;
           
           // Calculate trend percent change (capped at ±50%)
-          moodTrend = calculateMoodTrend(recentAvg, prevAvg);
-          moodTrend = Math.max(-50, Math.min(50, moodTrend));
+          if (recentMoods.length > 0 || previousWeekMoods.length > 0) {
+            moodTrend = calculateMoodTrend(recentAvg, prevAvg);
+            moodTrend = Math.max(-50, Math.min(50, moodTrend));
+          } else {
+            // If no moods recorded for the last two weeks, keep it at 0
+            moodTrend = 0;
+          }
         }
             
-        // Process journal data
-        let journalConsistency = 0;
+        // Calculate journal consistency only if journal data exists
         if (storedJournals) {
           const journalEntries = JSON.parse(storedJournals);
           const oneWeekAgo = new Date();
@@ -83,10 +90,7 @@ export function useInsights(userId?: string) {
           journalConsistency = Math.round((daysWithJournals / 7) * 100);
         }
         
-        // Process habit data
-        let habitStreaks = 0;
-        let activityLevel = 0;
-        
+        // Calculate habit streaks only if habit data exists
         if (storedHabits) {
           const habitEntries = JSON.parse(storedHabits);
           
@@ -143,7 +147,7 @@ export function useInsights(userId?: string) {
             );
             
             const completedThisWeek = thisWeekHabits.filter((entry: any) => entry.completed).length;
-            const totalHabitsThisWeek = thisWeekHabits.length;
+            const totalHabitsThisWeek = thisWeekHabits.length || 1; // Avoid division by zero
             
             const habitCompletionRate = totalHabitsThisWeek > 0 
               ? Math.round((completedThisWeek / totalHabitsThisWeek) * 100)
@@ -153,34 +157,51 @@ export function useInsights(userId?: string) {
             const journalActivityRate = journalConsistency;
             
             // Mood engagement (percentage of days with mood entries)
-            const recentMoods = storedMoods 
-              ? JSON.parse(storedMoods).filter((entry: any) => new Date(entry.date) >= oneWeekAgo)
-              : [];
-            
-            const daysWithMoods = new Set(
-              recentMoods.map((entry: any) => new Date(entry.date).toDateString())
-            ).size;
-            const moodEngagementRate = Math.round((daysWithMoods / 7) * 100);
+            const moodEngagementRate = storedMoods 
+              ? (() => {
+                  const recentMoods = JSON.parse(storedMoods).filter((entry: any) => 
+                    new Date(entry.date) >= oneWeekAgo
+                  );
+                  const daysWithMoods = new Set(
+                    recentMoods.map((entry: any) => new Date(entry.date).toDateString())
+                  ).size;
+                  return Math.round((daysWithMoods / 7) * 100);
+                })()
+              : 0;
             
             // Calculate overall activity level as weighted average
-            activityLevel = Math.round(
-              (habitCompletionRate * 0.5) + (journalActivityRate * 0.3) + (moodEngagementRate * 0.2)
-            );
+            if (habitCompletionRate > 0 || journalActivityRate > 0 || moodEngagementRate > 0) {
+              activityLevel = Math.round(
+                (habitCompletionRate * 0.5) + (journalActivityRate * 0.3) + (moodEngagementRate * 0.2)
+              );
+            }
           }
         }
         
-        // If no data exists, fallback to defaults
-        if ((!storedHabits || JSON.parse(storedHabits).length === 0) && storedMoods) {
-          const moodEntries = JSON.parse(storedMoods);
-          const oneWeekAgo = new Date();
-          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        // If some data exists but habits don't, create a more realistic activity level
+        if ((!storedHabits || JSON.parse(storedHabits).length === 0) && (storedMoods || storedJournals)) {
+          const moodCount = storedMoods ? JSON.parse(storedMoods).length : 0;
+          const journalCount = storedJournals ? JSON.parse(storedJournals).length : 0;
           
-          const recentMoods = moodEntries.filter((entry: any) => 
-            new Date(entry.date) >= oneWeekAgo
-          );
-          
-          habitStreaks = Math.min(100, recentMoods.length * 15);
-          activityLevel = Math.min(100, Math.max(30, recentMoods.length * 10));
+          if (moodCount > 0 || journalCount > 0) {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            const recentMoods = storedMoods 
+              ? JSON.parse(storedMoods).filter((entry: any) => 
+                  new Date(entry.date) >= oneWeekAgo
+                ).length
+              : 0;
+              
+            const recentJournals = storedJournals
+              ? JSON.parse(storedJournals).filter((entry: any) => 
+                  new Date(entry.date) >= oneWeekAgo
+                ).length
+              : 0;
+            
+            // Simplified activity level calculation for users without habits
+            activityLevel = Math.min(100, Math.max(0, (recentMoods * 10) + (recentJournals * 15)));
+          }
         }
         
         setInsights({
