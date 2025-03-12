@@ -11,19 +11,19 @@ export function JournalConsistencyCard({ journalConsistency }: JournalConsistenc
   const hasJournalData = journalConsistency !== null && journalConsistency > 0;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-40">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
       <CardContent className="p-4 flex flex-col justify-between h-full">
-        <div className="space-y-1 mb-auto">
+        <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Journal Consistency</h3>
             <BookOpen className={`h-5 w-5 ${hasJournalData ? (journalConsistency >= 50 ? 'text-blue-500' : 'text-orange-400') : 'text-gray-300'}`} />
           </div>
-          <p className="text-xs text-muted-foreground line-clamp-3">
+          <p className="text-xs text-muted-foreground">
             {hasJournalData
               ? (journalConsistency >= 50 
-                ? "Maintaining good journaling habits this week. Continue your progress!" 
-                : "Try to journal more regularly to build a healthy habit")
-              : "Start writing in your journal to track your thoughts and feelings"}
+                ? "Good journaling habits this week" 
+                : "Try to journal more regularly")
+              : "Start writing in your journal"}
           </p>
         </div>
         
