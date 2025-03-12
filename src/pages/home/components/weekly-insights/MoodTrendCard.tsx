@@ -11,9 +11,9 @@ export function MoodTrendCard({ moodTrend }: MoodTrendCardProps) {
   const hasMoodData = moodTrend !== null;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-40">
       <CardContent className="p-4 flex flex-col justify-between h-full">
-        <div className="space-y-2 mb-auto">
+        <div className="space-y-1 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Mood Trend</h3>
             {hasMoodData ? (
@@ -26,12 +26,12 @@ export function MoodTrendCard({ moodTrend }: MoodTrendCardProps) {
               <ThumbsUp className="h-5 w-5 text-gray-300" />
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground line-clamp-3">
             {hasMoodData 
               ? (moodTrend >= 0 
-                  ? "Your mood has been improving" 
-                  : "Your mood has been declining")
-              : "Start tracking your mood daily"}
+                  ? "Your mood has been improving this week" 
+                  : "Your mood has been declining this week")
+              : "Start tracking your mood daily to see trends"}
           </p>
         </div>
         

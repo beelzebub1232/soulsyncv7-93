@@ -11,19 +11,19 @@ export function ActivityLevelCard({ activityLevel }: ActivityLevelCardProps) {
   const hasActivityData = activityLevel !== null && activityLevel > 0;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-40">
       <CardContent className="p-4 flex flex-col justify-between h-full">
-        <div className="space-y-2 mb-auto">
+        <div className="space-y-1 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Activity Level</h3>
             <Activity className={`h-5 w-5 ${hasActivityData ? 'text-purple-500' : 'text-gray-300'}`} />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground line-clamp-3">
             {hasActivityData
               ? (activityLevel >= 60
-                  ? "Great weekly progress on your wellness goals"
-                  : "Continue building healthy routines this week")
-              : "Start using the app to track your activities"}
+                  ? "Great weekly progress on your wellness goals. You're doing well!" 
+                  : "Continue building healthy routines this week to improve your wellbeing")
+              : "Start using the app to track your activities and build healthy habits"}
           </p>
         </div>
         

@@ -11,19 +11,19 @@ export function HabitStreaksCard({ habitStreaks }: HabitStreaksCardProps) {
   const hasHabitData = habitStreaks !== null && habitStreaks > 0;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-40">
       <CardContent className="p-4 flex flex-col justify-between h-full">
-        <div className="space-y-2 mb-auto">
+        <div className="space-y-1 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Habit Streaks</h3>
             <TrendingUp className={`h-5 w-5 ${hasHabitData ? 'text-blue-500' : 'text-gray-300'}`} />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground line-clamp-3">
             {hasHabitData
               ? (habitStreaks >= 50 
-                  ? "You're building good habits consistently" 
-                  : "Keep working on your daily habits")
-              : "Start tracking your daily habits"}
+                  ? "You're building good habits consistently. Keep up the great work!" 
+                  : "Keep working on your daily habits to build lasting routines")
+              : "Start tracking your daily habits to build positive routines"}
           </p>
         </div>
         
