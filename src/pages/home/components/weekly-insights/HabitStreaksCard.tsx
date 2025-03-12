@@ -11,9 +11,9 @@ export function HabitStreaksCard({ habitStreaks }: HabitStreaksCardProps) {
   const hasHabitData = habitStreaks !== null && habitStreaks > 0;
   
   return (
-    <Card className="h-full overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
       <CardContent className="p-4 flex flex-col justify-between h-full">
-        <div className="space-y-2">
+        <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Habit Streaks</h3>
             <TrendingUp className={`h-5 w-5 ${hasHabitData ? 'text-blue-500' : 'text-gray-300'}`} />

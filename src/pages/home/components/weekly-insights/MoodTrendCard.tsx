@@ -11,9 +11,9 @@ export function MoodTrendCard({ moodTrend }: MoodTrendCardProps) {
   const hasMoodData = moodTrend !== null;
   
   return (
-    <Card className="h-full overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
       <CardContent className="p-4 flex flex-col justify-between h-full">
-        <div className="space-y-2">
+        <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Mood Trend</h3>
             {hasMoodData ? (
