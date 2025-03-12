@@ -1,17 +1,19 @@
 
-// Cache name
-const CACHE_NAME = 'soulsync-cache-v1';
+// Cache version
+const CACHE_NAME = 'soulsync-cache-v2';
 
-// Files to cache
+// Files to cache - include app assets
 const filesToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/offline.html',
+  '/icons/heart-icon-192x192.png',
+  '/icons/heart-icon-512x512.png',
+  '/placeholder.svg'
 ];
 
-// Install service worker
+// Install service worker and cache required files
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,73 +22,56 @@ self.addEventListener('install', event => {
         return cache.addAll(filesToCache);
       })
   );
+  self.skipWaiting(); // Ensure new service worker activates immediately
 });
 
-// Activate service worker (clean up old caches)
+// Clean up old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.filter(cacheName => {
-          return cacheName !== CACHE_NAME;
-        }).map(cacheName => {
-          return caches.delete(cacheName);
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
         })
       );
     })
   );
+  self.clients.claim(); // Take control of all pages immediately
 });
 
-// Fetch strategy: Cache first, then network
+// Fetch strategy: Network first, then cache
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        // Cache hit - return response from cache
-        if (response) {
-          return response;
-        }
-
-        // Clone the request because it's a one-time use stream
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(response => {
-          // Check if we received a valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-
-          // Clone the response because it's a one-time use stream
+        // Cache successful responses
+        if (response && response.status === 200) {
           const responseToCache = response.clone();
-
           caches.open(CACHE_NAME)
             .then(cache => {
-              // Only cache GET requests
               if (event.request.method === 'GET') {
                 cache.put(event.request, responseToCache);
               }
             });
-
-          return response;
-        }).catch(() => {
-          // If network fails, attempt to serve offline page
-          if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
-          }
-        });
+        }
+        return response;
+      })
+      .catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request)
+          .then(response => {
+            if (response) {
+              return response;
+            }
+            // For navigation requests, show offline page
+            if (event.request.mode === 'navigate') {
+              return caches.match('/offline.html');
+            }
+            // Return error for other requests
+            throw new Error('Network and cache both failed');
+          });
       })
   );
-});
-
-// Handle offline fallback
-self.addEventListener('fetch', event => {
-  if (event.request.mode === 'navigate' || 
-      (event.request.method === 'GET' && 
-       event.request.headers.get('accept').includes('text/html'))) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/offline.html');
-      })
-    );
-  }
 });
