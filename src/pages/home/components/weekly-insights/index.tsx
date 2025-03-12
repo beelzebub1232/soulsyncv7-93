@@ -12,18 +12,10 @@ export function WeeklyInsights() {
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      <div className="h-40">
-        <MoodTrendCard moodTrend={insights.moodTrend} />
-      </div>
-      <div className="h-40">
-        <JournalConsistencyCard journalConsistency={insights.journalConsistency} />
-      </div>
-      <div className="h-40">
-        <HabitStreaksCard habitStreaks={insights.habitStreaks} />
-      </div>
-      <div className="h-40">
-        <ActivityLevelCard activityLevel={insights.activityLevel} />
-      </div>
+      <MoodTrendCard moodTrend={insights.moodTrend} />
+      <JournalConsistencyCard journalConsistency={insights.journalConsistency} />
+      <HabitStreaksCard habitStreaks={insights.habitStreaks} />
+      <ActivityLevelCard activityLevel={insights.activityLevel} />
     </div>
   );
 }

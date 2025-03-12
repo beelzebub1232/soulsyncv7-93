@@ -11,7 +11,7 @@ export function JournalConsistencyCard({ journalConsistency }: JournalConsistenc
   const hasJournalData = journalConsistency !== null && journalConsistency > 0;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-full">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
       <CardContent className="p-4 flex flex-col justify-between h-full">
         <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
