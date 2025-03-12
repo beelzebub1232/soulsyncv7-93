@@ -4,26 +4,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 interface JournalConsistencyCardProps {
-  journalConsistency: number;
+  journalConsistency: number | null;
 }
 
 export function JournalConsistencyCard({ journalConsistency }: JournalConsistencyCardProps) {
+  const hasJournalData = journalConsistency !== null && journalConsistency > 0;
+  
   return (
     <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-sm font-medium">Journal Consistency</h3>
-          <BookOpen className={`h-4 w-4 ${journalConsistency >= 50 ? 'text-blue-500' : 'text-orange-400'}`} />
+      <CardContent className="p-4 flex flex-col justify-between h-full">
+        <div className="space-y-2 mb-auto">
+          <div className="flex justify-between items-start">
+            <h3 className="text-sm font-medium">Journal Consistency</h3>
+            <BookOpen className={`h-5 w-5 ${hasJournalData ? (journalConsistency >= 50 ? 'text-blue-500' : 'text-orange-400') : 'text-gray-300'}`} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {hasJournalData
+              ? (journalConsistency >= 50 
+                ? "Good journaling habits this week" 
+                : "Try to journal more regularly")
+              : "Start writing in your journal"}
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground mb-2">
-          {journalConsistency >= 50 
-            ? "Good journaling habits this week" 
-            : "Try to journal more regularly"}
-        </p>
+        
         <Progress 
-          className="h-2"
-          value={journalConsistency}
-          indicatorClassName={journalConsistency >= 50 
+          className="h-2 mt-3"
+          value={hasJournalData ? journalConsistency : 0}
+          indicatorClassName={hasJournalData && journalConsistency >= 50 
             ? "bg-gradient-to-r from-blue-300 to-blue-500" 
             : "bg-gradient-to-r from-orange-300 to-red-400"}
         />

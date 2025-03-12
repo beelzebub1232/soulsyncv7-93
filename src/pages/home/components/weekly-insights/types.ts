@@ -1,7 +1,7 @@
 
 export interface InsightData {
-  moodTrend: number;
-  journalConsistency: number;
-  habitStreaks: number;
-  activityLevel: number;
+  moodTrend: number | null;
+  journalConsistency: number | null;
+  habitStreaks: number | null;
+  activityLevel: number | null;
 }
