@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { InsightData } from "./types";
-import { calculateMoodTrend, getMoodScores } from "./utils";
+import { useInsightsDataFetcher } from "./hooks/useInsightsDataFetcher";
+import { getMoodEngagementRate } from "./utils/moodUtils";
 
 export function useInsights(userId?: string) {
   const [insights, setInsights] = useState<InsightData>({
@@ -11,221 +12,31 @@ export function useInsights(userId?: string) {
     activityLevel: null
   });
   
+  const { fetchData } = useInsightsDataFetcher();
+  
   useEffect(() => {
     if (!userId) return;
     
-    const fetchData = () => {
-      const moodStorageKey = `soulsync_moods`;
-      const storedMoods = localStorage.getItem(moodStorageKey);
-      
-      const journalStorageKey = `soulsync_journal_${userId}`;
-      const storedJournals = localStorage.getItem(journalStorageKey);
-      
-      const habitsStorageKey = `soulsync_habits_${userId}`;
-      const storedHabits = localStorage.getItem(habitsStorageKey);
-      
-      try {
-        // Process mood data for trend
-        let moodTrend = null;
-        
-        if (storedMoods) {
-          const moodEntries = JSON.parse(storedMoods);
-          
-          // Only calculate if there are actually mood entries
-          if (moodEntries && moodEntries.length > 0) {
-            // Map mood values to numeric scores
-            const moodScores = getMoodScores();
-            
-            // Get today and one week ago
-            const today = new Date();
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(today.getDate() - 7);
-            
-            // Calculate current week vs previous week mood score
-            const recentMoods = moodEntries.filter((entry: any) => 
-              new Date(entry.date) >= oneWeekAgo
-            );
-            
-            // Only proceed if there are recent moods
-            if (recentMoods.length > 0) {
-              const twoWeeksAgo = new Date();
-              twoWeeksAgo.setDate(today.getDate() - 14);
-              
-              const previousWeekMoods = moodEntries.filter((entry: any) => 
-                new Date(entry.date) >= twoWeeksAgo && new Date(entry.date) < oneWeekAgo
-              );
-              
-              const recentAvg = recentMoods.reduce((sum: number, entry: any) => 
-                sum + (moodScores[entry.value] || 3), 0) / recentMoods.length;
-                
-              const prevAvg = previousWeekMoods.length > 0 
-                ? previousWeekMoods.reduce((sum: number, entry: any) => 
-                  sum + (moodScores[entry.value] || 3), 0) / previousWeekMoods.length 
-                : 0;
-              
-              // Calculate trend percent change (capped at ±50%)
-              moodTrend = calculateMoodTrend(recentAvg, prevAvg);
-              moodTrend = Math.max(-40, Math.min(40, moodTrend));
-            }
-          }
-        }
-            
-        // Process journal data
-        let journalConsistency = null;
-        if (storedJournals) {
-          const journalEntries = JSON.parse(storedJournals);
-          
-          // Only calculate if there are journal entries
-          if (journalEntries && journalEntries.length > 0) {
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-            
-            const thisWeekJournals = journalEntries.filter((entry: any) => 
-              new Date(entry.date) >= oneWeekAgo
-            );
-            
-            if (thisWeekJournals.length > 0) {
-              const daysWithJournals = new Set(
-                thisWeekJournals.map((entry: any) => new Date(entry.date).toDateString())
-              ).size;
-              
-              // Journal consistency percentage (out of 7 days)
-              journalConsistency = Math.round((daysWithJournals / 7) * 100);
-            }
-          }
-        }
-        
-        // Process habit data
-        let habitStreaks = null;
-        let activityLevel = null;
-        
-        if (storedHabits) {
-          const habitEntries = JSON.parse(storedHabits);
-          
-          // Calculate habit streaks only if there are habit entries
-          if (habitEntries && habitEntries.length > 0) {
-            // Group habits by name
-            const habitGroups: Record<string, any[]> = {};
-            habitEntries.forEach((entry: any) => {
-              if (!habitGroups[entry.name]) {
-                habitGroups[entry.name] = [];
-              }
-              habitGroups[entry.name].push(entry);
-            });
-            
-            // Check if we have actual completed habits
-            const hasCompletedHabits = habitEntries.some((entry: any) => entry.completed);
-            
-            if (hasCompletedHabits) {
-              // Calculate streaks for each habit
-              const habitStreakValues: number[] = [];
-              
-              Object.values(habitGroups).forEach((entries: any[]) => {
-                // Sort entries by date
-                const sortedEntries = [...entries].sort(
-                  (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-                );
-                
-                // Find the longest streak of completed habits
-                let currentStreak = 0;
-                let maxStreak = 0;
-                
-                sortedEntries.forEach((entry) => {
-                  if (entry.completed) {
-                    currentStreak++;
-                    maxStreak = Math.max(maxStreak, currentStreak);
-                  } else {
-                    currentStreak = 0;
-                  }
-                });
-                
-                // Calculate streak percentage (max 100%)
-                const streakPercentage = Math.min(100, Math.round((maxStreak / 7) * 100));
-                habitStreakValues.push(streakPercentage);
-              });
-              
-              // Average of all habit streaks
-              habitStreaks = habitStreakValues.length > 0
-                ? Math.round(habitStreakValues.reduce((sum, val) => sum + val, 0) / habitStreakValues.length)
-                : null;
-                
-              // Calculate actual activity level from habit completions this week
-              const today = new Date();
-              const oneWeekAgo = new Date();
-              oneWeekAgo.setDate(today.getDate() - 7);
-              
-              const thisWeekHabits = habitEntries.filter((entry: any) => 
-                new Date(entry.date) >= oneWeekAgo
-              );
-              
-              const completedThisWeek = thisWeekHabits.filter((entry: any) => entry.completed).length;
-              const totalHabitsThisWeek = thisWeekHabits.length;
-              
-              const habitCompletionRate = totalHabitsThisWeek > 0 
-                ? Math.round((completedThisWeek / totalHabitsThisWeek) * 100)
-                : 0;
-              
-              // Journal activity
-              const journalActivityRate = journalConsistency || 0;
-              
-              // Mood engagement (percentage of days with mood entries)
-              let moodEngagementRate = 0;
-              if (storedMoods) {
-                const recentMoods = JSON.parse(storedMoods).filter((entry: any) => 
-                  new Date(entry.date) >= oneWeekAgo
-                );
-                
-                if (recentMoods.length > 0) {
-                  const daysWithMoods = new Set(
-                    recentMoods.map((entry: any) => new Date(entry.date).toDateString())
-                  ).size;
-                  moodEngagementRate = Math.round((daysWithMoods / 7) * 100);
-                }
-              }
-              
-              // Only calculate activity level if there is at least one type of activity
-              if (habitCompletionRate > 0 || journalActivityRate > 0 || moodEngagementRate > 0) {
-                // Calculate overall activity level as weighted average
-                activityLevel = Math.round(
-                  (habitCompletionRate * 0.5) + (journalActivityRate * 0.3) + (moodEngagementRate * 0.2)
-                );
-              }
-            }
-          }
-        }
-        
-        setInsights({
-          moodTrend,
-          journalConsistency,
-          habitStreaks,
-          activityLevel
-        });
-      } catch (err) {
-        console.error("Failed to load insights data", err);
-        setInsights({
-          moodTrend: null,
-          journalConsistency: null,
-          habitStreaks: null,
-          activityLevel: null
-        });
-      }
+    const loadInsightsData = () => {
+      const insightData = fetchData(userId);
+      setInsights(insightData);
     };
     
-    fetchData();
+    loadInsightsData();
     
     // Listen for storage changes
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key && (e.key.startsWith('soulsync_') || e.key === 'soulsync_moods')) {
-        fetchData();
+        loadInsightsData();
       }
     };
     
     // Also run a periodic refresh to catch changes
-    const intervalId = setInterval(fetchData, 5000);
+    const intervalId = setInterval(loadInsightsData, 5000);
     
     // Use custom event for immediate updates
     const handleCustomStorageChange = () => {
-      fetchData();
+      loadInsightsData();
     };
     
     window.addEventListener('storage', handleStorageChange);
@@ -237,7 +48,7 @@ export function useInsights(userId?: string) {
       clearInterval(intervalId);
     };
     
-  }, [userId]);
+  }, [userId, fetchData]);
 
   return insights;
 }
