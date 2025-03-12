@@ -11,28 +11,26 @@ export function JournalConsistencyCard({ journalConsistency }: JournalConsistenc
   const hasJournalData = journalConsistency !== null && journalConsistency > 0;
   
   return (
-    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all">
+    <Card className="overflow-hidden border border-mindscape-light hover:shadow-md transition-all h-full">
       <CardContent className="p-4 flex flex-col justify-between h-full">
         <div className="space-y-2 mb-auto">
           <div className="flex justify-between items-start">
             <h3 className="text-sm font-medium">Journal Consistency</h3>
-            <BookOpen className={`h-5 w-5 ${hasJournalData ? (journalConsistency >= 50 ? 'text-blue-500' : 'text-orange-400') : 'text-gray-300'}`} />
+            <BookOpen className={`h-5 w-5 flex-shrink-0 ${hasJournalData ? 'text-amber-500' : 'text-gray-300'}`} />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground line-clamp-2 pr-6">
             {hasJournalData
-              ? (journalConsistency >= 50 
-                ? "Good journaling habits this week" 
-                : "Try to journal more regularly")
-              : "Start writing in your journal"}
+              ? (journalConsistency >= 60 
+                  ? "Great job journaling regularly" 
+                  : "Try to journal more consistently")
+              : "Start journaling to track your consistency"}
           </p>
         </div>
         
         <Progress 
           className="h-2 mt-3"
           value={hasJournalData ? journalConsistency : 0}
-          indicatorClassName={hasJournalData && journalConsistency >= 50 
-            ? "bg-gradient-to-r from-blue-300 to-blue-500" 
-            : "bg-gradient-to-r from-orange-300 to-red-400"}
+          indicatorClassName="bg-gradient-to-r from-yellow-300 to-amber-500"
         />
       </CardContent>
     </Card>

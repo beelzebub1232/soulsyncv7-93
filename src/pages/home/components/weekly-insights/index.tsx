@@ -11,7 +11,7 @@ export function WeeklyInsights() {
   const insights = useInsights(user?.id);
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <MoodTrendCard moodTrend={insights.moodTrend} />
       <JournalConsistencyCard journalConsistency={insights.journalConsistency} />
       <HabitStreaksCard habitStreaks={insights.habitStreaks} />

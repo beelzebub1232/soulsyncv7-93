@@ -15,7 +15,7 @@ interface HabitProgressProps {
 }
 
 export function HabitProgress({ habitProgress = [] }: HabitProgressProps) {
-  // Calculate completion percentage
+  // Calculate completion percentage for real user data only
   const chartData = habitProgress.map(habit => ({
     name: habit.name,
     percentage: Math.round((habit.completed / habit.total) * 100)
@@ -70,7 +70,7 @@ export function HabitProgress({ habitProgress = [] }: HabitProgressProps) {
           </div>
         ) : (
           <div className="h-[200px] flex items-center justify-center">
-            <p className="text-muted-foreground">No habit data available</p>
+            <p className="text-muted-foreground">No habit data recorded yet</p>
           </div>
         )}
       </CardContent>

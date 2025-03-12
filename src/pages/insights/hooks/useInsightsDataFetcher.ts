@@ -12,8 +12,7 @@ import {
   calculateHabitProgress,
   createWeeklySummary,
   getWeekInterval,
-  getDefaultInsightsData,
-  generateSampleMindfulnessData
+  getDefaultInsightsData
 } from '../utils/insightsUtils';
 import { isWithinInterval } from 'date-fns';
 
@@ -59,9 +58,6 @@ export function fetchInsightsData(selectedDate: Date, userId: string): InsightsD
     
     if (storedMindfulness) {
       mindfulnessData = JSON.parse(storedMindfulness);
-    } else {
-      // Fallback to sample data if no mindfulness sessions are recorded
-      mindfulnessData = generateSampleMindfulnessData();
     }
     
     // Filter data based on selected date

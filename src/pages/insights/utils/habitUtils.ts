@@ -24,22 +24,7 @@ export function calculateHabitProgress(
     }
   });
   
-  // If no habits, create sample data based on moods and journals
-  if (Object.keys(habitTracker).length === 0) {
-    const thisWeekJournals = journals.filter(entry =>
-      isWithinInterval(new Date(entry.date), weekInterval)
-    );
-    
-    // Create sample data
-    return [
-      { name: 'Meditation', completed: Math.min(thisWeekJournals.length + 1, 5), total: 7 },
-      { name: 'Exercise', completed: Math.min(thisWeekJournals.length, 4), total: 7 },
-      { name: 'Journaling', completed: thisWeekJournals.length, total: 7 },
-      { name: 'Reading', completed: Math.max(1, Math.min(thisWeekJournals.length - 1, 3)), total: 7 },
-      { name: 'Water', completed: Math.min(thisWeekJournals.length + 2, 7), total: 7 }
-    ];
-  }
-  
+  // Return only real user data, no sample data
   return Object.entries(habitTracker).map(([name, data]) => ({
     name,
     completed: data.completed,

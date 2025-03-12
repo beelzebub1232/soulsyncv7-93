@@ -33,6 +33,10 @@ export function WeeklySummary({
   
   // Generate insight based on mood data
   const getInsight = (mood: string): string => {
+    if (mood.toLowerCase() === 'no data') {
+      return 'Start tracking your mood, habits, and journal entries to get personalized insights.';
+    }
+    
     switch(mood.toLowerCase()) {
       case 'amazing':
         return 'Your mood has been excellent this week! Keep up with whatever you\'re doing.';
@@ -51,6 +55,13 @@ export function WeeklySummary({
   
   // Generate action recommendations
   const getActionRecommendation = () => {
+    if (moodAverage === "No data") {
+      return {
+        text: "Start tracking your mood",
+        action: () => navigate('/home')
+      };
+    }
+    
     if (journalEntries < 3) {
       return {
         text: "Try writing in your journal more often",
@@ -65,12 +76,14 @@ export function WeeklySummary({
       };
     }
     
-    const [completed, total] = completedHabits.split('/').map(Number);
-    if (completed / total < 0.6) {
-      return {
-        text: "Focus on completing more of your habits",
-        action: () => navigate('/habit-tracker')
-      };
+    if (completedHabits !== "No data") {
+      const [completed, total] = completedHabits.split('/').map(Number);
+      if (completed / total < 0.6) {
+        return {
+          text: "Focus on completing more of your habits",
+          action: () => navigate('/habit-tracker')
+        };
+      }
     }
     
     return {

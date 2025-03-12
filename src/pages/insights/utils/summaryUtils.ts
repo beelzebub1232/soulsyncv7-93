@@ -10,12 +10,20 @@ export function createWeeklySummary(
   habitProgress: HabitProgress[],
   mindfulnessMinutes: number
 ): WeeklySummary {
+  // Calculate completed habits from real data
+  const totalCompleted = habitProgress.reduce((sum, habit) => sum + habit.completed, 0);
+  const totalHabits = habitProgress.reduce((sum, habit) => sum + habit.total, 0);
+  
+  // Only show the completed habits ratio if there's actual data
+  const completedHabitsText = habitProgress.length > 0 
+    ? `${totalCompleted}/${totalHabits}`
+    : "No data";
+  
   return {
-    moodAverage: getMoodAverageLabel(thisWeekMoods),
+    moodAverage: thisWeekMoods.length > 0 ? getMoodAverageLabel(thisWeekMoods) : "No data",
     journalEntries: thisWeekJournals.length,
-    completedHabits: habitProgress.reduce((sum, habit) => sum + habit.completed, 0) + "/" + 
-                    habitProgress.reduce((sum, habit) => sum + habit.total, 0),
-    mindfulnessMinutes: mindfulnessMinutes || Math.floor(Math.random() * 60) + 15 // Fallback to random if no data
+    completedHabits: completedHabitsText,
+    mindfulnessMinutes: mindfulnessMinutes || 0 // No fallback to random, use 0 if no data
   };
 }
 
@@ -25,9 +33,9 @@ export function getDefaultInsightsData(): InsightsData {
     weeklyMoodCounts: {},
     moodDistribution: {},
     weeklySummary: {
-      moodAverage: "No Data",
+      moodAverage: "No data",
       journalEntries: 0,
-      completedHabits: "0/0",
+      completedHabits: "No data",
       mindfulnessMinutes: 0
     },
     moodTrend: 0,
@@ -37,18 +45,4 @@ export function getDefaultInsightsData(): InsightsData {
   };
 }
 
-export function generateSampleMindfulnessData(): MindfulnessSession[] {
-  const today = new Date();
-  const subDays = (date: Date, days: number) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() - days);
-    return result;
-  };
-  
-  return [
-    { date: subDays(today, 6).toISOString(), minutes: 10 },
-    { date: subDays(today, 4).toISOString(), minutes: 15 },
-    { date: subDays(today, 2).toISOString(), minutes: 5 },
-    { date: today.toISOString(), minutes: 20 },
-  ];
-}
+// Remove the sample data generation function since we won't use it anymore
