@@ -18,20 +18,20 @@ export function MoodTrendCard({ moodTrend }: MoodTrendCardProps) {
             <h3 className="text-sm font-medium">Mood Trend</h3>
             {hasMoodData ? (
               moodTrend >= 0 ? (
-                <ThumbsUp className="h-5 w-5 text-green-500 flex-shrink-0" />
+                <ThumbsUp className="h-5 w-5 text-green-500" />
               ) : (
-                <ThumbsDown className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <ThumbsDown className="h-5 w-5 text-red-500" />
               )
             ) : (
-              <ThumbsUp className="h-5 w-5 text-gray-300 flex-shrink-0" />
+              <ThumbsUp className="h-5 w-5 text-gray-300" />
             )}
           </div>
-          <p className="text-xs text-muted-foreground pr-6 line-clamp-2">
+          <p className="text-xs text-muted-foreground">
             {hasMoodData 
               ? (moodTrend >= 0 
-                  ? "Your mood has been improving this week. Keep up the positive mindset!" 
-                  : "Your mood has been lower this week. Remember to practice self-care.")
-              : "Start tracking your mood to see your emotional journey"}
+                  ? "Your mood has been improving" 
+                  : "Your mood has been declining")
+              : "Start tracking your mood daily"}
           </p>
         </div>
         
