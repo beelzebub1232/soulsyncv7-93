@@ -102,18 +102,20 @@ export function AdminPanel() {
       setReportedContent(updatedReports);
       
       // If rejecting report, also remove or hide the content
-      if (report.contentType === 'post') {
+      const reportToRemove = reports.find(r => r.id === reportId);
+      
+      if (reportToRemove && reportToRemove.contentType === 'post') {
         const storedPosts = localStorage.getItem('soulsync_forum_posts');
         if (storedPosts) {
           const posts = JSON.parse(storedPosts);
-          const updatedPosts = posts.filter((post: any) => post.id !== report.contentId);
+          const updatedPosts = posts.filter((post: any) => post.id !== reportToRemove.contentId);
           localStorage.setItem('soulsync_forum_posts', JSON.stringify(updatedPosts));
         }
-      } else if (report.contentType === 'reply') {
+      } else if (reportToRemove && reportToRemove.contentType === 'reply') {
         const storedReplies = localStorage.getItem('soulsync_forum_replies');
         if (storedReplies) {
           const replies = JSON.parse(storedReplies);
-          const updatedReplies = replies.filter((reply: any) => reply.id !== report.contentId);
+          const updatedReplies = replies.filter((reply: any) => reply.id !== reportToRemove.contentId);
           localStorage.setItem('soulsync_forum_replies', JSON.stringify(updatedReplies));
         }
       }
