@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,17 +30,33 @@ interface UserContextType {
   rejectProfessional: (professionalId: string) => void;
 }
 
-// Mock user database - needed to store user credentials including passwords
-const mockUsers: { [key: string]: { password: string } & UserData } = {
-  'admin@gmail.com': {
-    id: 'admin-1',
-    username: 'Admin',
-    email: 'admin@gmail.com',
-    password: '123',
-    role: 'admin',
-    avatar: '/placeholder.svg',
-    isVerified: true
+// Mock user database - store key in localStorage so it persists across sessions
+const MOCK_USERS_STORAGE_KEY = 'soulsync_users_mock_db';
+
+// Initialize mock users with admin user
+const initializeMockUsers = () => {
+  const storedUsers = localStorage.getItem(MOCK_USERS_STORAGE_KEY);
+  
+  if (storedUsers) {
+    try {
+      return JSON.parse(storedUsers);
+    } catch (error) {
+      console.error('Failed to parse stored users:', error);
+    }
   }
+  
+  // Default admin user if no stored users
+  return {
+    'admin@gmail.com': {
+      id: 'admin-1',
+      username: 'Admin',
+      email: 'admin@gmail.com',
+      password: '123',
+      role: 'admin',
+      avatar: '/placeholder.svg',
+      isVerified: true
+    }
+  };
 };
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -53,10 +70,16 @@ const PENDING_PROFESSIONALS_KEY = 'pending_professionals';
 const APPROVED_NOTIFICATIONS_KEY = 'approved_professional_notifications';
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+  const [mockUsers, setMockUsers] = useState(() => initializeMockUsers());
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [pendingProfessionals, setPendingProfessionals] = useState<UserData[]>([]);
   const { toast } = useToast();
+
+  // Save mockUsers to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(MOCK_USERS_STORAGE_KEY, JSON.stringify(mockUsers));
+  }, [mockUsers]);
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -326,9 +349,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       };
 
       // Add user to mockUsers
-      mockUsers[email] = newUser;
+      const updatedMockUsers = { ...mockUsers, [email]: newUser };
+      setMockUsers(updatedMockUsers);
       console.log("User registered:", newUser);
-      console.log("Updated mockUsers:", mockUsers);
+      console.log("Updated mockUsers:", updatedMockUsers);
 
       // If professional, add to pending list
       if (role === 'professional') {
@@ -395,7 +419,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       // Update mock database
       if (mockUsers[user.email]) {
-        mockUsers[user.email] = { ...mockUsers[user.email], ...data };
+        const updatedMockUsers = { 
+          ...mockUsers, 
+          [user.email]: { ...mockUsers[user.email], ...data } 
+        };
+        setMockUsers(updatedMockUsers);
       }
       
       toast({
@@ -413,18 +441,29 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       // Update the professional's verified status in mockUsers
       if (mockUsers[professional.email]) {
-        mockUsers[professional.email].isVerified = true;
-        console.log("Updated professional verification status in mockUsers:", mockUsers[professional.email]);
+        const updatedMockUsers = {
+          ...mockUsers,
+          [professional.email]: {
+            ...mockUsers[professional.email],
+            isVerified: true
+          }
+        };
+        setMockUsers(updatedMockUsers);
+        console.log("Updated professional verification status in mockUsers:", updatedMockUsers[professional.email]);
       } else {
         console.error("Professional not found in mockUsers:", professional.email);
         // This is a critical error - professional is in pending list but not in mockUsers
         // Re-add them to mockUsers with a default password
-        mockUsers[professional.email] = {
-          ...professional,
-          password: 'password123', // Default password as fallback
-          isVerified: true
+        const updatedMockUsers = {
+          ...mockUsers,
+          [professional.email]: {
+            ...professional,
+            password: 'password123', // Default password as fallback
+            isVerified: true
+          }
         };
-        console.log("Re-added professional to mockUsers:", mockUsers[professional.email]);
+        setMockUsers(updatedMockUsers);
+        console.log("Re-added professional to mockUsers:", updatedMockUsers[professional.email]);
       }
       
       // Store notification for the professional to see when they log in
@@ -453,12 +492,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   const rejectProfessional = (professionalId: string) => {
+    const professional = pendingProfessionals.find(p => p.id !== professionalId);
     const updatedPending = pendingProfessionals.filter(p => p.id !== professionalId);
-    const professional = pendingProfessionals.find(p => p.id === professionalId);
     
     if (professional) {
       // Remove from mock users
-      delete mockUsers[professional.email];
+      const { [professional.email]: _, ...restMockUsers } = mockUsers;
+      setMockUsers(restMockUsers);
       
       // Update pending professionals list
       setPendingProfessionals(updatedPending);
@@ -468,6 +508,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         title: "Professional Rejected",
         description: `${professional.username}'s professional application has been rejected.`,
       });
+    } else {
+      // Still update the pending list even if professional wasn't found
+      setPendingProfessionals(updatedPending);
+      localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
     }
   };
 
