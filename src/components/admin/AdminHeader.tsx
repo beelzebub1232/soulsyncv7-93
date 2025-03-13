@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,12 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, User, ShieldCheck } from "lucide-react";
+import { Bell, LogOut, User, ShieldCheck, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 // Sample notification type
 type AdminNotification = {
@@ -32,11 +32,9 @@ export function AdminHeader() {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [notificationOpen, setNotificationOpen] = useState(false);
   
-  // Load notifications based on app state
   useEffect(() => {
     const generatedNotifications: AdminNotification[] = [];
     
-    // Add notifications for pending professionals
     pendingProfessionals.forEach(professional => {
       generatedNotifications.push({
         id: `prof_${professional.id}`,
@@ -48,8 +46,7 @@ export function AdminHeader() {
       });
     });
     
-    // Add sample report notifications (in real app, these would come from backend)
-    const reportCount = 3; // Sample count
+    const reportCount = 3;
     for (let i = 0; i < reportCount; i++) {
       generatedNotifications.push({
         id: `report_${i}`,
@@ -61,7 +58,6 @@ export function AdminHeader() {
       });
     }
     
-    // Sort by timestamp descending
     generatedNotifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     setNotifications(generatedNotifications);
@@ -139,7 +135,6 @@ export function AdminHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          {/* Notifications panel */}
           <Sheet open={notificationOpen} onOpenChange={setNotificationOpen}>
             <SheetContent className="w-full md:max-w-md">
               <SheetHeader>
