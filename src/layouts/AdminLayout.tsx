@@ -27,7 +27,7 @@ export function AdminLayout() {
   return (
     <div className="flex h-screen flex-col bg-background">
       <AdminHeader />
-      <main className="flex-1 overflow-y-auto pt-16 pb-20 px-4">
+      <main className="flex-1 overflow-y-auto pt-14 pb-20 px-4">
         <Outlet />
       </main>
       <AdminBottomNav />

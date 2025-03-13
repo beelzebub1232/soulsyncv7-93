@@ -126,7 +126,7 @@ export default function AdminLogin() {
             <Button 
               variant="default" 
               size="sm" 
-              className="mx-auto flex items-center justify-center px-4 py-2 bg-black text-white hover:bg-gray-800"
+              className="mx-auto flex items-center justify-center px-4 py-2 w-full rounded-full bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:opacity-90 transition-all"
               onClick={() => navigate('/auth')}
             >
               Back to main login

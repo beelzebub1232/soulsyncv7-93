@@ -31,7 +31,7 @@ export default function ProfessionalVerifications() {
 
   if (pendingProfessionals.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 pt-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Professional Verifications</h1>
           <p className="text-muted-foreground">Review and approve professional account requests.</p>
@@ -74,7 +74,7 @@ export default function ProfessionalVerifications() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pt-2">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Professional Verifications</h1>
         <p className="text-muted-foreground">Review and approve professional account requests.</p>

@@ -136,7 +136,7 @@ export default function AdminDashboard() {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 pt-2">
       <div>
         <h1 className="text-2xl font-bold tracking-tight mb-1">Admin Dashboard</h1>
         <p className="text-muted-foreground">Overview of the SoulSync platform administration.</p>
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
       
-      <div className="grid gap-6 mb-6">
+      <div className="grid gap-6 mb-4">
         <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>Platform Activity</CardTitle>
@@ -207,16 +207,16 @@ export default function AdminDashboard() {
                 >
                   <defs>
                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#666" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#666" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#4A80B8" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#4A80B8" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#333" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#333" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#57A773" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#57A773" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#999" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#999" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#E8871E" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#E8871E" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -224,9 +224,9 @@ export default function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="users" stroke="#666" fillOpacity={1} fill="url(#colorUsers)" />
-                  <Area type="monotone" dataKey="posts" stroke="#333" fillOpacity={1} fill="url(#colorPosts)" />
-                  <Area type="monotone" dataKey="reports" stroke="#999" fillOpacity={1} fill="url(#colorReports)" />
+                  <Area type="monotone" dataKey="users" stroke="#4A80B8" fillOpacity={1} fill="url(#colorUsers)" />
+                  <Area type="monotone" dataKey="posts" stroke="#57A773" fillOpacity={1} fill="url(#colorPosts)" />
+                  <Area type="monotone" dataKey="reports" stroke="#E8871E" fillOpacity={1} fill="url(#colorReports)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

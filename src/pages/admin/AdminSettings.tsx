@@ -55,8 +55,8 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="container max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center gap-2 mb-6">
+    <div className="container max-w-5xl mx-auto space-y-4 pt-2">
+      <div className="flex items-center gap-2 mb-4">
         <Shield className="h-6 w-6 text-black dark:text-white" />
         <h1 className="text-2xl font-bold tracking-tight">Admin Settings</h1>
       </div>

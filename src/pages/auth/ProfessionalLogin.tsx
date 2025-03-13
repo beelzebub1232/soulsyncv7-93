@@ -149,22 +149,16 @@ export default function ProfessionalLogin() {
             </form>
           </div>
           
-          <div className="mt-4 text-center space-y-3">
-            <div className="flex justify-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-2"
-                onClick={() => navigate('/auth')}
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                <span className="text-xs">Back to Login</span>
-              </Button>
-            </div>
-            
-            <p className="text-xs text-muted-foreground">
-              By continuing, you agree to our Terms of Service and Privacy Policy.
-            </p>
+          <div className="mt-4 text-center">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="w-full rounded-full bg-gradient-to-r from-blue-600 to-purple-500 hover:opacity-90 transition-all flex items-center justify-center gap-2"
+              onClick={() => navigate('/auth')}
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Login</span>
+            </Button>
           </div>
         </div>
       </div>
