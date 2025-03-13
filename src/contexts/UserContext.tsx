@@ -165,7 +165,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error('Password must be at least 6 characters');
       }
 
-      // Check if professional exists
+      // Check if professional exists in mock database
       const storedUser = mockUsers[email];
       if (!storedUser || storedUser.password !== password) {
         throw new Error('Invalid credentials');
@@ -297,6 +297,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         identityDocument,
       };
 
+      // Save to mock database
       mockUsers[email] = newUser;
 
       // If professional, add to pending list
@@ -313,23 +314,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return;
       }
 
-      const userData: UserData = {
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role,
-        avatar: newUser.avatar,
-        isVerified: newUser.isVerified,
-        occupation: newUser.occupation,
-        identityDocument: newUser.identityDocument,
-      };
-
-      setUser(userData);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
-      
+      // For regular users - don't auto login, let them go to login page
       toast({
         title: "Account created!",
-        description: "Welcome to SoulSync!",
+        description: "Please login with your new credentials.",
       });
     } catch (error) {
       toast({
@@ -380,9 +368,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const professional = pendingProfessionals.find(p => p.id === professionalId);
     
     if (professional) {
-      // Update the professional's verified status
+      // Update the professional's verified status in mock database
       if (mockUsers[professional.email]) {
         mockUsers[professional.email].isVerified = true;
+        
+        // Send toast notification (in real app, this would be a server notification)
+        // For demo, we'll log it to console - in a real app this would be sent via API
+        console.log(`Professional ${professional.username} has been approved`);
       }
       
       // Update pending professionals list

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { UserRole } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
-export function Register() {
+interface RegisterProps {
+  initialRole?: UserRole;
+}
+
+export function Register({ initialRole = "user" }: RegisterProps) {
   const { register } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -19,11 +23,16 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("user");
+  const [role, setRole] = useState<UserRole>(initialRole);
   const [occupation, setOccupation] = useState("");
   const [identityDocument, setIdentityDocument] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Update role when initialRole changes
+  useEffect(() => {
+    setRole(initialRole);
+  }, [initialRole]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,13 +74,13 @@ export function Register() {
           title: "Registration pending",
           description: "Your professional account is pending admin verification.",
         });
-        navigate("/auth");
+        navigate("/auth/professional");
       } else {
         toast({
           title: "Account created!",
-          description: "Welcome to SoulSync!",
+          description: "Please log in with your new credentials.",
         });
-        navigate("/");
+        navigate("/auth");
       }
     } catch (error) {
       toast({
@@ -163,7 +172,6 @@ export function Register() {
       <div className="space-y-2">
         <Label>I am registering as a:</Label>
         <RadioGroup 
-          defaultValue="user" 
           value={role}
           onValueChange={(value) => setRole(value as UserRole)}
           className="flex gap-4"
@@ -202,7 +210,7 @@ export function Register() {
             <div className="mt-1 flex items-center">
               <label
                 htmlFor="identityDocument"
-                className="flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border bg-background/50 px-3 py-4 text-sm text-muted-foreground hover:border-mindscape-primary/50 hover:bg-mindscape-light/10"
+                className="flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border bg-background/50 px-3 py-4 text-sm text-muted-foreground hover:border-blue-600/50 hover:bg-blue-50/10"
               >
                 <Upload className="mr-2 h-4 w-4" />
                 <span>{identityDocument || "Upload professional credentials"}</span>

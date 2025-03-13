@@ -68,7 +68,7 @@ export default function ProfessionalLogin() {
         </div>
         
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter">
+          <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter relative overflow-hidden glow-card">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">Email</Label>
@@ -138,7 +138,7 @@ export default function ProfessionalLogin() {
                   className="text-blue-600 hover:text-blue-500 hover:underline"
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate("/auth");
+                    navigate("/auth", { state: { initialMode: "register", initialRole: "professional" } });
                   }}
                 >
                   Register here
