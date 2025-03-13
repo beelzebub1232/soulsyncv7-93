@@ -12,10 +12,12 @@ import { AuthLayout } from "@/layouts/AuthLayout";
 
 // Auth Pages
 import Auth from "@/pages/auth/Auth";
+import AdminLogin from "@/pages/auth/AdminLogin";
 
 // App Pages
 import Home from "@/pages/home/Home";
 import Journal from "@/pages/journal/Journal";
+import Community from "@/pages/community/Community";
 import Insights from "@/pages/insights/Insights";
 import Mindful from "@/pages/mindful/Mindful";
 import HabitTracker from "@/pages/habit-tracker/HabitTracker";
@@ -35,12 +37,14 @@ const App = () => (
             {/* Auth Routes */}
             <Route path="/auth" element={<AuthLayout />}>
               <Route index element={<Auth />} />
+              <Route path="admin" element={<AdminLogin />} />
             </Route>
             
             {/* App Routes */}
             <Route path="/" element={<AppLayout />}>
               <Route index element={<Home />} />
               <Route path="journal" element={<Journal />} />
+              <Route path="community" element={<Community />} />
               <Route path="insights" element={<Insights />} />
               <Route path="mindful" element={<Mindful />} />
               <Route path="habit-tracker" element={<HabitTracker />} />

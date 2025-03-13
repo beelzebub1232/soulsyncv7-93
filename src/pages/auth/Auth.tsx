@@ -3,7 +3,9 @@ import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
 import { cn } from "@/lib/utils";
-import { Heart } from "lucide-react";
+import { Heart, ShieldCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -55,9 +57,18 @@ export default function Auth() {
             {mode === "login" ? <Login /> : <Register />}
           </div>
           
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
-          </p>
+          <div className="mt-4 text-center space-y-3">
+            <Link to="/auth/admin">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                <span className="text-xs">Admin Login</span>
+              </Button>
+            </Link>
+            
+            <p className="text-xs text-muted-foreground">
+              By continuing, you agree to our Terms of Service and Privacy Policy.
+            </p>
+          </div>
         </div>
       </div>
     </div>

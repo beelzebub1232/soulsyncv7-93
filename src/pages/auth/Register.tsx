@@ -6,16 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { UserRole } from "@/contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 export function Register() {
   const { register } = useUser();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"user" | "professional">("user");
+  const [role, setRole] = useState<UserRole>("user");
+  const [occupation, setOccupation] = useState("");
+  const [identityDocument, setIdentityDocument] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -26,7 +32,7 @@ export function Register() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
       });
       return;
     }
@@ -40,14 +46,33 @@ export function Register() {
       return;
     }
     
+    if (role === "professional" && !occupation) {
+      toast({
+        variant: "destructive",
+        title: "Occupation required",
+        description: "Please provide your professional occupation.",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
-      await register(username, email, password, role);
-      toast({
-        title: "Account created!",
-        description: "Welcome to Mindscape Journal.",
-      });
+      await register(username, email, password, role, occupation, identityDocument);
+      
+      if (role === "professional") {
+        toast({
+          title: "Registration pending",
+          description: "Your professional account is pending admin verification.",
+        });
+        navigate("/auth");
+      } else {
+        toast({
+          title: "Account created!",
+          description: "Welcome to SoulSync!",
+        });
+        navigate("/");
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -56,6 +81,15 @@ export function Register() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // In a real app, you would upload this to a server
+      // Here we'll just store the filename for demonstration
+      setIdentityDocument(file.name);
     }
   };
   
@@ -131,7 +165,7 @@ export function Register() {
         <RadioGroup 
           defaultValue="user" 
           value={role}
-          onValueChange={(value) => setRole(value as "user" | "professional")}
+          onValueChange={(value) => setRole(value as UserRole)}
           className="flex gap-4"
         >
           <div className="flex items-center space-x-2">
@@ -144,6 +178,48 @@ export function Register() {
           </div>
         </RadioGroup>
       </div>
+      
+      {role === "professional" && (
+        <div className="space-y-4 pt-2 border-t border-border/50">
+          <div className="space-y-2">
+            <Label htmlFor="occupation" className="text-sm font-medium">
+              Occupation <span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="occupation"
+              placeholder="Psychologist, Therapist, Counselor, etc."
+              value={occupation}
+              onChange={(e) => setOccupation(e.target.value)}
+              className="min-h-24"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="identityDocument" className="text-sm font-medium">
+              Upload Identity Document
+            </Label>
+            <div className="mt-1 flex items-center">
+              <label
+                htmlFor="identityDocument"
+                className="flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed border-border bg-background/50 px-3 py-4 text-sm text-muted-foreground hover:border-mindscape-primary/50 hover:bg-mindscape-light/10"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                <span>{identityDocument || "Upload professional credentials"}</span>
+                <input
+                  id="identityDocument"
+                  type="file"
+                  className="sr-only"
+                  onChange={handleFileChange}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Upload credentials to verify your professional status. This will be reviewed by our team.
+            </p>
+          </div>
+        </div>
+      )}
       
       <Button 
         type="submit" 
