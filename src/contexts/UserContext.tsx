@@ -51,7 +51,6 @@ interface UserProviderProps {
 
 const STORAGE_KEY = 'soulsync_user_v2';
 const PENDING_PROFESSIONALS_KEY = 'pending_professionals';
-const APPROVED_TOAST_KEY = 'approved_professional_notifications';
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
@@ -89,33 +88,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     loadUser();
   }, []);
-
-  // Check for approval notifications
-  useEffect(() => {
-    const checkForApprovalNotifications = () => {
-      try {
-        const notificationsJson = localStorage.getItem(APPROVED_TOAST_KEY);
-        if (notificationsJson) {
-          const notifications = JSON.parse(notificationsJson);
-          
-          // Show notifications and remove them
-          notifications.forEach((notification: { email: string; username: string }) => {
-            toast({
-              title: "Professional Account Approved",
-              description: `Your professional account has been approved. You can now login.`,
-            });
-          });
-          
-          // Clear notifications after showing them
-          localStorage.removeItem(APPROVED_TOAST_KEY);
-        }
-      } catch (error) {
-        console.error('Failed to process approval notifications:', error);
-      }
-    };
-
-    checkForApprovalNotifications();
-  }, [toast]);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -325,7 +297,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         identityDocument,
       };
 
-      // Add to mock database
       mockUsers[email] = newUser;
 
       // If professional, add to pending list
@@ -342,9 +313,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return;
       }
 
+      const userData: UserData = {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role,
+        avatar: newUser.avatar,
+        isVerified: newUser.isVerified,
+        occupation: newUser.occupation,
+        identityDocument: newUser.identityDocument,
+      };
+
+      setUser(userData);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+      
       toast({
         title: "Account created!",
-        description: "Your account has been created successfully. Please sign in.",
+        description: "Welcome to SoulSync!",
       });
     } catch (error) {
       toast({
@@ -398,15 +383,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Update the professional's verified status
       if (mockUsers[professional.email]) {
         mockUsers[professional.email].isVerified = true;
-        
-        // Store approval notification
-        const notificationsJson = localStorage.getItem(APPROVED_TOAST_KEY) || '[]';
-        const notifications = JSON.parse(notificationsJson);
-        notifications.push({
-          email: professional.email,
-          username: professional.username
-        });
-        localStorage.setItem(APPROVED_TOAST_KEY, JSON.stringify(notifications));
       }
       
       // Update pending professionals list

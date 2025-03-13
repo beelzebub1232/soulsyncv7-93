@@ -159,36 +159,4 @@
   .card-highlight {
     @apply bg-gradient-to-br from-mindscape-light to-mindscape-light/50 rounded-xl p-4 border border-mindscape-primary/20;
   }
-  
-  /* Auth card glow animation */
-  .auth-card-glow {
-    @apply relative;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  }
-  
-  .auth-card-glow::before {
-    content: "";
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, hsl(var(--primary)), transparent, hsl(var(--primary)));
-    border-radius: calc(var(--radius) + 2px);
-    z-index: -1;
-    animation: glow 6s linear infinite;
-    opacity: 0.6;
-  }
-  
-  @keyframes glow {
-    0% {
-      background-position: 0% 0%;
-    }
-    50% {
-      background-position: 400% 0%;
-    }
-    100% {
-      background-position: 0% 0%;
-    }
-  }
 }

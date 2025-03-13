@@ -1,27 +1,15 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
 import { cn } from "@/lib/utils";
 import { Heart, ShieldCheck, UserCheck } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { UserRole } from "@/contexts/UserContext";
 
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Parse query parameters to handle role pre-selection
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const modeParam = queryParams.get('mode');
-    
-    if (modeParam === 'register') {
-      setMode('register');
-    }
-  }, [location]);
   
   return (
     <div className="min-h-full flex flex-col">
@@ -66,7 +54,7 @@ export default function Auth() {
             </button>
           </div>
           
-          <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter auth-card-glow">
+          <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter">
             {mode === "login" ? <Login /> : <Register />}
           </div>
           
