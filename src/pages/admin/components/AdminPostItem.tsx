@@ -12,7 +12,8 @@ import {
   Eye, 
   User,
   CheckCircle,
-  Shield
+  Shield,
+  BadgeCheck
 } from "lucide-react";
 import { 
   DropdownMenu,

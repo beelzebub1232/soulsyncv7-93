@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { MoreVertical, Trash, Flag, User, Shield, CheckCircle } from "lucide-react";
+import { MoreVertical, Trash, Flag, User, Shield, CheckCircle, BadgeCheck } from "lucide-react";
 import { ForumReply } from "@/types/community";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
