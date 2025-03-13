@@ -1,15 +1,16 @@
 
-import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ForumPost, ForumReply } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
-import { ChevronLeft, Heart, Flag, CheckCircle2, Calendar, Youtube } from "lucide-react";
+import { ChevronLeft, Heart, Flag, CheckCircle2, Calendar, Youtube, Link2, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
+import { NewPostSheet } from "./components/NewPostSheet";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,7 @@ export default function PostDetails() {
   const { postId } = useParams<{ postId: string }>();
   const { user } = useUser();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [post, setPost] = useState<ForumPost | null>(null);
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [replyContent, setReplyContent] = useState("");
@@ -41,6 +43,9 @@ export default function PostDetails() {
   const [reportReason, setReportReason] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likedReplies, setLikedReplies] = useState<string[]>([]);
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [editReplyContent, setEditReplyContent] = useState("");
+  const [isEditPostOpen, setIsEditPostOpen] = useState(false);
   
   // Load liked posts and replies from localStorage
   useEffect(() => {
@@ -81,34 +86,24 @@ export default function PostDetails() {
             // Convert date string back to Date object
             foundPost = {
               ...match,
-              date: new Date(match.date)
+              date: new Date(match.date),
+              lastEditedDate: match.lastEditedDate ? new Date(match.lastEditedDate) : undefined
             };
             break;
           }
         }
       }
       
-      // If found in localStorage, use it; otherwise use mock data
       if (foundPost) {
         setPost(foundPost);
       } else {
-        // Mock post as fallback
-        const mockPost: ForumPost = {
-          id: postId,
-          title: "How to handle anxiety during presentations?",
-          content: "I struggle with severe anxiety when giving presentations at work. Any tips that have worked for you? I've tried deep breathing and preparation, but I still freeze up when all eyes are on me.",
-          categoryId: "anxiety",
-          categoryName: "Anxiety Support",
-          author: "Anonymous",
-          authorId: "user123",
-          authorRole: "user",
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-          replies: 0,
-          isAnonymous: true,
-          likes: 0
-        };
-        
-        setPost(mockPost);
+        // Post not found, redirect to community page
+        toast({
+          title: "Post not found",
+          description: "The post you're looking for might have been deleted",
+          variant: "destructive"
+        });
+        navigate("/community");
       }
       
       // Load replies from localStorage
@@ -116,18 +111,20 @@ export default function PostDetails() {
       if (savedReplies) {
         const parsedReplies = JSON.parse(savedReplies).map((reply: ForumReply) => ({
           ...reply,
-          date: new Date(reply.date)
+          date: new Date(reply.date),
+          lastEditedDate: reply.lastEditedDate ? new Date(reply.lastEditedDate) : undefined
         }));
         setReplies(parsedReplies);
       } else {
-        // Mock replies as fallback
         setReplies([]);
       }
     }
-  }, [postId]);
+  }, [postId, navigate, toast]);
   
   // Update post in its category
   const updatePostInCategory = (updatedPost: ForumPost) => {
+    if (!updatedPost) return;
+    
     const categoryId = updatedPost.categoryId;
     const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
     
@@ -280,6 +277,111 @@ export default function PostDetails() {
     });
   };
   
+  const handleEditReply = (replyId: string) => {
+    const reply = replies.find(r => r.id === replyId);
+    if (reply) {
+      setEditingReplyId(replyId);
+      setEditReplyContent(reply.content);
+    }
+  };
+  
+  const handleSaveEditedReply = () => {
+    if (!editingReplyId || !editReplyContent.trim()) return;
+    
+    const updatedReplies = replies.map(reply => {
+      if (reply.id === editingReplyId) {
+        return {
+          ...reply,
+          content: editReplyContent,
+          isEdited: true,
+          lastEditedDate: new Date()
+        };
+      }
+      return reply;
+    });
+    
+    setReplies(updatedReplies);
+    
+    // Save to localStorage
+    localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify(updatedReplies));
+    
+    setEditingReplyId(null);
+    setEditReplyContent("");
+    
+    toast({
+      title: "Reply updated",
+      description: "Your reply has been updated successfully",
+    });
+  };
+  
+  const handleDeleteReply = (replyId: string) => {
+    // Remove reply from state
+    const updatedReplies = replies.filter(reply => reply.id !== replyId);
+    setReplies(updatedReplies);
+    
+    // Save updated replies to localStorage
+    localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify(updatedReplies));
+    
+    // Update post reply count
+    if (post) {
+      const updatedPost = {
+        ...post,
+        replies: Math.max(0, post.replies - 1)
+      };
+      setPost(updatedPost);
+      
+      // Update post in its category
+      updatePostInCategory(updatedPost);
+    }
+    
+    toast({
+      title: "Reply deleted",
+      description: "Your reply has been deleted successfully",
+    });
+  };
+  
+  const handleDeletePost = () => {
+    if (!post) return;
+    
+    // Delete post from its category
+    const categoryId = post.categoryId;
+    const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
+    
+    if (savedPosts) {
+      const allPosts = JSON.parse(savedPosts);
+      const updatedPosts = allPosts.filter((p: ForumPost) => p.id !== post.id);
+      
+      localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
+    }
+    
+    // Delete all replies
+    localStorage.removeItem(`soulsync_replies_${post.id}`);
+    
+    toast({
+      title: "Post deleted",
+      description: "Your post has been deleted successfully",
+    });
+    
+    // Navigate back to category
+    navigate(`/community/category/${post.categoryId}`);
+  };
+  
+  const handleUpdatePost = (updatedPost: ForumPost) => {
+    setPost(updatedPost);
+    updatePostInCategory(updatedPost);
+    setIsEditPostOpen(false);
+    
+    toast({
+      title: "Post updated",
+      description: "Your post has been updated successfully",
+    });
+  };
+  
+  // Function to check if a link is from YouTube
+  const isYouTubeLink = (url: string) => {
+    return url.includes("youtube.com") || url.includes("youtu.be");
+  };
+  
   // Function to render YouTube embeds
   const renderYouTubeEmbed = (url: string) => {
     // Extract video ID from YouTube URL
@@ -306,6 +408,8 @@ export default function PostDetails() {
     return null;
   };
   
+  const isPostAuthor = user && post && user.id === post.authorId;
+  
   if (!post) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -323,8 +427,50 @@ export default function PostDetails() {
       
       <div className="card-primary p-4 space-y-4">
         <div className="flex justify-between items-start">
-          <h1 className="text-lg sm:text-xl font-medium">{post.title}</h1>
+          <div>
+            <h1 className="text-lg sm:text-xl font-medium">{post.title}</h1>
+            {post.isEdited && (
+              <span className="text-xs text-muted-foreground">(edited {post.lastEditedDate ? formatDistanceToNow(new Date(post.lastEditedDate), { addSuffix: true }) : ""})</span>
+            )}
+          </div>
+          
           <div className="flex items-center gap-2">
+            {isPostAuthor && (
+              <div className="flex items-center gap-2 mr-2">
+                <button 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsEditPostOpen(true)}
+                >
+                  <Edit className="h-5 w-5" />
+                </button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="text-muted-foreground hover:text-destructive transition-colors">
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete post</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this post? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDeletePost}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
+            
             <button 
               className={`flex items-center gap-1 ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'} transition-colors`}
               onClick={handleLikePost}
@@ -379,7 +525,7 @@ export default function PostDetails() {
           
           {/* Images */}
           {post.images && post.images.length > 0 && (
-            <div className="mt-3 grid grid-cols-3 gap-2">
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
               {post.images.map((img, idx) => (
                 <div key={idx} className="aspect-square rounded overflow-hidden">
                   <img src={img} alt="" className="h-full w-full object-cover" />
@@ -390,18 +536,21 @@ export default function PostDetails() {
           
           {/* Video Links */}
           {post.videoLinks && post.videoLinks.map((link, idx) => (
-            renderYouTubeEmbed(link) || (
-              <a 
-                key={idx}
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 text-blue-500 text-sm flex items-center break-all"
-              >
-                <Youtube className="h-4 w-4 mr-1 flex-shrink-0" />
-                {link}
-              </a>
-            )
+            <div key={idx}>
+              {isYouTubeLink(link) ? (
+                renderYouTubeEmbed(link)
+              ) : (
+                <a 
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 text-blue-500 text-sm flex items-center break-all"
+                >
+                  <Link2 className="h-4 w-4 mr-1 flex-shrink-0" />
+                  {link}
+                </a>
+              )}
+            </div>
           ))}
         </div>
         
@@ -425,7 +574,7 @@ export default function PostDetails() {
           
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span>{formatDistanceToNow(post.date, { addSuffix: true })}</span>
+            <span>{formatDistanceToNow(new Date(post.date), { addSuffix: true })}</span>
           </div>
         </div>
       </div>
@@ -436,42 +585,107 @@ export default function PostDetails() {
         <div className="space-y-3">
           {replies.map((reply) => (
             <div key={reply.id} className="card-primary p-3 sm:p-4 space-y-3">
-              <p className="whitespace-pre-line text-sm">{reply.content}</p>
-              
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-1">
-                  {reply.isAnonymous ? (
-                    <span className="text-xs text-muted-foreground">Anonymous</span>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <span className={cn(
-                        "text-xs",
-                        reply.authorRole === "professional" ? "text-blue-600 font-medium" : "text-muted-foreground"
-                      )}>
-                        {reply.author}
-                      </span>
-                      {reply.authorRole === "professional" && (
-                        <CheckCircle2 className="h-3 w-3 text-blue-600 fill-blue-600" />
-                      )}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <button 
-                    className={`flex items-center gap-1 text-xs ${likedReplies.includes(reply.id) ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'} transition-colors`}
-                    onClick={() => handleLikeReply(reply.id)}
-                  >
-                    <Heart className={`h-3.5 w-3.5 ${likedReplies.includes(reply.id) ? 'fill-red-500' : ''}`} />
-                    <span>{reply.likes}</span>
-                  </button>
-                  
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>{formatDistanceToNow(reply.date, { addSuffix: true })}</span>
+              {editingReplyId === reply.id ? (
+                <div className="space-y-3">
+                  <Textarea
+                    value={editReplyContent}
+                    onChange={(e) => setEditReplyContent(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setEditingReplyId(null);
+                        setEditReplyContent("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveEditedReply}>Save</Button>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <p className="whitespace-pre-line text-sm">{reply.content}</p>
+                  {reply.isEdited && (
+                    <p className="text-xs text-muted-foreground">
+                      (edited {reply.lastEditedDate ? formatDistanceToNow(new Date(reply.lastEditedDate), { addSuffix: true }) : ""})
+                    </p>
+                  )}
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1">
+                      {reply.isAnonymous ? (
+                        <span className="text-xs text-muted-foreground">Anonymous</span>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <span className={cn(
+                            "text-xs",
+                            reply.authorRole === "professional" ? "text-blue-600 font-medium" : "text-muted-foreground"
+                          )}>
+                            {reply.author}
+                          </span>
+                          {reply.authorRole === "professional" && (
+                            <CheckCircle2 className="h-3 w-3 text-blue-600 fill-blue-600" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      {user && user.id === reply.authorId && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEditReply(reply.id)}
+                            className="text-xs text-muted-foreground hover:text-primary"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </button>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button className="text-xs text-muted-foreground hover:text-destructive">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-[95%] sm:max-w-md">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Reply</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this reply? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteReply(reply.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
+                      
+                      <button 
+                        className={`flex items-center gap-1 text-xs ${likedReplies.includes(reply.id) ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'} transition-colors`}
+                        onClick={() => handleLikeReply(reply.id)}
+                      >
+                        <Heart className={`h-3.5 w-3.5 ${likedReplies.includes(reply.id) ? 'fill-red-500' : ''}`} />
+                        <span>{reply.likes}</span>
+                      </button>
+                      
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>{formatDistanceToNow(new Date(reply.date), { addSuffix: true })}</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           ))}
           
@@ -512,6 +726,17 @@ export default function PostDetails() {
           )}
         </div>
       </div>
+      
+      {post && (
+        <NewPostSheet 
+          isOpen={isEditPostOpen} 
+          onClose={() => setIsEditPostOpen(false)}
+          onSubmit={handleUpdatePost}
+          categoryId={post.categoryId}
+          categoryName={post.categoryName}
+          editPost={post}
+        />
+      )}
     </div>
   );
 }

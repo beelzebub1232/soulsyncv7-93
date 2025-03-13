@@ -28,21 +28,21 @@ export function ForumCategoryList({ categories }: ForumCategoryListProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-3">
+    <div className="grid grid-cols-1 gap-4">
       {categories.map((category) => (
         <Link 
           to={`/community/category/${category.id}`}
           key={category.id}
-          className="block card-primary p-3 sm:p-4 transition-all hover:shadow-md"
+          className="block card-primary p-4 sm:p-5 transition-all hover:shadow-md"
         >
           <div className="flex justify-between items-center">
             <div className="flex gap-3 items-center">
-              <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", category.color)}>
+              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", category.color)}>
                 {getCategoryIcon(category.id)}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-sm sm:text-base">{category.name}</h3>
-                <p className="text-xs text-muted-foreground line-clamp-1 max-w-full">
+                <p className="text-xs text-muted-foreground max-w-full mt-1">
                   {category.description}
                 </p>
               </div>

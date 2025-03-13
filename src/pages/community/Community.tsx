@@ -18,7 +18,7 @@ export default function Community() {
       name: "Anxiety Support",
       description: "Discuss anxiety management techniques and share experiences",
       icon: "heart",
-      posts: 24,
+      posts: 0,
       color: "bg-blue-100"
     },
     {
@@ -26,7 +26,7 @@ export default function Community() {
       name: "Depression",
       description: "A safe space to talk about depression and coping strategies",
       icon: "brain",
-      posts: 18,
+      posts: 0,
       color: "bg-purple-100"
     },
     {
@@ -34,7 +34,7 @@ export default function Community() {
       name: "Mindfulness",
       description: "Share mindfulness practices and meditation techniques",
       icon: "flame",
-      posts: 32,
+      posts: 0,
       color: "bg-green-100"
     },
     {
@@ -42,7 +42,7 @@ export default function Community() {
       name: "Stress Management",
       description: "Tips and discussions about managing stress in daily life",
       icon: "book",
-      posts: 15,
+      posts: 0,
       color: "bg-orange-100"
     },
     {
@@ -50,7 +50,7 @@ export default function Community() {
       name: "General Discussions",
       description: "Open discussions about mental wellness and self-care",
       icon: "globe",
-      posts: 42,
+      posts: 0,
       color: "bg-gray-100"
     }
   ]);
@@ -88,7 +88,7 @@ export default function Community() {
             <TabsTrigger value="reports">Reported Content</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="forum" className="mt-4">
+          <TabsContent value="forum" className="mt-4 pb-16">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Forum Categories</CardTitle>
@@ -103,11 +103,11 @@ export default function Community() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="verifications" className="mt-4">
+          <TabsContent value="verifications" className="mt-4 pb-16">
             <PendingVerifications />
           </TabsContent>
           
-          <TabsContent value="reports" className="mt-4">
+          <TabsContent value="reports" className="mt-4 pb-16">
             <ReportedContent />
           </TabsContent>
         </Tabs>
@@ -118,7 +118,7 @@ export default function Community() {
             <TabsTrigger value="reports">Reported Content</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="forum" className="mt-4">
+          <TabsContent value="forum" className="mt-4 pb-16">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Forum Categories</CardTitle>
@@ -133,12 +133,12 @@ export default function Community() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="reports" className="mt-4">
+          <TabsContent value="reports" className="mt-4 pb-16">
             <ReportedContent />
           </TabsContent>
         </Tabs>
       ) : (
-        <Card>
+        <Card className="mb-16">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Forum Categories</CardTitle>
           </CardHeader>

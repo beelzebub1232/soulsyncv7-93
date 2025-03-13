@@ -38,6 +38,8 @@ export interface ForumPost {
   likes: number;
   images?: string[];
   videoLinks?: string[];
+  isEdited?: boolean;
+  lastEditedDate?: Date;
 }
 
 export interface ForumReply {
@@ -50,6 +52,8 @@ export interface ForumReply {
   date: Date;
   isAnonymous?: boolean;
   likes: number;
+  isEdited?: boolean;
+  lastEditedDate?: Date;
 }
 
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved';
