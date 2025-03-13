@@ -20,7 +20,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Mock activity data for charts
+// Mock activity data for charts (would be replaced by real data in production)
 const activityData = [
   { name: 'Mon', users: 5, posts: 12, reports: 1 },
   { name: 'Tue', users: 3, posts: 18, reports: 2 },
@@ -106,14 +106,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight mb-1">Admin Dashboard</h1>
         <p className="text-muted-foreground">Overview of the SoulSync platform administration.</p>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -124,13 +124,13 @@ export default function AdminDashboard() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Professionals</CardTitle>
+            <CardTitle className="text-sm font-medium">Pros</CardTitle>
             <ShieldCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-primary font-medium">{pendingProfessionals.length}</span> pending verification
+              <span className="text-primary font-medium">{pendingProfessionals.length}</span> pending
             </p>
           </CardContent>
         </Card>
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Content</CardTitle>
+            <CardTitle className="text-sm font-medium">Content</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -160,63 +160,44 @@ export default function AdminDashboard() {
         </Card>
       </div>
       
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 mb-6">
-        <Card className="col-span-1">
+      <div className="grid gap-6 mb-6">
+        <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle>Platform Activity</CardTitle>
             <CardDescription>New users, posts, and reports over the past week</CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={activityData}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
-                <defs>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ffc658" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#ffc658" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <Tooltip />
-                <Legend />
-                <Area type="monotone" dataKey="users" stroke="#8884d8" fillOpacity={1} fill="url(#colorUsers)" />
-                <Area type="monotone" dataKey="posts" stroke="#82ca9d" fillOpacity={1} fill="url(#colorPosts)" />
-                <Area type="monotone" dataKey="reports" stroke="#ffc658" fillOpacity={1} fill="url(#colorReports)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Content Distribution</CardTitle>
-            <CardDescription>Breakdown of content across different sections</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={contentDistribution}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#8884d8" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <CardContent className="p-0">
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={activityData}
+                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ffc658" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#ffc658" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Area type="monotone" dataKey="users" stroke="#8884d8" fillOpacity={1} fill="url(#colorUsers)" />
+                  <Area type="monotone" dataKey="posts" stroke="#82ca9d" fillOpacity={1} fill="url(#colorPosts)" />
+                  <Area type="monotone" dataKey="reports" stroke="#ffc658" fillOpacity={1} fill="url(#colorReports)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -257,8 +238,8 @@ export default function AdminDashboard() {
                         {activity.type === 'user' && <Users className="h-5 w-5 text-green-500" />}
                         {activity.type === 'content' && <FileText className="h-5 w-5 text-purple-500" />}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">
                           <span className="font-medium">{activity.user}</span> {activity.description}
                         </p>
                         <p className="text-xs text-muted-foreground">{formatTime(activity.time)}</p>
@@ -282,37 +263,37 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {pendingProfessionals.length > 0 && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <div className="flex-shrink-0">
-                      <ShieldCheck className="h-5 w-5 text-amber-600" />
+                  <div className="flex flex-col gap-4 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">Professional Verification Requests</p>
+                        <p className="text-xs text-muted-foreground">
+                          {pendingProfessionals.length} professionals awaiting verification
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Professional Verification Requests</p>
-                      <p className="text-xs text-muted-foreground">
-                        {pendingProfessionals.length} professionals awaiting verification
-                      </p>
-                    </div>
-                    <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+                    <Button asChild variant="outline" size="sm" className="w-full">
                       <Link to="/admin/verifications">
-                        Review
+                        Review Verifications
                       </Link>
                     </Button>
                   </div>
                 )}
                 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                  <div className="flex-shrink-0">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                <div className="flex flex-col gap-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">Content Reports</p>
+                      <p className="text-xs text-muted-foreground">
+                        5 reported content items require review
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Content Reports</p>
-                    <p className="text-xs text-muted-foreground">
-                      5 reported content items require review
-                    </p>
-                  </div>
-                  <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+                  <Button asChild variant="outline" size="sm" className="w-full">
                     <Link to="/admin/reports">
-                      Review
+                      Review Reports
                     </Link>
                   </Button>
                 </div>

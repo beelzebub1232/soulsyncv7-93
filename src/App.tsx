@@ -32,6 +32,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ProfessionalVerifications from "@/pages/admin/ProfessionalVerifications";
 import ReportedContent from "@/pages/admin/ReportedContent";
 import AdminSettings from "@/pages/admin/AdminSettings";
+import UserManagement from "@/pages/admin/UserManagement";
 
 const queryClient = new QueryClient();
 
@@ -52,8 +53,10 @@ const App = () => (
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UserManagement />} />
               <Route path="verifications" element={<ProfessionalVerifications />} />
               <Route path="reports" element={<ReportedContent />} />
+              <Route path="content" element={<ReportedContent />} /> {/* Temporarily reusing ReportedContent */}
               <Route path="settings" element={<AdminSettings />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>

@@ -6,7 +6,6 @@ import {
   AlertTriangle, 
   Check, 
   MessageSquare, 
-  ExternalLink,
   X, 
   Flag,
   Eye
@@ -20,7 +19,8 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -145,10 +145,10 @@ export default function ReportedContent() {
           <CardTitle>Pending Reports ({pendingReports.length})</CardTitle>
         </CardHeader>
         <CardContent className="px-0 py-0">
-          <ScrollArea className="h-[calc(100vh-20rem)]">
+          <ScrollArea className="h-[calc(100vh-16rem)]">
             <div className="divide-y">
               {pendingReports.map((report) => (
-                <div key={report.id} className="p-4 md:p-5 hover:bg-muted/30">
+                <div key={report.id} className="p-4 hover:bg-muted/30">
                   <div className="flex flex-col space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 mt-1">
@@ -157,7 +157,7 @@ export default function ReportedContent() {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+                        <div className="flex items-center justify-between gap-1">
                           <div className="flex items-center gap-2">
                             <p className="font-medium">
                               Reported {report.contentType === 'post' ? 'Post' : 'Reply'}
@@ -178,11 +178,11 @@ export default function ReportedContent() {
                       </div>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between mt-2 pl-11">
+                    <div className="flex flex-col gap-2 mt-2 pl-11">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="justify-start sm:justify-center"
+                        className="justify-start"
                         onClick={() => handleViewContent(report)}
                       >
                         <Eye className="h-3.5 w-3.5 mr-1.5" />
@@ -194,7 +194,7 @@ export default function ReportedContent() {
                           variant="outline" 
                           size="sm" 
                           onClick={() => handleDismissReport(report.id)}
-                          className="flex-1 sm:flex-none"
+                          className="flex-1"
                         >
                           <X className="h-4 w-4 mr-1.5" />
                           Dismiss
@@ -202,7 +202,7 @@ export default function ReportedContent() {
                         <Button 
                           variant="default"
                           size="sm"
-                          className="bg-red-600 hover:bg-red-700 text-white flex-1 sm:flex-none"
+                          className="bg-red-600 hover:bg-red-700 text-white flex-1"
                           onClick={() => handleApproveReport(report.id)}
                         >
                           <Check className="h-4 w-4 mr-1.5" />
@@ -220,11 +220,14 @@ export default function ReportedContent() {
 
       {/* Content Preview Dialog */}
       <Dialog open={contentDialogOpen} onOpenChange={setContentDialogOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               {selectedReport?.contentType === 'post' ? 'Reported Post' : 'Reported Reply'}
             </DialogTitle>
+            <DialogDescription>
+              Reported by: {selectedReport?.reportedBy}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {selectedReport && (
@@ -243,24 +246,25 @@ export default function ReportedContent() {
                 </div>
                 
                 <div className="p-3 bg-muted rounded-md">
-                  <p className="text-sm mb-1.5"><strong>Reported by:</strong> {selectedReport.reportedBy}</p>
                   <p className="text-sm mb-1.5"><strong>Date:</strong> {selectedReport.date.toLocaleDateString()}</p>
                   <p className="text-sm"><strong>Reason:</strong> {selectedReport.reason}</p>
                 </div>
               </>
             )}
           </div>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex flex-col gap-2">
             <Button 
               variant="outline" 
               onClick={() => setContentDialogOpen(false)}
+              className="w-full"
             >
               Close
             </Button>
             {selectedReport && (
-              <>
+              <div className="flex gap-2 w-full">
                 <Button 
                   variant="outline" 
+                  className="flex-1"
                   onClick={() => {
                     handleDismissReport(selectedReport.id);
                     setContentDialogOpen(false);
@@ -271,7 +275,7 @@ export default function ReportedContent() {
                 </Button>
                 <Button 
                   variant="default"
-                  className="bg-red-600 hover:bg-red-700"
+                  className="bg-red-600 hover:bg-red-700 flex-1"
                   onClick={() => {
                     handleApproveReport(selectedReport.id);
                     setContentDialogOpen(false);
@@ -280,7 +284,7 @@ export default function ReportedContent() {
                   <Check className="h-4 w-4 mr-2" />
                   Remove Content
                 </Button>
-              </>
+              </div>
             )}
           </DialogFooter>
         </DialogContent>
