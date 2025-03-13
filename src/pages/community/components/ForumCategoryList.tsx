@@ -28,7 +28,7 @@ export function ForumCategoryList({ categories }: ForumCategoryListProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div className="grid grid-cols-1 gap-5">
       {categories.map((category) => (
         <Link 
           to={`/community/category/${category.id}`}
@@ -37,7 +37,7 @@ export function ForumCategoryList({ categories }: ForumCategoryListProps) {
         >
           <div className="flex justify-between items-center">
             <div className="flex gap-3 items-center">
-              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", category.color)}>
+              <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center", category.color)}>
                 {getCategoryIcon(category.id)}
               </div>
               <div className="flex-1 min-w-0">

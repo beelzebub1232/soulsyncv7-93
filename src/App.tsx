@@ -40,6 +40,8 @@ import UserManagement from "@/pages/admin/UserManagement";
 import ProfessionalHome from "@/pages/professional/ProfessionalHome";
 import ProfessionalCommunity from "@/pages/professional/ProfessionalCommunity";
 import ProfessionalSettings from "@/pages/professional/ProfessionalSettings";
+import ProfessionalCategoryPosts from "@/pages/professional/ProfessionalCategoryPosts";
+import ProfessionalPostDetails from "@/pages/professional/ProfessionalPostDetails";
 
 const queryClient = new QueryClient();
 
@@ -72,8 +74,8 @@ const App = () => (
             <Route path="/professional" element={<ProfessionalLayout />}>
               <Route index element={<ProfessionalHome />} />
               <Route path="community" element={<ProfessionalCommunity />} />
-              <Route path="community/category/:categoryId" element={<CategoryPosts />} />
-              <Route path="community/post/:postId" element={<PostDetails />} />
+              <Route path="community/category/:categoryId" element={<ProfessionalCategoryPosts />} />
+              <Route path="community/post/:postId" element={<ProfessionalPostDetails />} />
               <Route path="settings" element={<ProfessionalSettings />} />
               <Route path="*" element={<Navigate to="/professional" replace />} />
             </Route>

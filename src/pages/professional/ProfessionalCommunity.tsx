@@ -12,59 +12,79 @@ import { ProfessionalForumCategoryList } from "./components/ProfessionalForumCat
 import { ProfessionalReportedContent } from "./components/ProfessionalReportedContent";
 import { ProfessionalPendingQuestions } from "./components/ProfessionalPendingQuestions";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUser } from "@/contexts/UserContext";
 
 export default function ProfessionalCommunity() {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState<ForumCategory[]>([]);
+  const { user } = useUser();
+  const [categories, setCategories] = useState<ForumCategory[]>([
+    {
+      id: "anxiety",
+      name: "Anxiety Support",
+      description: "Discuss anxiety management techniques and share experiences",
+      icon: "heart",
+      posts: 0,
+      color: "bg-primary/10"
+    },
+    {
+      id: "depression",
+      name: "Depression",
+      description: "A safe space to talk about depression and coping strategies",
+      icon: "heart",
+      posts: 0,
+      color: "bg-primary/10"
+    },
+    {
+      id: "mindfulness",
+      name: "Mindfulness",
+      description: "Share mindfulness practices and meditation techniques",
+      icon: "heart",
+      posts: 0,
+      color: "bg-primary/10"
+    },
+    {
+      id: "stress",
+      name: "Stress Management",
+      description: "Tips and discussions about managing stress in daily life",
+      icon: "heart",
+      posts: 0,
+      color: "bg-primary/10"
+    },
+    {
+      id: "general",
+      name: "General Discussions",
+      description: "Open discussions about mental wellness and self-care",
+      icon: "heart",
+      posts: 0,
+      color: "bg-primary/10"
+    }
+  ]);
   const [loading, setLoading] = useState(true);
   
+  // Count posts per category from localStorage
   useEffect(() => {
-    // Simulate fetching categories
-    setTimeout(() => {
-      setCategories([
-        {
-          id: "anxiety",
-          name: "Anxiety Support",
-          description: "Discuss anxiety management techniques and share experiences",
-          icon: "heart",
-          posts: 24,
-          color: "bg-primary/10"
-        },
-        {
-          id: "depression",
-          name: "Depression",
-          description: "A safe space to talk about depression and coping strategies",
-          icon: "heart",
-          posts: 18,
-          color: "bg-primary/10"
-        },
-        {
-          id: "mindfulness",
-          name: "Mindfulness",
-          description: "Share mindfulness practices and meditation techniques",
-          icon: "heart",
-          posts: 32,
-          color: "bg-primary/10"
-        },
-        {
-          id: "stress",
-          name: "Stress Management",
-          description: "Tips and discussions about managing stress in daily life",
-          icon: "heart",
-          posts: 15,
-          color: "bg-primary/10"
-        },
-        {
-          id: "general",
-          name: "General Discussions",
-          description: "Open discussions about mental wellness and self-care",
-          icon: "heart",
-          posts: 42,
-          color: "bg-primary/10"
+    const updatedCategories = [...categories];
+    let needsUpdate = false;
+    
+    for (const category of updatedCategories) {
+      const savedPosts = localStorage.getItem(`soulsync_posts_${category.id}`);
+      if (savedPosts) {
+        const posts = JSON.parse(savedPosts);
+        if (posts.length !== category.posts) {
+          category.posts = posts.length;
+          needsUpdate = true;
         }
-      ]);
+      }
+    }
+    
+    if (needsUpdate) {
+      setCategories(updatedCategories);
+    }
+    
+    // Simulate loading completion
+    setTimeout(() => {
       setLoading(false);
-    }, 800);
+    }, 500);
   }, []);
 
   return (
