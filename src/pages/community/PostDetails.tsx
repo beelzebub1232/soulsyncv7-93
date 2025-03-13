@@ -1,12 +1,11 @@
 
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { ForumPost, ForumReply } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
-import { ChevronLeft, Heart, Flag, CheckCircle2, Calendar, Youtube, Link2, Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, Heart, Flag, CheckCircle2, Calendar, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -32,7 +31,6 @@ import {
 
 export default function PostDetails() {
   const { postId } = useParams<{ postId: string }>();
-  const navigate = useNavigate();
   const { user } = useUser();
   const { toast } = useToast();
   const [post, setPost] = useState<ForumPost | null>(null);
@@ -43,14 +41,7 @@ export default function PostDetails() {
   const [reportReason, setReportReason] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [likedReplies, setLikedReplies] = useState<string[]>([]);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
-  const [editContent, setEditContent] = useState("");
-  const [editingReply, setEditingReply] = useState<ForumReply | null>(null);
-  const [editReplyContent, setEditReplyContent] = useState("");
-  const [isEditReplyDialogOpen, setIsEditReplyDialogOpen] = useState(false);
-  const [replyToDelete, setReplyToDelete] = useState<string | null>(null);
-
+  
   // Load liked posts and replies from localStorage
   useEffect(() => {
     if (user) {
@@ -77,83 +68,67 @@ export default function PostDetails() {
   // Load post and replies from localStorage
   useEffect(() => {
     if (postId) {
-      const loadPostAndReplies = () => {
-        // Check all categories for the post
-        const categories = ["anxiety", "depression", "mindfulness", "stress", "general"];
-        let foundPost = null;
-        
-        for (const category of categories) {
-          const savedPosts = localStorage.getItem(`soulsync_posts_${category}`);
-          if (savedPosts) {
-            const posts = JSON.parse(savedPosts);
-            const match = posts.find((p: any) => p.id === postId);
-            if (match) {
-              // Convert date string back to Date object
-              foundPost = {
-                ...match,
-                date: new Date(match.date)
-              };
-              break;
-            }
+      // Check all categories for the post
+      const categories = ["anxiety", "depression", "mindfulness", "stress", "general"];
+      let foundPost = null;
+      
+      for (const category of categories) {
+        const savedPosts = localStorage.getItem(`soulsync_posts_${category}`);
+        if (savedPosts) {
+          const posts = JSON.parse(savedPosts);
+          const match = posts.find((p: ForumPost) => p.id === postId);
+          if (match) {
+            // Convert date string back to Date object
+            foundPost = {
+              ...match,
+              date: new Date(match.date)
+            };
+            break;
           }
         }
+      }
+      
+      // If found in localStorage, use it; otherwise use mock data
+      if (foundPost) {
+        setPost(foundPost);
+      } else {
+        // Mock post as fallback
+        const mockPost: ForumPost = {
+          id: postId,
+          title: "How to handle anxiety during presentations?",
+          content: "I struggle with severe anxiety when giving presentations at work. Any tips that have worked for you? I've tried deep breathing and preparation, but I still freeze up when all eyes are on me.",
+          categoryId: "anxiety",
+          categoryName: "Anxiety Support",
+          author: "Anonymous",
+          authorId: "user123",
+          authorRole: "user",
+          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+          replies: 0,
+          isAnonymous: true,
+          likes: 0
+        };
         
-        // If found in localStorage, use it; otherwise use mock data
-        if (foundPost) {
-          setPost(foundPost);
-          
-          // Now load replies
-          const savedReplies = localStorage.getItem(`soulsync_replies_${postId}`);
-          if (savedReplies) {
-            const parsedReplies = JSON.parse(savedReplies).map((reply: any) => ({
-              ...reply,
-              date: new Date(reply.date)
-            }));
-            setReplies(parsedReplies);
-          } else {
-            // Initialize empty replies if none exist
-            localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify([]));
-            setReplies([]);
-          }
-        } else {
-          // Post not found, redirect to community page
-          toast({
-            variant: "destructive",
-            title: "Post not found",
-            description: "The post you're looking for doesn't exist or has been deleted.",
-          });
-          navigate("/community");
-        }
-      };
+        setPost(mockPost);
+      }
       
-      // Load post and replies initially
-      loadPostAndReplies();
-      
-      // Set up event listener for storage changes
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === `soulsync_posts_${postId}` || e.key === `soulsync_replies_${postId}`) {
-          loadPostAndReplies();
-        }
-      };
-      
-      window.addEventListener('storage', handleStorageChange);
-      
-      // Listen for postsUpdated event
-      const handlePostsUpdated = () => loadPostAndReplies();
-      window.addEventListener('postsUpdated', handlePostsUpdated);
-      
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        window.removeEventListener('postsUpdated', handlePostsUpdated);
-      };
+      // Load replies from localStorage
+      const savedReplies = localStorage.getItem(`soulsync_replies_${postId}`);
+      if (savedReplies) {
+        const parsedReplies = JSON.parse(savedReplies).map((reply: ForumReply) => ({
+          ...reply,
+          date: new Date(reply.date)
+        }));
+        setReplies(parsedReplies);
+      } else {
+        // Mock replies as fallback
+        setReplies([]);
+      }
     }
-  }, [postId, navigate, toast]);
+  }, [postId]);
   
   // Update post in its category
   const updatePostInCategory = (updatedPost: ForumPost) => {
-    if (!post) return;
-    
-    const categoryId = post.categoryId;
+    const categoryId = updatedPost.categoryId;
     const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
     
     if (savedPosts) {
@@ -163,9 +138,6 @@ export default function PostDetails() {
       );
       
       localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
-      
-      // Dispatch event to notify other components
-      window.dispatchEvent(new CustomEvent('postsUpdated'));
     }
   };
   
@@ -269,11 +241,9 @@ export default function PostDetails() {
     
     setIsSubmitting(true);
     
-    // Create new reply with unique ID
-    const replyId = `reply_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+    // Create new reply
     const newReply: ForumReply = {
-      id: replyId,
+      id: Date.now().toString(),
       postId: post.id,
       content: replyContent,
       author: isAnonymous ? "Anonymous" : (user?.username || "Unknown"),
@@ -310,130 +280,6 @@ export default function PostDetails() {
     });
   };
   
-  const handleEditPost = () => {
-    if (!post) return;
-    setEditTitle(post.title);
-    setEditContent(post.content);
-    setIsEditDialogOpen(true);
-  };
-  
-  const handleSavePostEdit = () => {
-    if (!post) return;
-    
-    const updatedPost = {
-      ...post,
-      title: editTitle,
-      content: editContent,
-      isEdited: true
-    };
-    
-    setPost(updatedPost);
-    updatePostInCategory(updatedPost);
-    setIsEditDialogOpen(false);
-    
-    toast({
-      title: "Post updated",
-      description: "Your post has been updated successfully",
-    });
-  };
-  
-  const handleDeletePost = () => {
-    if (!post) return;
-    
-    // Remove post from localStorage
-    const categoryId = post.categoryId;
-    const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
-    
-    if (savedPosts) {
-      const allPosts = JSON.parse(savedPosts);
-      const updatedPosts = allPosts.filter((p: ForumPost) => p.id !== post.id);
-      
-      localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
-      
-      // Remove replies for this post
-      localStorage.removeItem(`soulsync_replies_${post.id}`);
-      
-      // Dispatch event to notify other components
-      window.dispatchEvent(new CustomEvent('postsUpdated'));
-      
-      toast({
-        title: "Post deleted",
-        description: "Your post has been deleted successfully",
-      });
-      
-      // Navigate back to category page
-      navigate(`/community/category/${categoryId}`);
-    }
-  };
-  
-  const handleEditReply = (reply: ForumReply) => {
-    setEditingReply(reply);
-    setEditReplyContent(reply.content);
-    setIsEditReplyDialogOpen(true);
-  };
-  
-  const handleSaveReplyEdit = () => {
-    if (!editingReply) return;
-    
-    const updatedReplies = replies.map(reply => {
-      if (reply.id === editingReply.id) {
-        return {
-          ...reply,
-          content: editReplyContent,
-          isEdited: true
-        };
-      }
-      return reply;
-    });
-    
-    setReplies(updatedReplies);
-    localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify(updatedReplies));
-    setIsEditReplyDialogOpen(false);
-    
-    toast({
-      title: "Reply updated",
-      description: "Your reply has been updated successfully",
-    });
-  };
-  
-  const handleDeleteReply = () => {
-    if (!replyToDelete || !post) return;
-    
-    // Remove reply from state
-    const updatedReplies = replies.filter(reply => reply.id !== replyToDelete);
-    setReplies(updatedReplies);
-    
-    // Save to localStorage
-    localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
-    
-    // Update post reply count in parent post
-    const updatedPost = {
-      ...post,
-      replies: post.replies - 1
-    };
-    setPost(updatedPost);
-    
-    // Update post in its category
-    updatePostInCategory(updatedPost);
-    
-    setReplyToDelete(null);
-    
-    toast({
-      title: "Reply deleted",
-      description: "Your reply has been deleted successfully",
-    });
-  };
-  
-  const canUserEditPost = () => {
-    if (!user || !post) return false;
-    return post.authorId === user.id;
-  };
-  
-  const canUserEditReply = (reply: ForumReply) => {
-    if (!user) return false;
-    return reply.authorId === user.id;
-  };
-  
   // Function to render YouTube embeds
   const renderYouTubeEmbed = (url: string) => {
     // Extract video ID from YouTube URL
@@ -460,11 +306,6 @@ export default function PostDetails() {
     return null;
   };
   
-  // Function to check if a link is from YouTube
-  const isYouTubeLink = (url: string) => {
-    return url.includes("youtube.com") || url.includes("youtu.be");
-  };
-  
   if (!post) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -474,7 +315,7 @@ export default function PostDetails() {
   }
   
   return (
-    <div className="space-y-4 pb-16">
+    <div className="space-y-4">
       <Link to={`/community/category/${post.categoryId}`} className="flex items-center text-muted-foreground hover:text-foreground">
         <ChevronLeft className="h-4 w-4 mr-1" />
         <span className="text-sm">Back to {post.categoryName}</span>
@@ -482,10 +323,7 @@ export default function PostDetails() {
       
       <div className="card-primary p-4 space-y-4">
         <div className="flex justify-between items-start">
-          <h1 className="text-lg sm:text-xl font-medium">
-            {post.title}
-            {post.isEdited && <span className="text-xs text-muted-foreground ml-1">(edited)</span>}
-          </h1>
+          <h1 className="text-lg sm:text-xl font-medium">{post.title}</h1>
           <div className="flex items-center gap-2">
             <button 
               className={`flex items-center gap-1 ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'} transition-colors`}
@@ -495,77 +333,44 @@ export default function PostDetails() {
               <span>{post.likes}</span>
             </button>
             
-            {canUserEditPost() ? (
-              <div className="flex gap-2">
-                <button 
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                  onClick={handleEditPost}
-                >
-                  <Pencil className="h-5 w-5" />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="text-muted-foreground hover:text-orange-500 transition-colors">
+                  <Flag className="h-5 w-5" />
                 </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Report this post</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please select a reason for reporting this post. A moderator will review it soon.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
                 
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button className="text-muted-foreground hover:text-destructive transition-colors">
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete post</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete this post? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeletePost} className="bg-destructive text-destructive-foreground">
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            ) : (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="text-muted-foreground hover:text-orange-500 transition-colors">
-                    <Flag className="h-5 w-5" />
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Report this post</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Please select a reason for reporting this post. A moderator will review it soon.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  
-                  <Select onValueChange={setReportReason}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select reason" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inappropriate">Inappropriate content</SelectItem>
-                      <SelectItem value="offensive">Offensive language</SelectItem>
-                      <SelectItem value="spam">Spam</SelectItem>
-                      <SelectItem value="harmful">Harmful content</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleReport}
-                      disabled={!reportReason}
-                    >
-                      Submit Report
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+                <Select onValueChange={setReportReason}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inappropriate">Inappropriate content</SelectItem>
+                    <SelectItem value="offensive">Offensive language</SelectItem>
+                    <SelectItem value="spam">Spam</SelectItem>
+                    <SelectItem value="harmful">Harmful content</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleReport}
+                    disabled={!reportReason}
+                  >
+                    Submit Report
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
         
@@ -574,7 +379,7 @@ export default function PostDetails() {
           
           {/* Images */}
           {post.images && post.images.length > 0 && (
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div className="mt-3 grid grid-cols-3 gap-2">
               {post.images.map((img, idx) => (
                 <div key={idx} className="aspect-square rounded overflow-hidden">
                   <img src={img} alt="" className="h-full w-full object-cover" />
@@ -585,21 +390,18 @@ export default function PostDetails() {
           
           {/* Video Links */}
           {post.videoLinks && post.videoLinks.map((link, idx) => (
-            <div key={idx} className="mt-2">
-              {isYouTubeLink(link) ? (
-                renderYouTubeEmbed(link)
-              ) : (
-                <a 
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 text-blue-500 text-sm flex items-center break-all"
-                >
-                  <Link2 className="h-4 w-4 mr-1 flex-shrink-0" />
-                  {link}
-                </a>
-              )}
-            </div>
+            renderYouTubeEmbed(link) || (
+              <a 
+                key={idx}
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 text-blue-500 text-sm flex items-center break-all"
+              >
+                <Youtube className="h-4 w-4 mr-1 flex-shrink-0" />
+                {link}
+              </a>
+            )
           ))}
         </div>
         
@@ -633,11 +435,8 @@ export default function PostDetails() {
         
         <div className="space-y-3">
           {replies.map((reply) => (
-            <div key={reply.id} className="card-primary p-3 sm:p-4 space-y-3 relative">
-              <p className="whitespace-pre-line text-sm">
-                {reply.content}
-                {reply.isEdited && <span className="text-xs text-muted-foreground ml-1">(edited)</span>}
-              </p>
+            <div key={reply.id} className="card-primary p-3 sm:p-4 space-y-3">
+              <p className="whitespace-pre-line text-sm">{reply.content}</p>
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1">
@@ -673,27 +472,6 @@ export default function PostDetails() {
                   </div>
                 </div>
               </div>
-              
-              {canUserEditReply(reply) && (
-                <div className="absolute top-2 right-2 flex gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6"
-                    onClick={() => handleEditReply(reply)}
-                  >
-                    <Pencil className="h-3 w-3 text-muted-foreground" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6"
-                    onClick={() => setReplyToDelete(reply.id)}
-                  >
-                    <Trash2 className="h-3 w-3 text-muted-foreground" />
-                  </Button>
-                </div>
-              )}
             </div>
           ))}
           
@@ -734,91 +512,6 @@ export default function PostDetails() {
           )}
         </div>
       </div>
-      
-      {/* Edit Post Dialog */}
-      <AlertDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Edit Post</AlertDialogTitle>
-            <AlertDialogDescription>
-              Make changes to your post.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="edit-title" className="text-sm font-medium">Title</label>
-              <Input
-                id="edit-title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="edit-content" className="text-sm font-medium">Content</label>
-              <Textarea
-                id="edit-content"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                rows={6}
-              />
-            </div>
-          </div>
-          
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSavePostEdit}>Save Changes</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
-      {/* Edit Reply Dialog */}
-      <AlertDialog open={isEditReplyDialogOpen} onOpenChange={setIsEditReplyDialogOpen}>
-        <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Edit Reply</AlertDialogTitle>
-            <AlertDialogDescription>
-              Make changes to your reply.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="edit-reply-content" className="text-sm font-medium">Content</label>
-              <Textarea
-                id="edit-reply-content"
-                value={editReplyContent}
-                onChange={(e) => setEditReplyContent(e.target.value)}
-                rows={6}
-              />
-            </div>
-          </div>
-          
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSaveReplyEdit}>Save Changes</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
-      {/* Delete Reply Confirmation Dialog */}
-      <AlertDialog open={!!replyToDelete} onOpenChange={(open) => !open && setReplyToDelete(null)}>
-        <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Reply</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this reply? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteReply} className="bg-destructive text-destructive-foreground">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

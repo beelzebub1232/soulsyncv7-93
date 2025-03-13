@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { 
   Sheet, 
   SheetContent, 
@@ -43,7 +43,6 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
   const [mediaType, setMediaType] = useState<"image" | "video" | "link">("image");
   const [mediaInput, setMediaInput] = useState("");
   const [videoLinks, setVideoLinks] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,13 +58,10 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
     
     setIsSubmitting(true);
     
-    // Generate a unique post ID
-    const postId = `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
     // In a real app, this would be an API call
     setTimeout(() => {
       const newPost: ForumPost = {
-        id: postId,
+        id: Date.now().toString(),
         title: title.trim(),
         content: content.trim(),
         categoryId,
@@ -94,40 +90,19 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
     }, 500);
   };
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        if (event.target && event.target.result) {
-          const imageUrl = event.target.result.toString();
-          setImages([...images, imageUrl]);
-          
-          toast({
-            title: "Image added",
-            description: "Your image has been added to the post",
-          });
-        }
-      };
-      
-      reader.readAsDataURL(file);
-      
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-  
   const addMedia = () => {
-    if (!mediaInput.trim() && mediaType !== "image") return;
+    if (!mediaInput.trim()) return;
     
     switch (mediaType) {
       case "image":
-        // Trigger file input click
-        if (fileInputRef.current) {
-          fileInputRef.current.click();
+        // In a real app, this would upload the image
+        const mockImageUrl = "/placeholder.svg";
+        if (!images.includes(mockImageUrl)) {
+          setImages([...images, mockImageUrl]);
+          toast({
+            title: "Image added",
+            description: "In a real app, this would upload your image",
+          });
         }
         break;
         
@@ -137,7 +112,7 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
           if (!videoLinks.includes(mediaInput.trim())) {
             setVideoLinks([...videoLinks, mediaInput.trim()]);
             toast({
-              title: "YouTube video added",
+              title: "Video link added",
               description: "YouTube video will be embedded in your post",
             });
           }
@@ -228,47 +203,33 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
               </Select>
               
               <div className="flex-1 flex gap-2">
-                {mediaType === "image" ? (
-                  <>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      className="flex-1 flex items-center justify-center gap-2"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Image className="h-4 w-4" />
-                      <span>Select Image</span>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Input
-                      placeholder={
-                        mediaType === "video"
-                          ? "Paste YouTube URL"
-                          : "Paste URL"
-                      }
-                      value={mediaInput}
-                      onChange={(e) => setMediaInput(e.target.value)}
-                      type="url"
-                    />
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={addMedia}
-                      disabled={!mediaInput.trim()}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
+                <Input
+                  placeholder={
+                    mediaType === "image" 
+                      ? "Click to select image..." 
+                      : mediaType === "video"
+                        ? "Paste YouTube URL"
+                        : "Paste URL"
+                  }
+                  value={mediaInput}
+                  onChange={(e) => setMediaInput(e.target.value)}
+                  type={mediaType === "image" ? "text" : "url"}
+                  onClick={() => {
+                    if (mediaType === "image") {
+                      // In a real app, this would open a file picker
+                      setMediaInput("/placeholder.svg");
+                    }
+                  }}
+                  readOnly={mediaType === "image"}
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={addMedia}
+                  disabled={!mediaInput.trim()}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
             </div>
             
