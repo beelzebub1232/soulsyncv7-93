@@ -1,3 +1,4 @@
+
 import { ForumPost } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Heart, Calendar, Edit, Trash2, Link2, Youtube, BadgeCheck } from "lucide-react";
@@ -200,7 +201,7 @@ export function PostItem({ post, onLike, onEdit, onDelete, isLiked = false }: Po
                 {post.author}
               </span>
               {post.authorRole === "professional" && (
-                <BadgeCheck className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                <BadgeCheck className="w-3.5 h-3.5 text-blue-600 fill-blue-600 stroke-white" />
               )}
             </div>
           )}
