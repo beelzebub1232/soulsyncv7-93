@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { FileUp, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Shield, Upload } from "lucide-react";
 
 interface ProfessionalVerificationFormProps {
   isOpen: boolean;
@@ -23,92 +23,98 @@ export function ProfessionalVerificationForm({ isOpen, onClose }: ProfessionalVe
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleSubmit = async () => {
-    if (!occupation.trim() || !documentUrl.trim()) {
+    if (!occupation.trim()) {
       toast({
         variant: "destructive",
         title: "Missing information",
-        description: "Please provide both your occupation and identification document."
+        description: "Please enter your occupation."
+      });
+      return;
+    }
+    
+    if (!documentUrl.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please provide a document URL for verification."
       });
       return;
     }
     
     setIsSubmitting(true);
+    
     try {
       await submitProfessionalVerification(occupation, documentUrl);
       onClose();
+      toast({
+        title: "Verification submitted",
+        description: "Your professional verification request has been submitted for review."
+      });
     } catch (error) {
-      console.error("Failed to submit verification:", error);
+      toast({
+        variant: "destructive",
+        title: "Submission failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <Shield className="h-5 w-5 mr-2 text-mindscape-primary" />
-            Professional Verification
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-blue-500" />
+            <span>Professional Verification</span>
           </DialogTitle>
           <DialogDescription>
-            Complete your professional verification to get a verified badge and contribute as a mental health professional.
+            Complete your professional profile to get verified. Your credentials will be reviewed by our admin team.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-md text-sm">
-            <p>
-              Professional accounts require verification by our admin team before gaining verified status. 
-              Your information will only be used for verification purposes.
+          <div className="space-y-2">
+            <Label htmlFor="occupation">Professional Occupation</Label>
+            <Input
+              id="occupation"
+              placeholder="e.g., Licensed Therapist, Psychologist"
+              value={occupation}
+              onChange={(e) => setOccupation(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Please specify your occupation and qualifications
             </p>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="occupation">Professional Occupation</Label>
-            <div className="relative">
-              <Input
-                id="occupation"
-                placeholder="e.g. Clinical Psychologist, Therapist"
-                value={occupation}
-                onChange={(e) => setOccupation(e.target.value)}
-              />
-              <Badge 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                variant="secondary"
-              >
-                Required
-              </Badge>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="document">Identification Document</Label>
-            <div className="relative">
+            <Label htmlFor="document">Verification Document</Label>
+            <div className="flex items-center space-x-2">
               <Input
                 id="document"
-                placeholder="URL to your professional license or certification"
+                placeholder="URL to your license/certificate"
                 value={documentUrl}
                 onChange={(e) => setDocumentUrl(e.target.value)}
               />
-              <Badge 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                variant="secondary"
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="icon"
+                className="shrink-0"
               >
-                Required
-              </Badge>
+                <Upload className="h-4 w-4" />
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Please provide a link to an image of your professional license, certification, or credentials.
+              Provide a link to your professional license, certification, or other relevant document
             </p>
           </div>
           
-          <div>
-            <Label className="text-xs text-muted-foreground">
-              For demo purposes, you can enter any valid URL for your document.
-            </Label>
+          <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-md">
+            <p className="text-sm">
+              After submission, your request will be reviewed by our admin team. Once approved, you'll receive a verified badge on your posts and can contribute as a professional.
+            </p>
           </div>
         </div>
         
@@ -118,8 +124,8 @@ export function ProfessionalVerificationForm({ isOpen, onClose }: ProfessionalVe
           </Button>
           <Button 
             onClick={handleSubmit} 
-            className="button-primary"
             disabled={isSubmitting}
+            className="button-primary"
           >
             {isSubmitting ? "Submitting..." : "Submit for Verification"}
           </Button>

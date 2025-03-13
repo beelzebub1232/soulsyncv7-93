@@ -1,6 +1,7 @@
 
 import { ForumCategory } from "@/types/community";
-import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { MessageSquare } from "lucide-react";
 
 interface CategoryCardProps {
   category: ForumCategory;
@@ -8,26 +9,31 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category, onClick }: CategoryCardProps) {
+  const getBorderColor = () => {
+    return category.color || "border-mindscape-primary";
+  };
+  
   return (
-    <button 
+    <Card 
+      className={`p-4 cursor-pointer hover:shadow-md transition-shadow ${getBorderColor()} border-l-4`}
       onClick={onClick}
-      className={cn(
-        "card-primary block hover:shadow-md transition-all border-l-4 text-left w-full",
-        category.color
-      )}
     >
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-mindscape-light flex items-center justify-center text-xl">
-          {category.icon}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium">{category.name}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-1">{category.description}</p>
-          <div className="mt-1 text-xs text-mindscape-primary">
-            {category.posts} {category.posts === 1 ? 'post' : 'posts'}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2">
+          <div className="text-2xl">{category.icon}</div>
+          <div>
+            <h3 className="font-medium">{category.name}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {category.description}
+            </p>
           </div>
         </div>
+        
+        <div className="flex items-center text-xs text-muted-foreground">
+          <MessageSquare className="h-3.5 w-3.5 mr-1" />
+          <span>{category.posts}</span>
+        </div>
       </div>
-    </button>
+    </Card>
   );
 }
