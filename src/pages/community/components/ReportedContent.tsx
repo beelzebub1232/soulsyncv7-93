@@ -1,11 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Report } from "@/types/community";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, AlertTriangle, Trash } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -19,34 +20,40 @@ import {
 
 export function ReportedContent() {
   const { toast } = useToast();
+  const { user } = useUser();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
-  
-  const [reports, setReports] = useState<Report[]>([
-    {
-      id: "1",
-      contentId: "post123",
-      contentType: "post",
-      reportedBy: "user456",
-      reason: "Inappropriate content",
-      date: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      status: "pending"
-    },
-    {
-      id: "2",
-      contentId: "reply789",
-      contentType: "reply",
-      reportedBy: "user123",
-      reason: "Offensive language",
-      date: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      status: "pending"
+  const [reports, setReports] = useState<Report[]>([]);
+
+  // Load reported content from localStorage
+  useEffect(() => {
+    const savedReports = localStorage.getItem('soulsync_reported_content');
+    if (savedReports) {
+      try {
+        const parsedReports = JSON.parse(savedReports);
+        // Convert date strings to Date objects
+        const processedReports = parsedReports.map((report: any) => ({
+          ...report,
+          date: new Date(report.date)
+        }));
+        setReports(processedReports);
+      } catch (error) {
+        console.error('Failed to parse reported content:', error);
+        setReports([]);
+      }
+    } else {
+      setReports([]);
+      localStorage.setItem('soulsync_reported_content', JSON.stringify([]));
     }
-  ]);
+  }, []);
 
   const handleDismiss = (id: string) => {
-    setReports(prev => 
-      prev.map(r => r.id === id ? {...r, status: 'reviewed'} : r)
+    const updatedReports = reports.map(r => 
+      r.id === id ? {...r, status: 'reviewed' as 'reviewed'} : r
     );
+    setReports(updatedReports);
+    localStorage.setItem('soulsync_reported_content', JSON.stringify(updatedReports));
+    
     toast({
       title: "Report dismissed",
       description: "The report has been marked as reviewed",
@@ -60,17 +67,71 @@ export function ReportedContent() {
 
   const handleDelete = () => {
     if (selectedReportId) {
-      setReports(prev => 
-        prev.map(r => r.id === selectedReportId ? {...r, status: 'resolved'} : r)
-      );
-      toast({
-        title: "Content removed",
-        description: "The reported content has been deleted",
-      });
+      // Find the report
+      const report = reports.find(r => r.id === selectedReportId);
+      
+      if (report) {
+        // Update report status
+        const updatedReports = reports.map(r => 
+          r.id === selectedReportId ? {...r, status: 'resolved' as 'resolved'} : r
+        );
+        setReports(updatedReports);
+        localStorage.setItem('soulsync_reported_content', JSON.stringify(updatedReports));
+        
+        // Delete the content
+        if (report.contentType === 'post') {
+          const postsStorageKey = `soulsync_posts_${report.categoryId}`;
+          const savedPosts = localStorage.getItem(postsStorageKey);
+          if (savedPosts) {
+            const posts = JSON.parse(savedPosts);
+            const updatedPosts = posts.filter((post: any) => post.id !== report.contentId);
+            localStorage.setItem(postsStorageKey, JSON.stringify(updatedPosts));
+            
+            // Update category post count
+            const savedCategories = localStorage.getItem('soulsync_forum_categories');
+            if (savedCategories) {
+              const categories = JSON.parse(savedCategories);
+              const updatedCategories = categories.map((c: any) => 
+                c.id === report.categoryId ? {...c, posts: updatedPosts.length} : c
+              );
+              localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
+            }
+          }
+        } else if (report.contentType === 'reply') {
+          const repliesStorageKey = `soulsync_replies_${report.postId}`;
+          const savedReplies = localStorage.getItem(repliesStorageKey);
+          if (savedReplies) {
+            const replies = JSON.parse(savedReplies);
+            const updatedReplies = replies.filter((reply: any) => reply.id !== report.contentId);
+            localStorage.setItem(repliesStorageKey, JSON.stringify(updatedReplies));
+            
+            // Update post reply count
+            const postCategoryId = report.categoryId;
+            if (postCategoryId) {
+              const postsStorageKey = `soulsync_posts_${postCategoryId}`;
+              const savedPosts = localStorage.getItem(postsStorageKey);
+              if (savedPosts) {
+                const posts = JSON.parse(savedPosts);
+                const updatedPosts = posts.map((post: any) => 
+                  post.id === report.postId ? {...post, replies: updatedReplies.length} : post
+                );
+                localStorage.setItem(postsStorageKey, JSON.stringify(updatedPosts));
+              }
+            }
+          }
+        }
+        
+        toast({
+          title: "Content removed",
+          description: "The reported content has been deleted",
+        });
+      }
+      
       setIsDeleteDialogOpen(false);
     }
   };
 
+  // Only show pending reports relevant to the current user
   const pendingReports = reports.filter(r => r.status === 'pending');
 
   if (pendingReports.length === 0) {

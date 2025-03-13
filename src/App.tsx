@@ -35,6 +35,9 @@ import ProfessionalVerifications from "@/pages/admin/ProfessionalVerifications";
 import ReportedContent from "@/pages/admin/ReportedContent";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import UserManagement from "@/pages/admin/UserManagement";
+import AdminCommunity from "@/pages/admin/AdminCommunity";
+import AdminCategoryPosts from "@/pages/admin/AdminCategoryPosts";
+import AdminPostDetails from "@/pages/admin/AdminPostDetails";
 
 // Professional Pages
 import ProfessionalHome from "@/pages/professional/ProfessionalHome";
@@ -67,6 +70,9 @@ const App = () => (
               <Route path="verifications" element={<ProfessionalVerifications />} />
               <Route path="reports" element={<ReportedContent />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="community" element={<AdminCommunity />} />
+              <Route path="community/category/:categoryId" element={<AdminCategoryPosts />} />
+              <Route path="community/post/:postId" element={<AdminPostDetails />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
             

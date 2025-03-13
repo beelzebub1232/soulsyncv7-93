@@ -1,32 +1,15 @@
 
-import { Heart, Brain, Flame, Globe, Book, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { ForumCategory } from "@/types/community";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { CategoryIcon } from "@/components/community/CategoryIcon";
 
 interface ForumCategoryListProps {
   categories: ForumCategory[];
 }
 
 export function ForumCategoryList({ categories }: ForumCategoryListProps) {
-  // Function to get the appropriate icon based on category id
-  const getCategoryIcon = (categoryId: string) => {
-    switch(categoryId) {
-      case 'anxiety':
-        return <Heart className="h-5 w-5 text-mindscape-primary" />;
-      case 'depression':
-        return <Brain className="h-5 w-5 text-mindscape-primary" />;
-      case 'mindfulness':
-        return <Flame className="h-5 w-5 text-mindscape-primary" />;
-      case 'stress':
-        return <Book className="h-5 w-5 text-mindscape-primary" />;
-      case 'general':
-        return <Globe className="h-5 w-5 text-mindscape-primary" />;
-      default:
-        return <Heart className="h-5 w-5 text-mindscape-primary" />;
-    }
-  };
-
   return (
     <div className="grid grid-cols-1 gap-5">
       {categories.map((category) => (
@@ -38,7 +21,7 @@ export function ForumCategoryList({ categories }: ForumCategoryListProps) {
           <div className="flex justify-between items-center">
             <div className="flex gap-3 items-center">
               <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center", category.color)}>
-                {getCategoryIcon(category.id)}
+                <CategoryIcon categoryId={category.id} className="text-mindscape-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-sm sm:text-base">{category.name}</h3>

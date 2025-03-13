@@ -66,6 +66,9 @@ export interface Report {
   reason: string;
   date: Date;
   status: ReportStatus;
+  content?: string;
+  categoryId?: string;
+  postId?: string;
 }
 
 export interface Notification {

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -23,70 +23,71 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-
-interface Report {
-  id: string;
-  contentId: string;
-  contentType: 'post' | 'reply';
-  reportedBy: string;
-  reason: string;
-  content: string;
-  date: Date;
-  status: 'pending' | 'resolved' | 'reviewed';
-}
+import { Report } from "@/types/community";
 
 export default function ReportedContent() {
   const { toast } = useToast();
-  const [reports, setReports] = useState<Report[]>([
-    {
-      id: "1",
-      contentId: "post123",
-      contentType: "post",
-      reportedBy: "user456",
-      reason: "This post contains harmful advice that could be dangerous to those with anxiety disorders.",
-      content: "I found this technique that helps with anxiety: just hold your breath for 3 minutes. Your body will naturally reset itself.",
-      date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      status: "pending"
-    },
-    {
-      id: "2",
-      contentId: "reply789",
-      contentType: "reply",
-      reportedBy: "user789",
-      reason: "This reply contains inappropriate language and is offensive.",
-      content: "That's a terrible idea! Only an idiot would think this way. You should be ashamed.",
-      date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      status: "pending"
-    },
-    {
-      id: "3",
-      contentId: "post456",
-      contentType: "post",
-      reportedBy: "user123",
-      reason: "This post contains misinformation about depression treatments.",
-      content: "I've discovered that you can cure depression by just avoiding all negative people. It's not a real illness, just a choice.",
-      date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      status: "pending"
-    },
-    {
-      id: "4",
-      contentId: "reply234",
-      contentType: "reply",
-      reportedBy: "user567",
-      reason: "This reply is promoting harmful behavior.",
-      content: "When I feel down, I just stop eating for a few days. The hunger helps me focus on something else.",
-      date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
-      status: "pending"
-    }
-  ]);
-
+  const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [contentDialogOpen, setContentDialogOpen] = useState(false);
 
+  // Load reported content from localStorage
+  useEffect(() => {
+    const savedReports = localStorage.getItem('soulsync_reported_content');
+    if (savedReports) {
+      try {
+        const parsedReports = JSON.parse(savedReports);
+        // Convert date strings to Date objects
+        const processedReports = parsedReports.map((report: any) => ({
+          ...report,
+          date: new Date(report.date)
+        }));
+        setReports(processedReports);
+      } catch (error) {
+        console.error('Failed to parse reported content:', error);
+        // Fallback to empty array
+        setReports([]);
+      }
+    } else {
+      // If no reports found, initialize with empty array
+      setReports([]);
+      localStorage.setItem('soulsync_reported_content', JSON.stringify([]));
+    }
+  }, []);
+
   const handleApproveReport = (id: string) => {
-    setReports(prev => 
-      prev.map(r => r.id === id ? {...r, status: 'resolved'} : r)
+    // Mark the report as resolved
+    const updatedReports = reports.map(r => 
+      r.id === id ? {...r, status: 'resolved' as 'resolved'} : r
     );
+    setReports(updatedReports);
+    localStorage.setItem('soulsync_reported_content', JSON.stringify(updatedReports));
+    
+    // Find the reported content and remove it
+    const report = reports.find(r => r.id === id);
+    if (report) {
+      // If it's a post
+      if (report.contentType === 'post') {
+        const postsStorageKey = `soulsync_posts_${report.categoryId}`;
+        const savedPosts = localStorage.getItem(postsStorageKey);
+        if (savedPosts) {
+          const posts = JSON.parse(savedPosts);
+          const updatedPosts = posts.filter((post: any) => post.id !== report.contentId);
+          localStorage.setItem(postsStorageKey, JSON.stringify(updatedPosts));
+        }
+      }
+      // If it's a reply
+      else if (report.contentType === 'reply') {
+        const repliesStorageKey = `soulsync_replies_${report.postId}`;
+        const savedReplies = localStorage.getItem(repliesStorageKey);
+        if (savedReplies) {
+          const replies = JSON.parse(savedReplies);
+          const updatedReplies = replies.filter((reply: any) => reply.id !== report.contentId);
+          localStorage.setItem(repliesStorageKey, JSON.stringify(updatedReplies));
+        }
+      }
+    }
+    
     toast({
       title: "Report resolved",
       description: "The reported content has been removed",
@@ -94,9 +95,12 @@ export default function ReportedContent() {
   };
 
   const handleDismissReport = (id: string) => {
-    setReports(prev => 
-      prev.map(r => r.id === id ? {...r, status: 'reviewed'} : r)
+    const updatedReports = reports.map(r => 
+      r.id === id ? {...r, status: 'reviewed' as 'reviewed'} : r
     );
+    setReports(updatedReports);
+    localStorage.setItem('soulsync_reported_content', JSON.stringify(updatedReports));
+    
     toast({
       title: "Report dismissed",
       description: "The reported content has been kept",
