@@ -58,7 +58,7 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
         content: content.trim(),
         categoryId,
         categoryName,
-        author: isAnonymous ? "Anonymous" : (user?.name || "Unknown"),
+        author: isAnonymous ? "Anonymous" : (user?.username || "Unknown"),
         authorId: user?.id || "unknown",
         authorRole: user?.role || "user",
         date: new Date(),

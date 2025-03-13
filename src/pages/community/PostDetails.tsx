@@ -148,7 +148,7 @@ export default function PostDetails() {
         id: Date.now().toString(),
         postId: post.id,
         content: replyContent,
-        author: isAnonymous ? "Anonymous" : (user?.name || "Unknown"),
+        author: isAnonymous ? "Anonymous" : (user?.username || "Unknown"),
         authorId: user?.id || "unknown",
         authorRole: user?.role || "user",
         date: new Date(),
