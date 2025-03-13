@@ -1,96 +1,135 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Users, ShieldCheck } from "lucide-react";
+import { ForumCategory } from "@/types/community";
+import { ForumCategoryList } from "./components/ForumCategoryList";
+import { EmptyState } from "./components/EmptyState";
+import { CommunityHeader } from "./components/CommunityHeader";
+import { PendingVerifications } from "./components/PendingVerifications";
+import { ReportedContent } from "./components/ReportedContent";
 
 export default function Community() {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState("posts");
-  
-  useEffect(() => {
-    // Set default tab based on user role
-    if (user?.role === "admin") {
-      setActiveTab("admin");
-    } else if (user?.role === "professional" && user?.isVerified) {
-      setActiveTab("professional");
-    } else {
-      setActiveTab("posts");
+  const [categories] = useState<ForumCategory[]>([
+    {
+      id: "anxiety",
+      name: "Anxiety Support",
+      description: "Discuss anxiety management techniques and share experiences",
+      icon: "heart",
+      posts: 24,
+      color: "bg-blue-100"
+    },
+    {
+      id: "depression",
+      name: "Depression",
+      description: "A safe space to talk about depression and coping strategies",
+      icon: "heart",
+      posts: 18,
+      color: "bg-purple-100"
+    },
+    {
+      id: "mindfulness",
+      name: "Mindfulness",
+      description: "Share mindfulness practices and meditation techniques",
+      icon: "heart",
+      posts: 32,
+      color: "bg-green-100"
+    },
+    {
+      id: "stress",
+      name: "Stress Management",
+      description: "Tips and discussions about managing stress in daily life",
+      icon: "heart",
+      posts: 15,
+      color: "bg-orange-100"
+    },
+    {
+      id: "general",
+      name: "General Discussions",
+      description: "Open discussions about mental wellness and self-care",
+      icon: "heart",
+      posts: 42,
+      color: "bg-gray-100"
     }
-  }, [user]);
-  
+  ]);
+
   return (
-    <div className="container py-6 space-y-6 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Community</h1>
-      </div>
+    <div className="space-y-6">
+      <CommunityHeader />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="posts" className="flex items-center gap-1">
-            <MessageSquare className="h-4 w-4" />
-            <span>Posts</span>
-          </TabsTrigger>
+      {user?.role === "admin" ? (
+        <Tabs defaultValue="forum" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="forum">Community Forum</TabsTrigger>
+            <TabsTrigger value="verifications">Pending Verifications</TabsTrigger>
+            <TabsTrigger value="reports">Reported Content</TabsTrigger>
+          </TabsList>
           
-          {user?.role === "professional" && user?.isVerified && (
-            <TabsTrigger value="professional" className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              <span>Professional</span>
-            </TabsTrigger>
-          )}
-          
-          {user?.role === "admin" && (
-            <TabsTrigger value="admin" className="flex items-center gap-1">
-              <ShieldCheck className="h-4 w-4" />
-              <span>Admin</span>
-            </TabsTrigger>
-          )}
-        </TabsList>
-        
-        <TabsContent value="posts" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Community Posts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                This is where community posts will appear. Implementation coming in the next step.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {user?.role === "professional" && user?.isVerified && (
-          <TabsContent value="professional" className="mt-4">
+          <TabsContent value="forum" className="mt-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Professional Dashboard</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Forum Categories</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Here you can access professional features like moderation and community management.
-                </p>
+                {categories.length > 0 ? (
+                  <ForumCategoryList categories={categories} />
+                ) : (
+                  <EmptyState />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
-        )}
-        
-        {user?.role === "admin" && (
-          <TabsContent value="admin" className="mt-4">
+          
+          <TabsContent value="verifications" className="mt-4">
+            <PendingVerifications />
+          </TabsContent>
+          
+          <TabsContent value="reports" className="mt-4">
+            <ReportedContent />
+          </TabsContent>
+        </Tabs>
+      ) : user?.role === "professional" ? (
+        <Tabs defaultValue="forum" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="forum">Community Forum</TabsTrigger>
+            <TabsTrigger value="reports">Reported Content</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="forum" className="mt-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Admin Dashboard</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Forum Categories</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Here you can manage users, verify professionals, and moderate the community.
-                </p>
+                {categories.length > 0 ? (
+                  <ForumCategoryList categories={categories} />
+                ) : (
+                  <EmptyState />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
-        )}
-      </Tabs>
+          
+          <TabsContent value="reports" className="mt-4">
+            <ReportedContent />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Forum Categories</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {categories.length > 0 ? (
+              <ForumCategoryList categories={categories} />
+            ) : (
+              <EmptyState />
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
