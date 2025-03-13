@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Send, Heart, Calendar, Flag, AlertTriangle, MessageSquare, Shield, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Send, Heart, Calendar, Flag, AlertTriangle, MessageSquare, Shield, CheckCircle2, BadgeCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ForumPost, ForumReply } from "@/types/community";
@@ -45,11 +44,9 @@ export default function ProfessionalPostDetails() {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [itemToReport, setItemToReport] = useState<{ id: string, type: 'post' | 'reply' } | null>(null);
   
-  // Load post details
   useEffect(() => {
     if (!postId) return;
     
-    // Find which category this post belongs to
     const categories = ["anxiety", "depression", "mindfulness", "stress", "general"];
     let foundPost: ForumPost | null = null;
     let categoryId = "";
@@ -69,7 +66,6 @@ export default function ProfessionalPostDetails() {
     
     if (foundPost) {
       setPost(foundPost);
-      // Load replies for this post
       const savedReplies = localStorage.getItem(`soulsync_replies_${postId}`);
       if (savedReplies) {
         const repliesData = JSON.parse(savedReplies) as ForumReply[];
@@ -87,7 +83,6 @@ export default function ProfessionalPostDetails() {
     }
   }, [postId, toast]);
   
-  // Load liked posts and replies
   useEffect(() => {
     if (user) {
       const savedLikedPosts = localStorage.getItem(`soulsync_liked_posts_${user.id}`);
@@ -103,7 +98,6 @@ export default function ProfessionalPostDetails() {
     }
   }, [user]);
   
-  // Save liked posts and replies when changed
   useEffect(() => {
     if (user) {
       if (likedPosts.length > 0) {
@@ -121,14 +115,12 @@ export default function ProfessionalPostDetails() {
     
     const isLiked = likedPosts.includes(post.id);
     
-    // Update liked posts state
     if (isLiked) {
       setLikedPosts(prev => prev.filter(id => id !== post.id));
     } else {
       setLikedPosts(prev => [...prev, post.id]);
     }
     
-    // Update post with new like count
     const updatedPost = {
       ...post,
       likes: isLiked ? Math.max(0, post.likes - 1) : post.likes + 1
@@ -136,7 +128,6 @@ export default function ProfessionalPostDetails() {
     
     setPost(updatedPost);
     
-    // Update localStorage
     const savedPosts = localStorage.getItem(`soulsync_posts_${post.categoryId}`);
     if (savedPosts) {
       const posts = JSON.parse(savedPosts);
@@ -158,14 +149,12 @@ export default function ProfessionalPostDetails() {
     
     const isLiked = likedReplies.includes(replyId);
     
-    // Update liked replies state
     if (isLiked) {
       setLikedReplies(prev => prev.filter(id => id !== replyId));
     } else {
       setLikedReplies(prev => [...prev, replyId]);
     }
     
-    // Update reply with new like count
     const updatedReplies = replies.map(reply => {
       if (reply.id === replyId) {
         return {
@@ -178,7 +167,6 @@ export default function ProfessionalPostDetails() {
     
     setReplies(updatedReplies);
     
-    // Update localStorage
     localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
     
     toast({
@@ -204,14 +192,11 @@ export default function ProfessionalPostDetails() {
       likes: 0
     };
     
-    // Add new reply
     const updatedReplies = [...replies, newReply];
     setReplies(updatedReplies);
     
-    // Save to localStorage
     localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
     
-    // Update post reply count
     const updatedPost = {
       ...post,
       replies: post.replies + 1
@@ -219,7 +204,6 @@ export default function ProfessionalPostDetails() {
     
     setPost(updatedPost);
     
-    // Update post in its category
     const savedPosts = localStorage.getItem(`soulsync_posts_${post.categoryId}`);
     if (savedPosts) {
       const posts = JSON.parse(savedPosts);
@@ -239,7 +223,6 @@ export default function ProfessionalPostDetails() {
       description: "Your reply has been posted successfully"
     });
     
-    // Scroll to the bottom to see the new reply
     setTimeout(() => {
       window.scrollTo({
         top: document.body.scrollHeight,
@@ -276,7 +259,6 @@ export default function ProfessionalPostDetails() {
     
     setReplies(updatedReplies);
     
-    // Save to localStorage
     localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
     
     setEditReplyId(null);
@@ -297,7 +279,6 @@ export default function ProfessionalPostDetails() {
     if (!itemToDelete || !post) return;
     
     if (itemToDelete.type === 'post') {
-      // Remove post from its category
       const savedPosts = localStorage.getItem(`soulsync_posts_${post.categoryId}`);
       if (savedPosts) {
         const posts = JSON.parse(savedPosts);
@@ -305,7 +286,6 @@ export default function ProfessionalPostDetails() {
         
         localStorage.setItem(`soulsync_posts_${post.categoryId}`, JSON.stringify(updatedPosts));
         
-        // Remove all replies to this post
         localStorage.removeItem(`soulsync_replies_${post.id}`);
         
         toast({
@@ -313,18 +293,14 @@ export default function ProfessionalPostDetails() {
           description: "The post has been deleted successfully"
         });
         
-        // Navigate back to category page
         navigate(`/professional/community/category/${post.categoryId}`);
       }
     } else {
-      // Remove reply
       const updatedReplies = replies.filter(reply => reply.id !== itemToDelete.id);
       setReplies(updatedReplies);
       
-      // Save to localStorage
       localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
       
-      // Update post reply count
       const updatedPost = {
         ...post,
         replies: Math.max(0, post.replies - 1)
@@ -332,7 +308,6 @@ export default function ProfessionalPostDetails() {
       
       setPost(updatedPost);
       
-      // Update post in its category
       const savedPosts = localStorage.getItem(`soulsync_posts_${post.categoryId}`);
       if (savedPosts) {
         const posts = JSON.parse(savedPosts);
@@ -370,12 +345,10 @@ export default function ProfessionalPostDetails() {
     setItemToReport(null);
   };
   
-  // Professional-specific moderation function
   const handleHideContent = (id: string, type: 'post' | 'reply') => {
     if (!post) return;
     
     if (type === 'post') {
-      // Hide post
       const updatedPost = {
         ...post,
         isHidden: true,
@@ -385,7 +358,6 @@ export default function ProfessionalPostDetails() {
       
       setPost(updatedPost);
       
-      // Update post in its category
       const savedPosts = localStorage.getItem(`soulsync_posts_${post.categoryId}`);
       if (savedPosts) {
         const posts = JSON.parse(savedPosts);
@@ -396,7 +368,6 @@ export default function ProfessionalPostDetails() {
         localStorage.setItem(`soulsync_posts_${post.categoryId}`, JSON.stringify(updatedPosts));
       }
     } else {
-      // Hide reply
       const updatedReplies = replies.map(reply => {
         if (reply.id === id) {
           return {
@@ -411,7 +382,6 @@ export default function ProfessionalPostDetails() {
       
       setReplies(updatedReplies);
       
-      // Save to localStorage
       localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
     }
     
@@ -507,7 +477,7 @@ export default function ProfessionalPostDetails() {
                     {post.author}
                   </span>
                   {post.authorRole === "professional" && (
-                    <CheckCircle2 className="h-3 w-3 text-blue-600 fill-blue-600" />
+                    <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600" />
                   )}
                 </div>
               )}
@@ -582,7 +552,7 @@ export default function ProfessionalPostDetails() {
                               {reply.author}
                             </span>
                             {reply.authorRole === "professional" && (
-                              <CheckCircle2 className="h-3 w-3 text-blue-600 fill-blue-600" />
+                              <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600" />
                             )}
                           </div>
                         )}
@@ -713,7 +683,7 @@ export default function ProfessionalPostDetails() {
                     onClick={() => setIsAnonymous(!isAnonymous)}
                   >
                     Post anonymously
-                    {isAnonymous && <CheckCircle2 className="ml-1 h-3.5 w-3.5" />}
+                    {isAnonymous && <BadgeCheck className="ml-1 h-3.5 w-3.5" />}
                   </Button>
                 </div>
                 

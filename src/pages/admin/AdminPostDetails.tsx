@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Heart, MessageSquare, MoreVertical, Trash, Flag, User, CheckCircle, Shield, EyeOff, Eye } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, MoreVertical, Trash, Flag, User, BadgeCheck, Shield, EyeOff, Eye } from "lucide-react";
 import { ForumPost, ForumReply } from "@/types/community";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
@@ -407,7 +406,7 @@ export default function AdminPostDetails() {
                     By {post.isAnonymous ? 'Anonymous' : post.author}
                     {post.authorRole === 'professional' && (
                       <span className="ml-2 inline-flex items-center">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                        <BadgeCheck className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
                       </span>
                     )}
                     {post.authorRole === 'admin' && (
@@ -470,7 +469,6 @@ export default function AdminPostDetails() {
           <div className="mt-4 text-sm">
             <p className="whitespace-pre-wrap">{post.content}</p>
             
-            {/* Display images if any */}
             {post.images && post.images.length > 0 && (
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {post.images.map((img, index) => (
@@ -484,7 +482,6 @@ export default function AdminPostDetails() {
               </div>
             )}
             
-            {/* Display video links if any */}
             {post.videoLinks && post.videoLinks.length > 0 && (
               <div className="mt-4 space-y-2">
                 {post.videoLinks.map((link, index) => (

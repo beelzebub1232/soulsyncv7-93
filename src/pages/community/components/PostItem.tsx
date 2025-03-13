@@ -1,7 +1,6 @@
-
 import { ForumPost } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Heart, Calendar, Edit, Trash2, Link2, Youtube } from "lucide-react";
+import { MessageSquare, Heart, Calendar, Edit, Trash2, Link2, Youtube, BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
@@ -201,7 +200,7 @@ export function PostItem({ post, onLike, onEdit, onDelete, isLiked = false }: Po
                 {post.author}
               </span>
               {post.authorRole === "professional" && (
-                <CategoryIcon categoryId="verified" className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                <BadgeCheck className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
               )}
             </div>
           )}

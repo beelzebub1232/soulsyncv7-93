@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ForumPost, ForumReply } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
-import { ChevronLeft, Heart, Flag, CheckCircle2, Calendar, Youtube, Link2, Edit, Trash2 } from "lucide-react";
+import { ChevronLeft, Heart, Flag, BadgeCheck, Calendar, Youtube, Link2, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/contexts/UserContext";
@@ -11,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { NewPostSheet } from "./components/NewPostSheet";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -47,7 +46,6 @@ export default function PostDetails() {
   const [editReplyContent, setEditReplyContent] = useState("");
   const [isEditPostOpen, setIsEditPostOpen] = useState(false);
   
-  // Load liked posts and replies from localStorage
   useEffect(() => {
     if (user) {
       const savedLikedPosts = localStorage.getItem(`soulsync_liked_posts_${user.id}`);
@@ -63,17 +61,14 @@ export default function PostDetails() {
     }
   }, [user, postId]);
   
-  // Save liked replies to localStorage when changed
   useEffect(() => {
     if (user && likedReplies.length > 0) {
       localStorage.setItem(`soulsync_liked_replies_${user.id}`, JSON.stringify(likedReplies));
     }
   }, [likedReplies, user]);
   
-  // Load post and replies from localStorage
   useEffect(() => {
     if (postId) {
-      // Check all categories for the post
       const categories = ["anxiety", "depression", "mindfulness", "stress", "general"];
       let foundPost = null;
       
@@ -83,7 +78,6 @@ export default function PostDetails() {
           const posts = JSON.parse(savedPosts);
           const match = posts.find((p: ForumPost) => p.id === postId);
           if (match) {
-            // Convert date string back to Date object
             foundPost = {
               ...match,
               date: new Date(match.date),
@@ -97,7 +91,6 @@ export default function PostDetails() {
       if (foundPost) {
         setPost(foundPost);
       } else {
-        // Post not found, redirect to community page
         toast({
           title: "Post not found",
           description: "The post you're looking for might have been deleted",
@@ -106,7 +99,6 @@ export default function PostDetails() {
         navigate("/community");
       }
       
-      // Load replies from localStorage
       const savedReplies = localStorage.getItem(`soulsync_replies_${postId}`);
       if (savedReplies) {
         const parsedReplies = JSON.parse(savedReplies).map((reply: ForumReply) => ({
@@ -121,7 +113,6 @@ export default function PostDetails() {
     }
   }, [postId, navigate, toast]);
   
-  // Update post in its category
   const updatePostInCategory = (updatedPost: ForumPost) => {
     if (!updatedPost) return;
     
@@ -141,18 +132,15 @@ export default function PostDetails() {
   const handleLikePost = () => {
     if (!user || !post) return;
     
-    // Toggle like state
     const newIsLiked = !isLiked;
     setIsLiked(newIsLiked);
     
-    // Update post likes count
     const updatedPost = {
       ...post,
       likes: newIsLiked ? post.likes + 1 : Math.max(0, post.likes - 1)
     };
     setPost(updatedPost);
     
-    // Update liked posts in localStorage
     const savedLikedPosts = localStorage.getItem(`soulsync_liked_posts_${user.id}`);
     let likedPostsList: string[] = savedLikedPosts ? JSON.parse(savedLikedPosts) : [];
     
@@ -164,7 +152,6 @@ export default function PostDetails() {
     
     localStorage.setItem(`soulsync_liked_posts_${user.id}`, JSON.stringify(likedPostsList));
     
-    // Update post in its category
     updatePostInCategory(updatedPost);
     
     toast({
@@ -176,10 +163,8 @@ export default function PostDetails() {
   const handleLikeReply = (replyId: string) => {
     if (!user) return;
     
-    // Check if reply is already liked
     const isReplyLiked = likedReplies.includes(replyId);
     
-    // Toggle like state
     let newLikedReplies: string[];
     if (isReplyLiked) {
       newLikedReplies = likedReplies.filter(id => id !== replyId);
@@ -188,7 +173,6 @@ export default function PostDetails() {
     }
     setLikedReplies(newLikedReplies);
     
-    // Update reply likes count
     const updatedReplies = replies.map(reply => {
       if (reply.id === replyId) {
         return {
@@ -201,10 +185,8 @@ export default function PostDetails() {
     
     setReplies(updatedReplies);
     
-    // Save updated replies to localStorage
     localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify(updatedReplies));
     
-    // Save liked replies to localStorage
     localStorage.setItem(`soulsync_liked_replies_${user.id}`, JSON.stringify(newLikedReplies));
     
     toast({
@@ -238,7 +220,6 @@ export default function PostDetails() {
     
     setIsSubmitting(true);
     
-    // Create new reply
     const newReply: ForumReply = {
       id: Date.now().toString(),
       postId: post.id,
@@ -251,21 +232,17 @@ export default function PostDetails() {
       likes: 0
     };
     
-    // Update replies
     const updatedReplies = [...replies, newReply];
     setReplies(updatedReplies);
     
-    // Save to localStorage
     localStorage.setItem(`soulsync_replies_${post.id}`, JSON.stringify(updatedReplies));
     
-    // Update post reply count in parent post
     const updatedPost = {
       ...post,
       replies: post.replies + 1
     };
     setPost(updatedPost);
     
-    // Update post in its category
     updatePostInCategory(updatedPost);
     
     setReplyContent("");
@@ -302,7 +279,6 @@ export default function PostDetails() {
     
     setReplies(updatedReplies);
     
-    // Save to localStorage
     localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify(updatedReplies));
     
     setEditingReplyId(null);
@@ -315,14 +291,11 @@ export default function PostDetails() {
   };
   
   const handleDeleteReply = (replyId: string) => {
-    // Remove reply from state
     const updatedReplies = replies.filter(reply => reply.id !== replyId);
     setReplies(updatedReplies);
     
-    // Save updated replies to localStorage
     localStorage.setItem(`soulsync_replies_${postId}`, JSON.stringify(updatedReplies));
     
-    // Update post reply count
     if (post) {
       const updatedPost = {
         ...post,
@@ -330,7 +303,6 @@ export default function PostDetails() {
       };
       setPost(updatedPost);
       
-      // Update post in its category
       updatePostInCategory(updatedPost);
     }
     
@@ -343,7 +315,6 @@ export default function PostDetails() {
   const handleDeletePost = () => {
     if (!post) return;
     
-    // Delete post from its category
     const categoryId = post.categoryId;
     const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
     
@@ -354,7 +325,6 @@ export default function PostDetails() {
       localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
     }
     
-    // Delete all replies
     localStorage.removeItem(`soulsync_replies_${post.id}`);
     
     toast({
@@ -362,7 +332,6 @@ export default function PostDetails() {
       description: "Your post has been deleted successfully",
     });
     
-    // Navigate back to category
     navigate(`/community/category/${post.categoryId}`);
   };
   
@@ -377,14 +346,11 @@ export default function PostDetails() {
     });
   };
   
-  // Function to check if a link is from YouTube
   const isYouTubeLink = (url: string) => {
     return url.includes("youtube.com") || url.includes("youtu.be");
   };
   
-  // Function to render YouTube embeds
   const renderYouTubeEmbed = (url: string) => {
-    // Extract video ID from YouTube URL
     const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regex);
     
@@ -523,7 +489,6 @@ export default function PostDetails() {
         <div className="bg-accent/50 p-3 sm:p-4 rounded-lg">
           <p className="whitespace-pre-line text-sm">{post.content}</p>
           
-          {/* Images */}
           {post.images && post.images.length > 0 && (
             <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
               {post.images.map((img, idx) => (
@@ -534,7 +499,6 @@ export default function PostDetails() {
             </div>
           )}
           
-          {/* Video Links */}
           {post.videoLinks && post.videoLinks.map((link, idx) => (
             <div key={idx}>
               {isYouTubeLink(link) ? (
@@ -566,7 +530,7 @@ export default function PostDetails() {
                   {post.author}
                 </span>
                 {post.authorRole === "professional" && (
-                  <CheckCircle2 className="h-4 w-4 text-blue-600 fill-blue-600" />
+                  <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600" />
                 )}
               </div>
             )}
@@ -627,7 +591,7 @@ export default function PostDetails() {
                             {reply.author}
                           </span>
                           {reply.authorRole === "professional" && (
-                            <CheckCircle2 className="h-3 w-3 text-blue-600 fill-blue-600" />
+                            <BadgeCheck className="h-3 w-3 text-blue-600 fill-blue-600" />
                           )}
                         </div>
                       )}
