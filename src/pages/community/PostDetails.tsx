@@ -530,7 +530,7 @@ export default function PostDetails() {
                   {post.author}
                 </span>
                 {post.authorRole === "professional" && (
-                  <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600" />
+                  <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600 stroke-white" />
                 )}
               </div>
             )}
