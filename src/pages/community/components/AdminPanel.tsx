@@ -71,9 +71,9 @@ export function AdminPanel() {
   
   const handleApproveContent = (reportId: string) => {
     // Mark the report as approved
-    const updatedReports = reportedContent.map(report => 
+    const updatedReports: ReportedContent[] = reportedContent.map(report => 
       report.id === reportId 
-        ? { ...report, status: 'approved', reviewDate: new Date(), reviewedBy: user?.id }
+        ? { ...report, status: 'approved' as 'approved', reviewDate: new Date(), reviewedBy: user?.id }
         : report
     );
     
@@ -114,9 +114,9 @@ export function AdminPanel() {
   
   const handleRemoveContent = (reportId: string) => {
     // Mark the report as rejected
-    const updatedReports = reportedContent.map(report => 
+    const updatedReports: ReportedContent[] = reportedContent.map(report => 
       report.id === reportId 
-        ? { ...report, status: 'rejected', reviewDate: new Date(), reviewedBy: user?.id }
+        ? { ...report, status: 'rejected' as 'rejected', reviewDate: new Date(), reviewedBy: user?.id }
         : report
     );
     

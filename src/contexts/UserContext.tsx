@@ -5,7 +5,7 @@ import { ProfessionalVerificationRequest } from '@/types/community';
 
 export type UserRole = 'user' | 'professional' | 'admin';
 
-interface UserData {
+export interface UserData {
   id: string;
   username: string;
   email: string;
