@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,9 +31,27 @@ interface UserContextType {
   registeredUsers: UserData[];
 }
 
+// Define the structure of the mock user entries
+interface MockUserEntry {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  avatar?: string;
+  isVerified?: boolean;
+  occupation?: string;
+  identityDocument?: string;
+}
+
+// Define the structure of the mock users object
+interface MockUsers {
+  [email: string]: MockUserEntry;
+}
+
 const MOCK_USERS_STORAGE_KEY = 'soulsync_users_mock_db';
 
-const initializeMockUsers = () => {
+const initializeMockUsers = (): MockUsers => {
   const storedUsers = localStorage.getItem(MOCK_USERS_STORAGE_KEY);
   
   if (storedUsers) {
@@ -67,18 +86,18 @@ const PENDING_PROFESSIONALS_KEY = 'pending_professionals';
 const APPROVED_NOTIFICATIONS_KEY = 'approved_professional_notifications';
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [mockUsers, setMockUsers] = useState(() => initializeMockUsers());
+  const [mockUsers, setMockUsers] = useState<MockUsers>(() => initializeMockUsers());
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [pendingProfessionals, setPendingProfessionals] = useState<UserData[]>([]);
   const { toast } = useToast();
 
   const registeredUsers = useMemo(() => {
-    return Object.values(mockUsers).map(user => ({
+    return Object.values(mockUsers).map((user: MockUserEntry) => ({
       id: user.id,
       username: user.username,
       email: user.email,
-      role: user.role as UserRole,
+      role: user.role,
       avatar: user.avatar,
       isVerified: user.isVerified,
       occupation: user.occupation,
