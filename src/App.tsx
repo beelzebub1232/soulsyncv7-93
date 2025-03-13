@@ -31,6 +31,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ProfessionalVerifications from "@/pages/admin/ProfessionalVerifications";
 import ReportedContent from "@/pages/admin/ReportedContent";
+import AdminSettings from "@/pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
               <Route index element={<AdminDashboard />} />
               <Route path="verifications" element={<ProfessionalVerifications />} />
               <Route path="reports" element={<ReportedContent />} />
+              <Route path="settings" element={<AdminSettings />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
             

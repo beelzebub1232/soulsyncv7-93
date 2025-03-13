@@ -1,56 +1,64 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Users, 
-  ShieldCheck, 
-  AlertTriangle, 
-  FileText, 
-  Settings 
-} from "lucide-react";
+import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
+import { LayoutDashboard, Users, ShieldCheck, AlertTriangle, Settings } from 'lucide-react';
 
 export function AdminBottomNav() {
   const location = useLocation();
   
-  const navigation = [
-    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { name: "Users", href: "/admin/users", icon: Users },
-    { name: "Verifications", href: "/admin/verifications", icon: ShieldCheck },
-    { name: "Reports", href: "/admin/reports", icon: AlertTriangle },
-    { name: "Content", href: "/admin/content", icon: FileText },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
+  const navItems = [
+    {
+      href: '/admin',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      exact: true
+    },
+    {
+      href: '/admin/verifications',
+      label: 'Verifications',
+      icon: ShieldCheck
+    },
+    {
+      href: '/admin/reports',
+      label: 'Reports',
+      icon: AlertTriangle
+    },
+    {
+      href: '/admin/settings',
+      label: 'Settings',
+      icon: Settings
+    }
   ];
-  
+
   return (
-    <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-gray-800 border-t border-gray-700 md:hidden">
-      <div className="grid h-full grid-cols-6">
-        {navigation.map((item) => {
-          const isActive = location.pathname === item.href || 
-            (item.href !== "/admin" && location.pathname.startsWith(item.href));
-          
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-background border-t border-border/40 shadow-md">
+      <nav className="flex items-center justify-around px-2">
+        {navItems.map((item) => {
+          const isActive = item.exact
+            ? location.pathname === item.href
+            : location.pathname.startsWith(item.href);
+
           return (
-            <Link
-              key={item.name}
+            <NavLink
+              key={item.href}
               to={item.href}
-              className={cn(
-                "inline-flex flex-col items-center justify-center px-1 text-xs",
-                isActive
-                  ? "text-primary font-medium"
-                  : "text-gray-400 hover:text-gray-200"
-              )}
+              className={({ isActive }) =>
+                cn(
+                  "flex flex-col items-center justify-center py-2 px-3 text-xs font-medium",
+                  "transition-colors duration-200",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )
+              }
             >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 mb-1",
-                  isActive ? "text-primary" : "text-gray-400"
-                )}
-              />
-              <span className="text-[10px]">{item.name}</span>
-            </Link>
+              <item.icon className="h-5 w-5 mb-1" />
+              <span>{item.label}</span>
+            </NavLink>
           );
         })}
-      </div>
+      </nav>
     </div>
   );
 }
