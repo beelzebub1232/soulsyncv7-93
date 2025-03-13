@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, Plus, Heart, MessageSquare, Calendar } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@/contexts/UserContext";
+import { useNotification } from "@/contexts/NotificationContext";
 import { NewPostSheet } from "./components/NewPostSheet";
 import { PostItem } from "./components/PostItem";
 
 export default function CategoryPosts() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { user } = useUser();
+  const { addNotification } = useNotification();
   const [isNewPostOpen, setIsNewPostOpen] = useState(false);
   const [category, setCategory] = useState<ForumCategory | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -97,6 +99,15 @@ export default function CategoryPosts() {
   const handleNewPost = (post: ForumPost) => {
     setPosts(prev => [post, ...prev]);
     setIsNewPostOpen(false);
+    
+    // Create notification for all users except the author
+    if (user && user.role === 'professional') {
+      addNotification({
+        type: 'post',
+        message: `Professional ${user.username} posted in ${category.name}`,
+        // In a real app, this would be sent to relevant users
+      });
+    }
   };
   
   return (

@@ -19,8 +19,8 @@ export interface ForumPost {
   authorRole: string;
   date: Date;
   replies: number;
-  isAnonymous: boolean;
   likes: number;
+  isAnonymous: boolean;
   images?: string[];
   videoLinks?: string[];
 }
@@ -33,38 +33,25 @@ export interface ForumReply {
   authorId: string;
   authorRole: string;
   date: Date;
-  isAnonymous: boolean;
   likes: number;
-  parentReplyId?: string;
+  isAnonymous: boolean;
 }
 
-export interface Report {
+export interface PostReport {
   id: string;
-  contentId: string;
-  contentType: 'post' | 'reply';
-  reportedBy: string;
+  postId: string;
+  reporterId: string;
   reason: string;
   date: Date;
-  status: 'pending' | 'reviewed' | 'resolved';
+  status: 'pending' | 'reviewed' | 'dismissed';
 }
 
-export interface ProfessionalVerification {
+export interface CommunityNotification {
   id: string;
   userId: string;
-  name: string;
-  occupation: string;
-  documentUrl: string;
-  status: 'pending' | 'approved' | 'rejected';
-  submittedDate: Date;
-  reviewedDate?: Date;
-}
-
-export interface Notification {
-  id: string;
-  userId: string;
-  type: 'reply' | 'like' | 'report' | 'verification';
-  content: string;
-  relatedId: string;
+  type: 'post' | 'reply' | 'like' | 'mention' | 'report';
+  message: string;
   date: Date;
   read: boolean;
+  targetId?: string; // ID of post, reply, etc.
 }
