@@ -15,7 +15,6 @@ import { useUser } from "@/contexts/UserContext";
 import { ForumPost } from "@/types/community";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { useNotification } from "@/contexts/NotificationContext"; 
 import { Image, Link2, Plus, X } from "lucide-react";
 
 interface NewPostSheetProps {
@@ -29,7 +28,6 @@ interface NewPostSheetProps {
 export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryName }: NewPostSheetProps) {
   const { user } = useUser();
   const { toast } = useToast();
-  const { addNotification } = useNotification();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(user?.role === "user");
@@ -72,14 +70,6 @@ export function NewPostSheet({ isOpen, onClose, onSubmit, categoryId, categoryNa
       };
       
       onSubmit(newPost);
-      
-      // Notify admin and professionals if it's a new post
-      if (user?.role === 'professional') {
-        addNotification({
-          type: 'post',
-          message: `Professional ${user.username} posted in ${categoryName}`,
-        });
-      }
       
       // Reset form
       setTitle("");

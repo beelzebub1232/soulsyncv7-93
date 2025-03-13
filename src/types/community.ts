@@ -19,8 +19,8 @@ export interface ForumPost {
   authorRole: string;
   date: Date;
   replies: number;
-  likes: number;
   isAnonymous: boolean;
+  likes: number;
   images?: string[];
   videoLinks?: string[];
 }
@@ -33,39 +33,19 @@ export interface ForumReply {
   authorId: string;
   authorRole: string;
   date: Date;
-  likes: number;
   isAnonymous: boolean;
+  likes: number;
+  parentReplyId?: string;
 }
 
-export interface PostReport {
+export interface Report {
   id: string;
-  postId: string;
-  reporterId: string;
+  contentId: string;
+  contentType: 'post' | 'reply';
+  reportedBy: string;
   reason: string;
   date: Date;
-  status: 'pending' | 'reviewed' | 'dismissed';
-}
-
-export interface CommunityNotification {
-  id: string;
-  userId: string;
-  type: 'post' | 'reply' | 'like' | 'mention' | 'report';
-  message: string;
-  date: Date;
-  read: boolean;
-  targetId?: string; // ID of post, reply, etc.
-}
-
-// Add missing types below
-
-export interface Notification {
-  id: string;
-  userId: string;
-  type: 'reply' | 'like' | 'report' | 'verification';
-  content: string;
-  relatedId: string;
-  date: Date;
-  read: boolean;
+  status: 'pending' | 'reviewed' | 'resolved';
 }
 
 export interface ProfessionalVerification {
@@ -79,12 +59,12 @@ export interface ProfessionalVerification {
   reviewedDate?: Date;
 }
 
-export interface Report {
+export interface Notification {
   id: string;
-  contentId: string;
-  contentType: 'post' | 'reply';
-  reportedBy: string;
-  reason: string;
+  userId: string;
+  type: 'reply' | 'like' | 'report' | 'verification';
+  content: string;
+  relatedId: string;
   date: Date;
-  status: 'pending' | 'reviewed' | 'resolved';
+  read: boolean;
 }

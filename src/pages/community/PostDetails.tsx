@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ForumPost, ForumReply } from "@/types/community";
@@ -6,7 +7,6 @@ import { ChevronLeft, Heart, Flag, CheckCircle2, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/contexts/UserContext";
-import { useNotification } from "@/contexts/NotificationContext";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { 
@@ -32,7 +32,6 @@ export default function PostDetails() {
   const { postId } = useParams<{ postId: string }>();
   const { user } = useUser();
   const { toast } = useToast();
-  const { addNotification } = useNotification();
   const [post, setPost] = useState<ForumPost | null>(null);
   const [replies, setReplies] = useState<ForumReply[]>([]);
   const [replyContent, setReplyContent] = useState("");
@@ -40,8 +39,10 @@ export default function PostDetails() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportReason, setReportReason] = useState("");
   
+  // Simulate loading post data
   useEffect(() => {
     if (postId) {
+      // This would be a real API call in a production app
       const mockPost: ForumPost = {
         id: postId,
         title: "How to handle anxiety during presentations?",
@@ -59,6 +60,7 @@ export default function PostDetails() {
       
       setPost(mockPost);
       
+      // Mock replies
       const mockReplies: ForumReply[] = [
         {
           id: "reply1",
@@ -102,53 +104,25 @@ export default function PostDetails() {
       title: "Post liked",
       description: "You liked this post",
     });
-    
-    if (!post.isAnonymous && post.authorId !== user?.id) {
-      addNotification({
-        type: 'like',
-        message: `Someone liked your post "${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}"`,
-        userId: post.authorId,
-        targetId: post.id
-      });
-    }
   };
   
   const handleLikeReply = (replyId: string) => {
-    const updatedReplies = replies.map(reply => 
+    setReplies(replies.map(reply => 
       reply.id === replyId 
         ? { ...reply, likes: reply.likes + 1 }
         : reply
-    );
-    
-    setReplies(updatedReplies);
-    
-    const likedReply = updatedReplies.find(r => r.id === replyId);
+    ));
     
     toast({
       title: "Reply liked",
       description: "You liked this reply",
     });
-    
-    if (likedReply && !likedReply.isAnonymous && likedReply.authorId !== user?.id) {
-      addNotification({
-        type: 'like',
-        message: 'Someone liked your reply',
-        userId: likedReply.authorId,
-        targetId: likedReply.id
-      });
-    }
   };
   
   const handleReport = () => {
     toast({
       title: "Report submitted",
       description: "A moderator will review this content soon",
-    });
-    
-    addNotification({
-      type: 'report',
-      message: `Post "${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}" has been reported: ${reportReason}`,
-      targetId: post.id
     });
     
     setReportReason("");
@@ -168,6 +142,7 @@ export default function PostDetails() {
     
     setIsSubmitting(true);
     
+    // In a real app, this would be an API call
     setTimeout(() => {
       const newReply: ForumReply = {
         id: Date.now().toString(),
@@ -185,6 +160,7 @@ export default function PostDetails() {
       setReplyContent("");
       setIsSubmitting(false);
       
+      // Update post reply count
       setPost({
         ...post,
         replies: post.replies + 1
@@ -194,15 +170,6 @@ export default function PostDetails() {
         title: "Reply posted",
         description: "Your reply has been added to the discussion",
       });
-      
-      if (!post.isAnonymous && post.authorId !== user?.id) {
-        addNotification({
-          type: 'reply',
-          message: `Someone replied to your post "${post.title.substring(0, 30)}${post.title.length > 30 ? '...' : ''}"`,
-          userId: post.authorId,
-          targetId: post.id
-        });
-      }
     }, 1000);
   };
   
