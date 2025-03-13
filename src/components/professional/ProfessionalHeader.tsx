@@ -10,8 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, UserCircle, Menu } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { LogOut, Settings, UserCircle } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export function ProfessionalHeader() {
@@ -27,11 +27,11 @@ export function ProfessionalHeader() {
     <header className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-border/40">
       <div className="px-4 h-16 flex items-center justify-between">
         <div className="flex items-center">
-          <div className="flex items-center gap-2">
-            <span className={cn("text-lg font-semibold text-blue-600")}>
+          <Link to="/professional" className="flex items-center gap-2">
+            <span className={cn("text-lg font-semibold text-primary")}>
               SoulSync Pro
             </span>
-          </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -43,9 +43,9 @@ export function ProfessionalHeader() {
               >
                 <Avatar className="h-8 w-8">
                   {user?.avatar ? (
-                    <AvatarImage src={user.avatar} alt={user.username} />
+                    <AvatarImage src="/assets/professional-avatar.png" alt={user.username} />
                   ) : (
-                    <AvatarFallback className="bg-blue-600 text-white">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
                       {user?.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   )}
@@ -59,13 +59,12 @@ export function ProfessionalHeader() {
                   <p className="text-xs text-muted-foreground truncate">
                     {user?.email}
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    {user?.occupation || "Mental Health Professional"}
+                  </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/professional/profile")}>
-                <UserCircle className="w-4 h-4 mr-2" />
-                <span>My Profile</span>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/professional/settings")}>
                 <Settings className="w-4 h-4 mr-2" />
                 <span>Settings</span>

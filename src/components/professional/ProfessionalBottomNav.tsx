@@ -5,8 +5,6 @@ import { cn } from '@/lib/utils';
 import { 
   Home, 
   Users, 
-  BarChart, 
-  Calendar, 
   Settings
 } from 'lucide-react';
 
@@ -24,16 +22,6 @@ export function ProfessionalBottomNav() {
       href: '/professional/community',
       label: 'Community',
       icon: Users
-    },
-    {
-      href: '/professional/insights',
-      label: 'Insights',
-      icon: BarChart
-    },
-    {
-      href: '/professional/schedule',
-      label: 'Schedule',
-      icon: Calendar
     },
     {
       href: '/professional/settings',
@@ -59,7 +47,7 @@ export function ProfessionalBottomNav() {
                   "flex flex-col items-center justify-center py-2 px-2 text-[10px] font-medium",
                   "transition-colors duration-200",
                   isActive
-                    ? "text-blue-600"
+                    ? "text-primary"
                     : "text-muted-foreground hover:text-foreground"
                 )
               }

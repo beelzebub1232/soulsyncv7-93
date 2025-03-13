@@ -1,9 +1,9 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Report } from "@/types/community";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, AlertTriangle, Trash, MessageSquare, EyeOff } from "lucide-react";
+import { Check, AlertTriangle, EyeOff, MessageSquare, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -17,33 +17,44 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ProfessionalReportedContent() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
-  
-  const [reports, setReports] = useState<Report[]>([
-    {
-      id: "1",
-      contentId: "post123",
-      contentType: "post",
-      reportedBy: "user456",
-      reason: "Inappropriate content",
-      date: new Date(Date.now() - 4 * 60 * 60 * 1000),
-      status: "pending"
-    },
-    {
-      id: "2",
-      contentId: "reply789",
-      contentType: "reply",
-      reportedBy: "user123",
-      reason: "Offensive language",
-      date: new Date(Date.now() - 12 * 60 * 60 * 1000),
-      status: "pending"
-    }
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [reports, setReports] = useState<Report[]>([]);
+
+  useEffect(() => {
+    // Simulate fetching reports
+    const timer = setTimeout(() => {
+      setReports([
+        {
+          id: "1",
+          contentId: "post123",
+          contentType: "post",
+          reportedBy: "user456",
+          reason: "Inappropriate content that may trigger anxiety",
+          date: new Date(Date.now() - 4 * 60 * 60 * 1000),
+          status: "pending"
+        },
+        {
+          id: "2",
+          contentId: "reply789",
+          contentType: "reply",
+          reportedBy: "user123",
+          reason: "Potentially harmful advice regarding medication",
+          date: new Date(Date.now() - 12 * 60 * 60 * 1000),
+          status: "pending"
+        }
+      ]);
+      setLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleDismiss = (id: string) => {
     setReports(prev => 
@@ -66,8 +77,8 @@ export function ProfessionalReportedContent() {
         prev.map(r => r.id === selectedReportId ? {...r, status: 'resolved'} : r)
       );
       toast({
-        title: "Content removed",
-        description: "The reported content has been hidden",
+        title: "Content hidden",
+        description: "The reported content has been hidden from users",
       });
       setIsDeleteDialogOpen(false);
     }
@@ -75,21 +86,43 @@ export function ProfessionalReportedContent() {
 
   const pendingReports = reports.filter(r => r.status === 'pending');
 
-  if (pendingReports.length === 0) {
+  if (loading) {
     return (
-      <Card>
+      <Card className="bg-card border border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
+            <AlertTriangle className="h-5 w-5 text-destructive" />
             Reported Content
           </CardTitle>
+          <CardDescription>Review and moderate reported content</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="py-6 text-center">
-            <div className="mx-auto w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4">
-              <AlertTriangle className="h-6 w-6 text-muted-foreground" />
+          <div className="space-y-4">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="h-32 bg-muted animate-pulse rounded-md"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (pendingReports.length === 0) {
+    return (
+      <Card className="bg-card border border-border/50">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            Reported Content
+          </CardTitle>
+          <CardDescription>Review and moderate reported content</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="py-12 text-center">
+            <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Check className="h-6 w-6 text-primary" />
             </div>
-            <p className="text-muted-foreground">No reported content</p>
+            <p className="text-muted-foreground">No reported content to review</p>
           </div>
         </CardContent>
       </Card>
@@ -98,66 +131,73 @@ export function ProfessionalReportedContent() {
 
   return (
     <>
-      <Card>
+      <Card className="bg-card border border-border/50">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600" />
+            <AlertTriangle className="h-5 w-5 text-destructive" />
             Reported Content ({pendingReports.length})
           </CardTitle>
+          <CardDescription>Review and moderate reported content</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {pendingReports.map((report) => (
-            <div key={report.id} className="card-primary p-4 space-y-3 border rounded-lg">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-medium">
-                    {report.contentType === 'post' ? 'Post Reported' : 'Reply Reported'}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Reported {formatDistanceToNow(report.date, { addSuffix: true })}
-                  </p>
-                </div>
-                <div className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
-                  {report.status}
-                </div>
-              </div>
+        <CardContent>
+          <ScrollArea className="max-h-[450px]">
+            <div className="space-y-4 pr-4">
+              {pendingReports.map((report) => (
+                <div key={report.id} className="border rounded-lg overflow-hidden">
+                  <div className="p-3 bg-background/50 border-b">
+                    <div className="flex flex-wrap justify-between items-center gap-2">
+                      <h3 className="font-medium text-sm">
+                        {report.contentType === 'post' ? 'Post Reported' : 'Reply Reported'}
+                      </h3>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          {formatDistanceToNow(report.date, { addSuffix: true })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="bg-accent/50 p-3 rounded-md text-sm">
-                <p className="font-medium mb-1">Reason for reporting</p>
-                <p>{report.reason}</p>
-              </div>
+                  <div className="p-3">
+                    <div className="bg-muted/50 p-3 rounded-md text-sm mb-3">
+                      <p className="font-medium mb-1 text-xs">Reason for reporting</p>
+                      <p>{report.reason}</p>
+                    </div>
 
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => navigate(`/professional/community/post/${report.contentId}`)}
-                >
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  View Content
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => handleDismiss(report.id)}
-                >
-                  <Check className="h-4 w-4 mr-1" />
-                  Dismiss
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={() => openDeleteDialog(report.id)}
-                >
-                  <EyeOff className="h-4 w-4 mr-1" />
-                  Hide Content
-                </Button>
-              </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => navigate(`/professional/community/post/${report.contentId}`)}
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1 md:mr-2" />
+                        <span>View</span>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleDismiss(report.id)}
+                      >
+                        <Check className="h-4 w-4 mr-1 md:mr-2" />
+                        <span>Dismiss</span>
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => openDeleteDialog(report.id)}
+                      >
+                        <EyeOff className="h-4 w-4 mr-1 md:mr-2" />
+                        <span>Hide</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </ScrollArea>
         </CardContent>
       </Card>
 

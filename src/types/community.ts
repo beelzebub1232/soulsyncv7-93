@@ -8,35 +8,22 @@ export interface ForumCategory {
   color: string;
 }
 
-export interface ForumPost {
+export interface PostData {
   id: string;
   title: string;
   content: string;
+  authorId: string;
+  authorName: string;
+  authorRole?: string;
   categoryId: string;
   categoryName: string;
-  author: string;
-  authorId: string;
-  authorRole: string;
-  date: Date;
-  replies: number;
-  isAnonymous: boolean;
+  createdAt: Date;
   likes: number;
-  images?: string[];
-  videoLinks?: string[];
+  replies: number;
+  isLiked?: boolean;
 }
 
-export interface ForumReply {
-  id: string;
-  postId: string;
-  content: string;
-  author: string;
-  authorId: string;
-  authorRole: string;
-  date: Date;
-  isAnonymous: boolean;
-  likes: number;
-  parentReplyId?: string;
-}
+export type ReportStatus = 'pending' | 'reviewed' | 'resolved';
 
 export interface Report {
   id: string;
@@ -45,26 +32,5 @@ export interface Report {
   reportedBy: string;
   reason: string;
   date: Date;
-  status: 'pending' | 'reviewed' | 'resolved';
-}
-
-export interface ProfessionalVerification {
-  id: string;
-  userId: string;
-  name: string;
-  occupation: string;
-  documentUrl: string;
-  status: 'pending' | 'approved' | 'rejected';
-  submittedDate: Date;
-  reviewedDate?: Date;
-}
-
-export interface Notification {
-  id: string;
-  userId: string;
-  type: 'reply' | 'like' | 'report' | 'verification';
-  content: string;
-  relatedId: string;
-  date: Date;
-  read: boolean;
+  status: ReportStatus;
 }

@@ -1,49 +1,40 @@
 
-import { Card } from "@/components/ui/card";
 import { ForumCategory } from "@/types/community";
-import { Heart, MessageCircle, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-interface ForumCategoryListProps {
+interface ProfessionalForumCategoryListProps {
   categories: ForumCategory[];
 }
 
-export function ProfessionalForumCategoryList({ categories }: ForumCategoryListProps) {
+export function ProfessionalForumCategoryList({ categories }: ProfessionalForumCategoryListProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="grid gap-4">
+    <div className="space-y-3">
       {categories.map((category) => (
-        <Card
+        <div
           key={category.id}
-          className="overflow-hidden border-border/60 hover:shadow-md transition-shadow cursor-pointer"
+          className="flex items-start gap-3 p-3 rounded-lg border border-border/50 hover:bg-accent/10 cursor-pointer transition-colors"
           onClick={() => navigate(`/professional/community/category/${category.id}`)}
         >
-          <div className="flex items-center p-4">
-            <div className={cn("p-2 rounded-md mr-4", category.color)}>
-              <Heart className="h-5 w-5 text-foreground/80" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm">{category.name}</h3>
-              <p className="text-xs text-muted-foreground truncate">
-                {category.description}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center text-muted-foreground">
-                <MessageCircle className="h-4 w-4 mr-1" />
-                <span className="text-xs">{category.posts}</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </div>
+          <div className={cn("p-2 rounded-md flex-shrink-0", "bg-primary/10")}>
+            <Heart className="h-5 w-5 text-primary" />
           </div>
-          <div className="bg-blue-50 dark:bg-blue-950/20 px-4 py-2">
-            <p className="text-xs text-blue-700 dark:text-blue-400">
-              <span className="font-medium">Professional:</span> You can provide expert guidance in this category
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex justify-between items-start">
+              <h3 className="font-medium truncate">{category.name}</h3>
+              <span className="ml-2 text-xs text-muted-foreground whitespace-nowrap">
+                {category.posts} posts
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {category.description}
             </p>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Upload, User, Bell, Shield, Moon, Sun } from "lucide-react";
+import { Upload, User, Bell, Moon, Sun } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -60,9 +60,9 @@ export default function ProfessionalSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Professional Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
           Manage your professional account and preferences
         </p>
@@ -76,7 +76,7 @@ export default function ProfessionalSettings() {
         </TabsList>
         
         <TabsContent value="profile" className="space-y-4 mt-4">
-          <Card>
+          <Card className="bg-card border border-border/50">
             <CardHeader>
               <CardTitle className="text-lg">Avatar</CardTitle>
               <CardDescription>
@@ -86,13 +86,10 @@ export default function ProfessionalSettings() {
             <CardContent>
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
-                  {user?.avatar ? (
-                    <AvatarImage src={user.avatar} alt={user.username} />
-                  ) : (
-                    <AvatarFallback className="bg-blue-600 text-white text-lg">
-                      {user?.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  )}
+                  <AvatarImage src="/assets/professional-avatar.png" alt={user?.username} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                    {user?.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 
                 <div>
@@ -114,7 +111,7 @@ export default function ProfessionalSettings() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="bg-card border border-border/50">
             <CardHeader>
               <CardTitle className="text-lg">Profile Information</CardTitle>
               <CardDescription>
@@ -177,7 +174,7 @@ export default function ProfessionalSettings() {
         </TabsContent>
         
         <TabsContent value="notifications" className="space-y-4 mt-4">
-          <Card>
+          <Card className="bg-card border border-border/50">
             <CardHeader>
               <CardTitle className="text-lg">Notification Preferences</CardTitle>
               <CardDescription>
@@ -240,7 +237,7 @@ export default function ProfessionalSettings() {
         </TabsContent>
         
         <TabsContent value="appearance" className="space-y-4 mt-4">
-          <Card>
+          <Card className="bg-card border border-border/50">
             <CardHeader>
               <CardTitle className="text-lg">Appearance</CardTitle>
               <CardDescription>
