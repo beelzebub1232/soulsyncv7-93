@@ -42,13 +42,9 @@ export function ProfessionalHeader() {
                 className="p-1 rounded-full h-9 w-9 flex items-center justify-center"
               >
                 <Avatar className="h-8 w-8">
-                  {user?.avatar ? (
-                    <AvatarImage src="/assets/professional-avatar.png" alt={user.username} />
-                  ) : (
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {user?.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  )}
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    <UserCircle className="h-4 w-4" />
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

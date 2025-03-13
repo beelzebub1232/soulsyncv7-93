@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, UserCog, ShieldCheck, AlertTriangle, Settings, User } from "lucide-react";
+import { Bell, LogOut, UserCog, ShieldCheck, AlertTriangle, Settings, User, UserCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +18,6 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-// Notification type
 type AdminNotification = {
   id: string;
   title: string;
@@ -38,7 +36,6 @@ export function AdminHeader() {
   useEffect(() => {
     const generatedNotifications: AdminNotification[] = [];
     
-    // Add notifications for pending professionals
     pendingProfessionals.forEach(professional => {
       generatedNotifications.push({
         id: `prof_${professional.id}`,
@@ -51,12 +48,11 @@ export function AdminHeader() {
       });
     });
     
-    // Add actual reports
     const storedReports = localStorage.getItem('soulsync_reported_content') ? 
       JSON.parse(localStorage.getItem('soulsync_reported_content') || '[]') : [];
     
     storedReports.forEach((report: any, index: number) => {
-      if (report.status === 'pending') { // Only show pending reports
+      if (report.status === 'pending') {
         generatedNotifications.push({
           id: `report_${report.id || index}`,
           title: 'Content Report',
@@ -69,7 +65,6 @@ export function AdminHeader() {
       }
     });
     
-    // Get notifications from storage
     const storedNotifications = localStorage.getItem('soulsync_admin_notifications');
     if (storedNotifications) {
       try {
@@ -99,7 +94,6 @@ export function AdminHeader() {
       )
     );
     
-    // Update stored notifications
     const updatedNotifications = notifications.map(notification => 
       notification.id === id ? {...notification, read: true} : notification
     );
@@ -114,7 +108,6 @@ export function AdminHeader() {
       prev.map(notification => ({...notification, read: true}))
     );
     
-    // Update stored notifications
     const filteredNotifications = notifications.filter(n => !n.id.startsWith('prof_') && !n.id.startsWith('report_'));
     const updatedNotifications = filteredNotifications.map(notification => ({...notification, read: true}));
     
@@ -155,9 +148,8 @@ export function AdminHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.avatar} alt={user?.username} />
                   <AvatarFallback className="bg-black text-white dark:bg-white dark:text-black">
-                    <UserCog className="h-4 w-4" />
+                    <ShieldCheck className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
               </Button>

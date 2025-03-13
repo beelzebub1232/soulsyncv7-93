@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
-import { Bell, AlertCircle, User, Settings, Heart, Plus, X } from "lucide-react";
+import { Bell, AlertCircle, User, Settings, Heart, Plus, X, UserCircle, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -138,6 +138,19 @@ export function TopNavbar({ className }: TopNavbarProps) {
     });
   };
   
+  const getUserIcon = () => {
+    if (!user) return <User className="h-4 w-4" />;
+    
+    switch (user.role) {
+      case 'admin':
+        return <ShieldCheck className="h-4 w-4" />;
+      case 'professional':
+        return <UserCircle className="h-4 w-4" />;
+      default:
+        return <User className="h-4 w-4" />;
+    }
+  };
+  
   return (
     <>
       <nav className={cn(
@@ -177,7 +190,7 @@ export function TopNavbar({ className }: TopNavbarProps) {
             className="w-8 h-8 rounded-full border-2 border-mindscape-primary hover:bg-mindscape-light transition-colors overflow-hidden flex items-center justify-center"
             aria-label="Profile"
           >
-            <User className="h-4 w-4" />
+            {getUserIcon()}
           </button>
         </div>
       </nav>
@@ -189,7 +202,7 @@ export function TopNavbar({ className }: TopNavbarProps) {
           </SheetHeader>
           <div className="py-6 flex flex-col items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-mindscape-light flex items-center justify-center overflow-hidden border-2 border-mindscape-primary">
-              <User className="h-10 w-10 text-mindscape-primary" />
+              {getUserIcon()}
             </div>
             
             <div className="text-center">

@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Users, Search, MoreVertical, UserX, UserCog, Mail, AlertTriangle, User, UserCheck } from "lucide-react";
+import { Users, Search, MoreVertical, UserX, UserCog, Mail, AlertTriangle, User, UserCheck, ShieldCheck, UserCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,17 +16,14 @@ export default function UserManagement() {
   const [users, setUsers] = useState<any[]>([]);
   const { verifyProfessional, rejectProfessional, registeredUsers } = useUser();
 
-  // Load user data
   useEffect(() => {
     if (registeredUsers && registeredUsers.length > 0) {
-      // Convert date strings to Date objects
       const processedUsers = registeredUsers.map((user: any) => ({
         ...user,
         lastActive: user.lastActive instanceof Date ? user.lastActive : new Date(user.lastActive || Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7),
         joinDate: user.joinDate instanceof Date ? user.joinDate : new Date(user.joinDate || Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30)
       }));
       
-      // Sort alphabetically by username
       processedUsers.sort((a: any, b: any) => a.username.localeCompare(b.username));
       
       setUsers(processedUsers);
@@ -52,14 +48,11 @@ export default function UserManagement() {
   );
 
   const handleSuspendUser = (userId: string) => {
-    // Find the user
     const user = users.find(u => u.id === userId);
     if (!user) return;
     
-    // Toggle suspension status
     const newStatus = !user.isSuspended;
     
-    // In a real app, this would call an API to suspend the user
     const updatedUsers = users.map(user => {
       if (user.id === userId) {
         return { ...user, isSuspended: newStatus };
@@ -69,7 +62,6 @@ export default function UserManagement() {
     
     setUsers(updatedUsers);
     
-    // Update localStorage to persist changes
     const usersObj = updatedUsers.reduce((acc: any, user: any) => {
       acc[user.email] = user;
       return acc;
@@ -84,7 +76,6 @@ export default function UserManagement() {
   };
 
   const handleManageRoles = (userId: string) => {
-    // For professionals waiting for verification, offer to verify them
     const user = users.find(u => u.id === userId);
     
     if (user?.role === 'professional' && !user?.isVerified) {
@@ -94,7 +85,6 @@ export default function UserManagement() {
         description: `${user?.username} has been verified as a professional.`
       });
       
-      // Update local state
       const updatedUsers = users.map(u => {
         if (u.id === userId) {
           return { ...u, isVerified: true };
@@ -103,7 +93,6 @@ export default function UserManagement() {
       });
       setUsers(updatedUsers);
       
-      // Add notification for the professional
       const notification = {
         id: crypto.randomUUID(),
         title: 'Professional Verification',
@@ -114,7 +103,6 @@ export default function UserManagement() {
         userId: userId
       };
       
-      // Get existing notifications
       const savedNotifications = localStorage.getItem(`soulsync_notifications_${userId}`);
       let notifications = [];
       
@@ -140,7 +128,6 @@ export default function UserManagement() {
       description: `Mail composition for ${user?.username || 'User'} would open here.`
     });
     
-    // Add notification for the user
     const notification = {
       id: crypto.randomUUID(),
       title: 'New Admin Message',
@@ -151,7 +138,6 @@ export default function UserManagement() {
       userId: userId
     };
     
-    // Get existing notifications
     const savedNotifications = localStorage.getItem(`soulsync_notifications_${userId}`);
     let notifications = [];
     
@@ -171,7 +157,6 @@ export default function UserManagement() {
       description: `A warning has been sent to ${user?.username || 'User'}.`
     });
     
-    // Add notification for the user
     const notification = {
       id: crypto.randomUUID(),
       title: 'Warning',
@@ -182,7 +167,6 @@ export default function UserManagement() {
       userId: userId
     };
     
-    // Get existing notifications
     const savedNotifications = localStorage.getItem(`soulsync_notifications_${userId}`);
     let notifications = [];
     
@@ -192,6 +176,16 @@ export default function UserManagement() {
     
     notifications.push(notification);
     localStorage.setItem(`soulsync_notifications_${userId}`, JSON.stringify(notifications));
+  };
+
+  const getUserRoleIcon = (role: string, isVerified: boolean) => {
+    if (role === 'admin') {
+      return <ShieldCheck className="h-4 w-4" />;
+    } else if (role === 'professional') {
+      return <UserCircle className="h-4 w-4" />;
+    } else {
+      return <User className="h-4 w-4" />;
+    }
   };
 
   return (
@@ -223,11 +217,8 @@ export default function UserManagement() {
               ) : filteredUsers.map(user => (
                 <div key={user.id} className="p-4 hover:bg-muted/50 flex flex-col sm:flex-row gap-4 items-start sm:items-center max-w-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={user.avatar} alt={user.username} />
                     <AvatarFallback className="bg-muted">
-                      {user.role === 'admin' && <UserCog className="h-4 w-4" />}
-                      {user.role === 'professional' && <UserCheck className="h-4 w-4" />}
-                      {(user.role === 'user' || !user.role) && <User className="h-4 w-4" />}
+                      {getUserRoleIcon(user.role, user.isVerified)}
                     </AvatarFallback>
                   </Avatar>
                   
