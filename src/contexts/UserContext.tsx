@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,6 +20,7 @@ interface UserContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  professionalLogin: (email: string, password: string) => Promise<void>;
   adminLogin: (email: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string, role: UserRole, occupation?: string, identityDocument?: string) => Promise<void>;
   logout: () => void;
@@ -48,6 +50,7 @@ interface UserProviderProps {
 }
 
 const STORAGE_KEY = 'soulsync_user_v2';
+const PENDING_PROFESSIONALS_KEY = 'pending_professionals';
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
@@ -71,7 +74,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         }
         
         // Load pending professionals from localStorage
-        const savedPendingProfessionals = localStorage.getItem('pending_professionals');
+        const savedPendingProfessionals = localStorage.getItem(PENDING_PROFESSIONALS_KEY);
         if (savedPendingProfessionals) {
           setPendingProfessionals(JSON.parse(savedPendingProfessionals));
         }
@@ -112,9 +115,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error('Invalid credentials');
       }
 
-      // Don't allow admin login through regular login
+      // Don't allow admin or professional login through regular login
       if (storedUser.role === 'admin') {
         throw new Error('Please use the admin login');
+      }
+      
+      if (storedUser.role === 'professional') {
+        throw new Error('Please use the professional login');
       }
 
       const userData: UserData = {
@@ -139,6 +146,63 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       toast({
         variant: "destructive",
         title: "Login failed",
+        description: error instanceof Error ? error.message : 'An error occurred',
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const professionalLogin = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      // Validate input
+      if (!validateEmail(email)) {
+        throw new Error('Invalid email format');
+      }
+      if (!validatePassword(password)) {
+        throw new Error('Password must be at least 6 characters');
+      }
+
+      // Check if professional exists
+      const storedUser = mockUsers[email];
+      if (!storedUser || storedUser.password !== password) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Verify it's a professional account
+      if (storedUser.role !== 'professional') {
+        throw new Error('This login is only for professional accounts');
+      }
+      
+      // Check if the professional is verified
+      if (!storedUser.isVerified) {
+        throw new Error('Your account is pending verification. Please wait for admin approval.');
+      }
+
+      const userData: UserData = {
+        id: storedUser.id,
+        username: storedUser.username,
+        email: storedUser.email,
+        role: storedUser.role,
+        avatar: storedUser.avatar,
+        isVerified: storedUser.isVerified,
+        occupation: storedUser.occupation,
+        identityDocument: storedUser.identityDocument,
+      };
+
+      setUser(userData);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+      
+      toast({
+        title: "Welcome back, Professional!",
+        description: `Logged in as ${userData.username}`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Professional login failed",
         description: error instanceof Error ? error.message : 'An error occurred',
       });
       throw error;
@@ -239,7 +303,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if (role === 'professional') {
         const updatedPendingList = [...pendingProfessionals, newUser];
         setPendingProfessionals(updatedPendingList);
-        localStorage.setItem('pending_professionals', JSON.stringify(updatedPendingList));
+        localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPendingList));
         
         toast({
           title: "Professional Registration Pending",
@@ -317,11 +381,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     
     if (professional) {
       // Update the professional's verified status
-      mockUsers[professional.email].isVerified = true;
+      if (mockUsers[professional.email]) {
+        mockUsers[professional.email].isVerified = true;
+      }
       
       // Update pending professionals list
       setPendingProfessionals(updatedPending);
-      localStorage.setItem('pending_professionals', JSON.stringify(updatedPending));
+      localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
       
       toast({
         title: "Professional Verified",
@@ -340,7 +406,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       // Update pending professionals list
       setPendingProfessionals(updatedPending);
-      localStorage.setItem('pending_professionals', JSON.stringify(updatedPending));
+      localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
       
       toast({
         title: "Professional Rejected",
@@ -356,6 +422,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         isAuthenticated: !!user, 
         isLoading, 
         login,
+        professionalLogin,
         adminLogin,
         register, 
         logout, 

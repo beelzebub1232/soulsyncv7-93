@@ -10,10 +10,12 @@ import { UserProvider } from "@/contexts/UserContext";
 import { AppLayout } from "@/layouts/AppLayout";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { AdminLayout } from "@/layouts/AdminLayout";
+import { ProfessionalLayout } from "@/layouts/ProfessionalLayout";
 
 // Auth Pages
 import Auth from "@/pages/auth/Auth";
 import AdminLogin from "@/pages/auth/AdminLogin";
+import ProfessionalLogin from "@/pages/auth/ProfessionalLogin";
 
 // App Pages
 import Home from "@/pages/home/Home";
@@ -34,6 +36,11 @@ import ReportedContent from "@/pages/admin/ReportedContent";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import UserManagement from "@/pages/admin/UserManagement";
 
+// Professional Pages
+import ProfessionalHome from "@/pages/professional/ProfessionalHome";
+import ProfessionalCommunity from "@/pages/professional/ProfessionalCommunity";
+import ProfessionalSettings from "@/pages/professional/ProfessionalSettings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -48,6 +55,7 @@ const App = () => (
             <Route path="/auth" element={<AuthLayout />}>
               <Route index element={<Auth />} />
               <Route path="admin" element={<AdminLogin />} />
+              <Route path="professional" element={<ProfessionalLogin />} />
             </Route>
             
             {/* Admin Routes */}
@@ -59,6 +67,16 @@ const App = () => (
               <Route path="content" element={<ReportedContent />} /> {/* Temporarily reusing ReportedContent */}
               <Route path="settings" element={<AdminSettings />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Route>
+            
+            {/* Professional Routes */}
+            <Route path="/professional" element={<ProfessionalLayout />}>
+              <Route index element={<ProfessionalHome />} />
+              <Route path="community" element={<ProfessionalCommunity />} />
+              <Route path="community/category/:categoryId" element={<CategoryPosts />} />
+              <Route path="community/post/:postId" element={<PostDetails />} />
+              <Route path="settings" element={<ProfessionalSettings />} />
+              <Route path="*" element={<Navigate to="/professional" replace />} />
             </Route>
             
             {/* App Routes */}

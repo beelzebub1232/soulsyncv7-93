@@ -3,12 +3,13 @@ import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
 import { cn } from "@/lib/utils";
-import { Heart, ShieldCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Heart, ShieldCheck, UserCheck } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "register">("login");
+  const navigate = useNavigate();
   
   return (
     <div className="min-h-full flex flex-col">
@@ -58,12 +59,27 @@ export default function Auth() {
           </div>
           
           <div className="mt-4 text-center space-y-3">
-            <Link to="/auth/admin">
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+            <div className="flex justify-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={() => navigate('/auth/professional')}
+              >
+                <UserCheck className="h-4 w-4" />
+                <span className="text-xs">Professional Login</span>
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="flex items-center gap-2"
+                onClick={() => navigate('/auth/admin')}
+              >
                 <ShieldCheck className="h-4 w-4" />
                 <span className="text-xs">Admin Login</span>
               </Button>
-            </Link>
+            </div>
             
             <p className="text-xs text-muted-foreground">
               By continuing, you agree to our Terms of Service and Privacy Policy.
