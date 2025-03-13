@@ -3,6 +3,7 @@ import { useUser } from "@/contexts/UserContext";
 import { Navigate, Outlet } from "react-router-dom";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminBottomNav } from "@/components/admin/AdminBottomNav";
 
 export function AdminLayout() {
   const { user, isLoading } = useUser();
@@ -29,9 +30,10 @@ export function AdminLayout() {
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <AdminHeader />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-background pb-20 md:pb-6">
           <Outlet />
         </main>
+        <AdminBottomNav />
       </div>
     </div>
   );
