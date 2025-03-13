@@ -7,8 +7,7 @@ import {
   Users, 
   ShieldCheck, 
   AlertTriangle, 
-  Settings,
-  FileText
+  Settings
 } from 'lucide-react';
 
 export function AdminBottomNav() {
@@ -35,11 +34,6 @@ export function AdminBottomNav() {
       href: '/admin/reports',
       label: 'Reports',
       icon: AlertTriangle
-    },
-    {
-      href: '/admin/content',
-      label: 'Content',
-      icon: FileText
     },
     {
       href: '/admin/settings',

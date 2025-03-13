@@ -193,16 +193,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Check if professional exists
       const storedUser = mockUsers[email];
       if (!storedUser || storedUser.password !== password) {
+        console.log("Invalid credentials: User not found or password mismatch");
         throw new Error('Invalid credentials');
       }
 
       // Verify it's a professional account
       if (storedUser.role !== 'professional') {
+        console.log("Not a professional account:", storedUser.role);
         throw new Error('This login is only for professional accounts');
       }
       
       // Check if the professional is verified
       if (!storedUser.isVerified) {
+        console.log("Professional not verified:", storedUser.isVerified);
         throw new Error('Your account is pending verification. Please wait for admin approval.');
       }
 
@@ -225,6 +228,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         description: `Logged in as ${userData.username}`,
       });
     } catch (error) {
+      console.error("Professional login error:", error);
       toast({
         variant: "destructive",
         title: "Professional login failed",
@@ -322,12 +326,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         identityDocument,
       };
 
-      // Always add the user to mockUsers
+      // Add user to mockUsers
       mockUsers[email] = newUser;
+      console.log("User registered:", newUser);
+      console.log("Updated mockUsers:", mockUsers);
 
       // If professional, add to pending list
       if (role === 'professional') {
-        const updatedPendingList = [...pendingProfessionals, newUser];
+        const professionalData: UserData = {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          role: newUser.role,
+          avatar: newUser.avatar,
+          isVerified: newUser.isVerified,
+          occupation: newUser.occupation,
+          identityDocument: newUser.identityDocument,
+        };
+        
+        const updatedPendingList = [...pendingProfessionals, professionalData];
         setPendingProfessionals(updatedPendingList);
         localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPendingList));
         
@@ -344,7 +361,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         description: "You can now sign in with your credentials.",
       });
       
-      // Don't auto-login for regular users anymore
+      // Don't auto-login for regular users
     } catch (error) {
       toast({
         variant: "destructive",
@@ -390,13 +407,25 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   const verifyProfessional = (professionalId: string) => {
-    const updatedPending = pendingProfessionals.filter(p => p.id !== professionalId);
     const professional = pendingProfessionals.find(p => p.id === professionalId);
     
     if (professional) {
-      // Update the professional's verified status
+      console.log("Found professional to verify:", professional);
+      
+      // Update the professional's verified status in mockUsers
       if (mockUsers[professional.email]) {
         mockUsers[professional.email].isVerified = true;
+        console.log("Updated professional verification status in mockUsers:", mockUsers[professional.email]);
+      } else {
+        console.error("Professional not found in mockUsers:", professional.email);
+        // This is a critical error - professional is in pending list but not in mockUsers
+        // Re-add them to mockUsers with a default password
+        mockUsers[professional.email] = {
+          ...professional,
+          password: 'password123', // Default password as fallback
+          isVerified: true
+        };
+        console.log("Re-added professional to mockUsers:", mockUsers[professional.email]);
       }
       
       // Store notification for the professional to see when they log in
@@ -404,12 +433,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const notifications = JSON.parse(localStorage.getItem(APPROVED_NOTIFICATIONS_KEY) || '[]');
         notifications.push(professional.id);
         localStorage.setItem(APPROVED_NOTIFICATIONS_KEY, JSON.stringify(notifications));
+        console.log("Added notification for professional:", professional.id);
       } catch (error) {
         console.error('Failed to store notification:', error);
         localStorage.setItem(APPROVED_NOTIFICATIONS_KEY, JSON.stringify([professional.id]));
       }
       
       // Update pending professionals list
+      const updatedPending = pendingProfessionals.filter(p => p.id !== professionalId);
       setPendingProfessionals(updatedPending);
       localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
       
@@ -417,6 +448,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         title: "Professional Verified",
         description: `${professional.username} has been approved as a professional.`,
       });
+    } else {
+      console.error("Professional not found in pending list:", professionalId);
     }
   };
 

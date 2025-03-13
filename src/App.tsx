@@ -64,7 +64,6 @@ const App = () => (
               <Route path="users" element={<UserManagement />} />
               <Route path="verifications" element={<ProfessionalVerifications />} />
               <Route path="reports" element={<ReportedContent />} />
-              <Route path="content" element={<ReportedContent />} /> {/* Temporarily reusing ReportedContent */}
               <Route path="settings" element={<AdminSettings />} />
               <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>

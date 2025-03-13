@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Mail, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export default function ProfessionalLogin() {
@@ -139,6 +139,7 @@ export default function ProfessionalLogin() {
                   Don't have a professional account?{" "}
                 </span>
                 <button 
+                  type="button"
                   onClick={handleRegisterClick}
                   className="text-blue-600 hover:text-blue-500 hover:underline"
                 >
