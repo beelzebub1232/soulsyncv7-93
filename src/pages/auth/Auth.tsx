@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
-import { AdminLogin } from "./AdminLogin";
 import { cn } from "@/lib/utils";
-import { Heart, Shield } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function Auth() {
-  const [mode, setMode] = useState<"login" | "register" | "admin">("login");
+  const [mode, setMode] = useState<"login" | "register">("login");
   
   return (
     <div className="min-h-full flex flex-col">
@@ -50,24 +49,10 @@ export default function Auth() {
             >
               Create Account
             </button>
-            <button
-              onClick={() => setMode("admin")}
-              className={cn(
-                "py-2 px-4 text-sm font-medium rounded-full transition-all flex items-center gap-1",
-                mode === "admin" 
-                  ? "bg-mindscape-primary text-white" 
-                  : "bg-secondary text-foreground hover:bg-secondary/80"
-              )}
-            >
-              <Shield className="h-3.5 w-3.5" />
-              Admin
-            </button>
           </div>
           
           <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter">
-            {mode === "login" && <Login />}
-            {mode === "register" && <Register />}
-            {mode === "admin" && <AdminLogin />}
+            {mode === "login" ? <Login /> : <Register />}
           </div>
           
           <p className="mt-6 text-center text-xs text-muted-foreground">

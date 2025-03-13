@@ -1,31 +1,31 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { MessageSquare, Users, Plus, Filter, Search, Bell, Settings } from "lucide-react";
+import { MessageSquare, Users, Plus, Filter, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@/contexts/UserContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ForumPost, ForumCategory, ProfessionalVerificationRequest } from "@/types/community";
-import { NewPostDialog } from "./components/NewPostDialog";
-import { CategoryCard } from "./components/CategoryCard";
-import { PostCard } from "./components/PostCard";
-import { AdminPanel } from "./components/AdminPanel";
-import { ProfessionalVerificationForm } from "./components/ProfessionalVerificationForm";
+import { ForumPost, ForumCategory } from "@/types/community";
 
 export default function Community() {
-  const [activeTab, setActiveTab] = useState<string>("forums");
   const [isNewPostOpen, setIsNewPostOpen] = useState(false);
-  const [isProfessionalFormOpen, setIsProfessionalFormOpen] = useState(false);
   const [categories, setCategories] = useState<ForumCategory[]>([]);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPosts, setFilteredPosts] = useState<ForumPost[]>([]);
-  const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
+  const [newPost, setNewPost] = useState({
+    title: "",
+    content: "",
+    categoryId: "",
+    isAnonymous: false
+  });
   const { toast } = useToast();
-  const { user } = useUser();
-  const navigate = useNavigate();
   
   // Initialize default categories and posts
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function Community() {
         name: "Anxiety Support",
         description: "Share coping strategies and support for anxiety",
         icon: "😰",
-        posts: 0,
+        posts: 128,
         color: "border-yellow-300"
       },
       {
@@ -44,7 +44,7 @@ export default function Community() {
         name: "Depression Support",
         description: "A safe space to discuss depression and find support",
         icon: "😔",
-        posts: 0,
+        posts: 215,
         color: "border-blue-300"
       },
       {
@@ -52,7 +52,7 @@ export default function Community() {
         name: "Mindfulness Practice",
         description: "Discussions about meditation and mindfulness techniques",
         icon: "🧘",
-        posts: 0,
+        posts: 96,
         color: "border-green-300"
       },
       {
@@ -60,24 +60,8 @@ export default function Community() {
         name: "General Wellness",
         description: "General discussions about mental wellbeing",
         icon: "💜",
-        posts: 0,
+        posts: 173,
         color: "border-purple-300"
-      },
-      {
-        id: "selfcare",
-        name: "Self-Care",
-        description: "Tips and discussions on self-care practices",
-        icon: "🌱",
-        posts: 0,
-        color: "border-green-400"
-      },
-      {
-        id: "relationships",
-        name: "Relationships",
-        description: "Support for navigating relationships and social anxiety",
-        icon: "❤️",
-        posts: 0,
-        color: "border-red-300"
       }
     ];
     
@@ -95,74 +79,76 @@ export default function Community() {
     if (storedPosts) {
       const parsedPosts = JSON.parse(storedPosts);
       setPosts(parsedPosts);
-      setFilteredPosts(sortPosts(parsedPosts, sortOrder));
+      setFilteredPosts(parsedPosts);
     }
-  }, [sortOrder]);
+  }, []);
   
-  // Filter and sort posts when search query or sort order changes
+  // Filter posts when search query changes
   useEffect(() => {
-    let filtered = posts;
-    
-    if (searchQuery.trim()) {
-      const lowerQuery = searchQuery.toLowerCase();
-      filtered = posts.filter(post => 
-        post.title.toLowerCase().includes(lowerQuery) || 
-        post.content.toLowerCase().includes(lowerQuery) ||
-        post.categoryName.toLowerCase().includes(lowerQuery)
-      );
+    if (!searchQuery.trim()) {
+      setFilteredPosts(posts);
+      return;
     }
     
-    setFilteredPosts(sortPosts(filtered, sortOrder));
-  }, [searchQuery, posts, sortOrder]);
+    const lowerQuery = searchQuery.toLowerCase();
+    const filtered = posts.filter(post => 
+      post.title.toLowerCase().includes(lowerQuery) || 
+      post.content.toLowerCase().includes(lowerQuery)
+    );
+    
+    setFilteredPosts(filtered);
+  }, [searchQuery, posts]);
   
-  const sortPosts = (postsToSort: ForumPost[], order: 'recent' | 'popular') => {
-    if (order === 'recent') {
-      return [...postsToSort].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-    } else {
-      return [...postsToSort].sort((a, b) => 
-        (b.likes + b.replies) - (a.likes + a.replies)
-      );
+  const handleCreatePost = () => {
+    if (!newPost.title || !newPost.content || !newPost.categoryId) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please fill in all required fields."
+      });
+      return;
     }
-  };
-  
-  const handleCreatePost = (newPost: ForumPost) => {
+    
+    const category = categories.find(c => c.id === newPost.categoryId);
+    if (!category) return;
+    
+    const post: ForumPost = {
+      id: Date.now().toString(),
+      title: newPost.title,
+      content: newPost.content,
+      categoryId: newPost.categoryId,
+      categoryName: category.name,
+      author: newPost.isAnonymous ? "Anonymous" : "Current User",
+      date: new Date(),
+      replies: 0,
+      isAnonymous: newPost.isAnonymous
+    };
+    
     // Update posts
-    const updatedPosts = [newPost, ...posts];
+    const updatedPosts = [post, ...posts];
     setPosts(updatedPosts);
     localStorage.setItem('soulsync_forum_posts', JSON.stringify(updatedPosts));
     
     // Update category post count
     const updatedCategories = categories.map(c => 
-      c.id === newPost.categoryId ? { ...c, posts: c.posts + 1 } : c
+      c.id === post.categoryId ? { ...c, posts: c.posts + 1 } : c
     );
     setCategories(updatedCategories);
     localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
+    
+    // Reset form and close dialog
+    setNewPost({
+      title: "",
+      content: "",
+      categoryId: "",
+      isAnonymous: false
+    });
+    setIsNewPostOpen(false);
     
     toast({
       title: "Post created",
       description: "Your post has been published to the community."
     });
-  };
-  
-  const handleSortChange = (order: 'recent' | 'popular') => {
-    setSortOrder(order);
-  };
-  
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    
-    // Reset search when changing tabs
-    setSearchQuery("");
-  };
-  
-  const handlePostClick = (postId: string) => {
-    navigate(`/community/post/${postId}`);
-  };
-  
-  const handleCategoryClick = (categoryId: string) => {
-    navigate(`/community/category/${categoryId}`);
   };
   
   return (
@@ -173,37 +159,13 @@ export default function Community() {
           <p className="text-muted-foreground">Support forums and discussions</p>
         </div>
         
-        <div className="flex items-center gap-2">
-          {user?.role === 'admin' && (
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setActiveTab('admin')}
-              className={activeTab === 'admin' ? 'bg-mindscape-light' : ''}
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          )}
-          
-          <Button 
-            variant="outline" 
-            size="icon"
-            className="relative"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-mindscape-primary text-[10px] text-white">
-              3
-            </span>
-          </Button>
-          
-          <Button 
-            onClick={() => setIsNewPostOpen(true)}
-            className="w-10 h-10 rounded-full bg-mindscape-primary text-white flex items-center justify-center shadow-md hover:bg-mindscape-secondary transition-all"
-            aria-label="New Discussion"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
-        </div>
+        <button 
+          onClick={() => setIsNewPostOpen(true)}
+          className="w-10 h-10 rounded-full bg-mindscape-primary text-white flex items-center justify-center shadow-md hover:bg-mindscape-secondary transition-all"
+          aria-label="New Discussion"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
       </header>
       
       <div className="flex items-center gap-2">
@@ -217,23 +179,18 @@ export default function Community() {
           />
         </div>
         
-        <Button 
-          variant="outline"
-          size="icon"
-          className="w-10 h-10 rounded-lg"
+        <button 
+          className="w-10 h-10 rounded-lg border border-input bg-background hover:bg-accent flex items-center justify-center"
           aria-label="Filter"
         >
           <Filter className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
       
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="w-full grid grid-cols-3">
+      <Tabs defaultValue="forums" className="w-full">
+        <TabsList className="w-full grid grid-cols-2">
           <TabsTrigger value="forums">Forums</TabsTrigger>
           <TabsTrigger value="discussions">Discussions</TabsTrigger>
-          {user?.role === 'admin' && (
-            <TabsTrigger value="admin">Admin Panel</TabsTrigger>
-          )}
         </TabsList>
         
         <TabsContent value="forums" className="space-y-4 mt-4">
@@ -244,13 +201,26 @@ export default function Community() {
             </h2>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-3">
             {categories.map((category) => (
-              <CategoryCard
+              <a 
                 key={category.id}
-                category={category}
-                onClick={() => handleCategoryClick(category.id)}
-              />
+                href={`/community/${category.id}`}
+                className={`card-primary block hover:shadow-md transition-all border-l-4 ${category.color}`}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-mindscape-light flex items-center justify-center text-xl">
+                    {category.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium">{category.name}</h3>
+                    <p className="text-sm text-muted-foreground">{category.description}</p>
+                    <div className="mt-1 text-xs text-mindscape-primary">
+                      {category.posts} posts
+                    </div>
+                  </div>
+                </div>
+              </a>
             ))}
           </div>
         </TabsContent>
@@ -262,91 +232,162 @@ export default function Community() {
               <span>Recent Discussions</span>
             </h2>
             
-            <div className="flex items-center gap-2">
-              <Button 
-                variant={sortOrder === 'recent' ? 'secondary' : 'outline'}
-                size="sm"
-                onClick={() => handleSortChange('recent')}
-                className="text-xs"
-              >
-                Recent
-              </Button>
-              <Button 
-                variant={sortOrder === 'popular' ? 'secondary' : 'outline'}
-                size="sm"
-                onClick={() => handleSortChange('popular')}
-                className="text-xs"
-              >
-                Popular
-              </Button>
-            </div>
+            <Select 
+              defaultValue="recent"
+              onValueChange={(value) => {
+                // Sort functionality would go here
+                console.log("Sort by:", value);
+              }}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Recent</SelectItem>
+                <SelectItem value="popular">Popular</SelectItem>
+                <SelectItem value="replies">Most Replies</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-3">
             {filteredPosts.length === 0 ? (
               <div className="card-primary p-5 text-center">
                 <p className="text-muted-foreground">No discussions found.</p>
-                <Button 
+                <button 
                   onClick={() => setIsNewPostOpen(true)} 
                   className="button-primary mt-3"
                 >
                   Start a Discussion
-                </Button>
+                </button>
               </div>
             ) : (
               filteredPosts.map((post) => (
-                <PostCard
+                <a 
                   key={post.id}
-                  post={post}
-                  onClick={() => handlePostClick(post.id)}
-                  currentUser={user}
-                />
+                  href={`/community/post/${post.id}`}
+                  className="card-primary block hover:shadow-md transition-all"
+                >
+                  <h3 className="font-medium">{post.title}</h3>
+                  
+                  <div className="flex justify-between items-center mt-2 text-xs">
+                    <span className="text-mindscape-primary">{post.categoryName}</span>
+                    <div className="text-muted-foreground">
+                      Posted by {post.author} · {formatRelativeTime(post.date)}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-2 text-xs">
+                    <span className="text-muted-foreground">{post.replies} replies</span>
+                  </div>
+                </a>
               ))
             )}
           </div>
         </TabsContent>
-        
-        {user?.role === 'admin' && (
-          <TabsContent value="admin" className="space-y-4 mt-4">
-            <AdminPanel />
-          </TabsContent>
-        )}
       </Tabs>
       
       {/* New Post Dialog */}
-      <NewPostDialog 
-        isOpen={isNewPostOpen}
-        onClose={() => setIsNewPostOpen(false)}
-        onCreatePost={handleCreatePost}
-        categories={categories}
-        currentUser={user}
-      />
-      
-      {/* Professional Verification Form */}
-      {user?.role === 'professional' && !user.isVerified && (
-        <ProfessionalVerificationForm
-          isOpen={isProfessionalFormOpen}
-          onClose={() => setIsProfessionalFormOpen(false)}
-        />
-      )}
+      <Dialog open={isNewPostOpen} onOpenChange={setIsNewPostOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Start a Discussion</DialogTitle>
+            <DialogDescription>
+              Share your thoughts with the community
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="post-title">Title</Label>
+              <Input
+                id="post-title"
+                placeholder="What would you like to discuss?"
+                value={newPost.title}
+                onChange={(e) => setNewPost({...newPost, title: e.target.value})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="post-content">Content</Label>
+              <Textarea
+                id="post-content"
+                placeholder="Share your thoughts, questions or experiences..."
+                value={newPost.content}
+                onChange={(e) => setNewPost({...newPost, content: e.target.value})}
+                className="min-h-[150px]"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="post-category">Category</Label>
+              <Select 
+                value={newPost.categoryId}
+                onValueChange={(value) => setNewPost({...newPost, categoryId: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={newPost.isAnonymous}
+                onCheckedChange={(checked) => setNewPost({...newPost, isAnonymous: checked})}
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsNewPostOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreatePost} className="button-primary">
+              Post
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <div className="text-center pt-4">
-        {user?.role === 'professional' && !user.isVerified ? (
-          <Button 
-            onClick={() => setIsProfessionalFormOpen(true)}
-            className="button-primary"
-          >
-            Complete Professional Verification
-          </Button>
-        ) : (
-          <Button 
-            onClick={() => setIsNewPostOpen(true)}
-            className="button-primary"
-          >
-            Start a Discussion
-          </Button>
-        )}
+        <button 
+          onClick={() => setIsNewPostOpen(true)}
+          className="button-primary"
+        >
+          Start a Discussion
+        </button>
       </div>
     </div>
   );
+}
+
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - new Date(date).getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffSecs < 60) {
+    return 'just now';
+  } else if (diffMins < 60) {
+    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  } else {
+    return new Date(date).toLocaleDateString();
+  }
 }

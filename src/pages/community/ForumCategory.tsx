@@ -1,16 +1,13 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, MessageSquare, Plus, Clock, Search, SortAsc, Heart } from "lucide-react";
+import { useParams, Link } from "react-router-dom";
+import { ChevronLeft, MessageSquare, Plus, Clock, Filter, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ForumCategory, ForumPost } from "@/types/community";
 import { useToast } from "@/hooks/use-toast";
-import { useUser } from "@/contexts/UserContext";
 import NotFound from "../NotFound";
-import { PostCard } from "./components/PostCard";
-import { NewPostDialog } from "./components/NewPostDialog";
-import { formatRelativeTime } from "./utils/dateUtils";
 
 export default function ForumCategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -19,10 +16,7 @@ export default function ForumCategoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<'recent' | 'popular'>('recent');
   const [isLoading, setIsLoading] = useState(true);
-  const [isNewPostOpen, setIsNewPostOpen] = useState(false);
   const { toast } = useToast();
-  const { user } = useUser();
-  const navigate = useNavigate();
   
   useEffect(() => {
     // Load category data
@@ -40,7 +34,13 @@ export default function ForumCategoryPage() {
         if (storedPosts) {
           const allPosts: ForumPost[] = JSON.parse(storedPosts);
           const categoryPosts = allPosts.filter(post => post.categoryId === categoryId);
-          setPosts(categoryPosts);
+          
+          // Sort posts by date (recent first)
+          const sortedPosts = categoryPosts.sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          
+          setPosts(sortedPosts);
         }
       } catch (error) {
         console.error("Error loading category data:", error);
@@ -57,11 +57,11 @@ export default function ForumCategoryPage() {
     loadCategoryData();
   }, [categoryId, toast]);
   
-  // Filter and sort posts based on search query and sort order
+  // Filter and sort posts
   const filteredAndSortedPosts = () => {
+    // First filter by search query
     let filtered = posts;
-    
-    if (searchQuery.trim()) {
+    if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = posts.filter(post => 
         post.title.toLowerCase().includes(query) || 
@@ -69,44 +69,15 @@ export default function ForumCategoryPage() {
       );
     }
     
-    if (sortOrder === 'recent') {
-      return [...filtered].sort((a, b) => 
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
-    } else {
-      return [...filtered].sort((a, b) => 
-        (b.likes + b.replies) - (a.likes + a.replies)
-      );
-    }
-  };
-  
-  const handleCreatePost = (newPost: ForumPost) => {
-    // Update posts
-    const updatedPosts = [newPost, ...posts];
-    setPosts(updatedPosts);
-    localStorage.setItem('soulsync_forum_posts', JSON.stringify([...updatedPosts]));
-    
-    // Update category post count in localStorage
-    const storedCategories = localStorage.getItem('soulsync_forum_categories');
-    if (storedCategories && category) {
-      const categories: ForumCategory[] = JSON.parse(storedCategories);
-      const updatedCategories = categories.map(c => 
-        c.id === category.id ? { ...c, posts: c.posts + 1 } : c
-      );
-      localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
-      
-      // Update local category state
-      setCategory({ ...category, posts: category.posts + 1 });
-    }
-    
-    toast({
-      title: "Post created",
-      description: "Your post has been published to the community."
+    // Then sort
+    return filtered.sort((a, b) => {
+      if (sortOrder === 'recent') {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      } else {
+        // Sort by reply count if sortOrder is 'popular'
+        return b.replies - a.replies;
+      }
     });
-  };
-  
-  const handlePostClick = (postId: string) => {
-    navigate(`/community/post/${postId}`);
   };
   
   if (isLoading) {
@@ -141,7 +112,7 @@ export default function ForumCategoryPage() {
           <div>
             <h1 className="text-2xl font-bold font-display">{category.name}</h1>
             <p className="text-muted-foreground">{category.description}</p>
-            <p className="text-sm mt-1 text-mindscape-primary">{category.posts} {category.posts === 1 ? 'post' : 'posts'}</p>
+            <p className="text-sm mt-1 text-mindscape-primary">{category.posts} posts</p>
           </div>
         </div>
       </header>
@@ -157,25 +128,18 @@ export default function ForumCategoryPage() {
           />
         </div>
         
-        <Button 
-          variant={sortOrder === 'recent' ? 'secondary' : 'outline'}
-          size="sm"
-          onClick={() => setSortOrder('recent')}
-          className="text-xs gap-1"
+        <Select 
+          value={sortOrder}
+          onValueChange={(value) => setSortOrder(value as 'recent' | 'popular')}
         >
-          <Clock className="h-3.5 w-3.5" />
-          <span>Recent</span>
-        </Button>
-        
-        <Button 
-          variant={sortOrder === 'popular' ? 'secondary' : 'outline'}
-          size="sm"
-          onClick={() => setSortOrder('popular')}
-          className="text-xs gap-1"
-        >
-          <Heart className="h-3.5 w-3.5" />
-          <span>Popular</span>
-        </Button>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Most Recent</SelectItem>
+            <SelectItem value="popular">Most Popular</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
       <div className="space-y-4">
@@ -185,47 +149,79 @@ export default function ForumCategoryPage() {
             <span>Discussions</span>
           </h2>
           
-          <Button
-            onClick={() => setIsNewPostOpen(true)}
-            className="button-primary flex items-center gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            <span>New Post</span>
-          </Button>
+          <Link to="/community">
+            <Button className="button-primary flex items-center gap-1">
+              <Plus className="h-4 w-4" />
+              <span>New Post</span>
+            </Button>
+          </Link>
         </div>
         
         {displayedPosts.length === 0 ? (
           <div className="card-primary p-5 text-center">
             <p className="text-muted-foreground">No discussions found in this category.</p>
-            <Button 
-              onClick={() => setIsNewPostOpen(true)}
-              className="button-primary mt-3"
-            >
-              Start the First Discussion
-            </Button>
+            <Link to="/community">
+              <button className="button-primary mt-3">
+                Start the First Discussion
+              </button>
+            </Link>
           </div>
         ) : (
           <div className="space-y-3">
             {displayedPosts.map((post) => (
-              <PostCard
+              <a 
                 key={post.id}
-                post={post}
-                onClick={() => handlePostClick(post.id)}
-                currentUser={user}
-              />
+                href={`/community/post/${post.id}`}
+                className="card-primary block hover:shadow-md transition-all"
+              >
+                <h3 className="font-medium">{post.title}</h3>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {post.content}
+                </p>
+                
+                <div className="flex justify-between items-center mt-3 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-mindscape-primary">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      <span>{post.replies} replies</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>{formatRelativeTime(post.date)}</span>
+                  </div>
+                </div>
+                
+                <div className="text-xs mt-2 text-muted-foreground">
+                  Posted by {post.author}
+                </div>
+              </a>
             ))}
           </div>
         )}
       </div>
-      
-      {/* New Post Dialog */}
-      <NewPostDialog 
-        isOpen={isNewPostOpen}
-        onClose={() => setIsNewPostOpen(false)}
-        onCreatePost={handleCreatePost}
-        categories={[category]}
-        currentUser={user}
-      />
     </div>
   );
+}
+
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - new Date(date).getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffSecs < 60) {
+    return 'just now';
+  } else if (diffMins < 60) {
+    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  } else {
+    return new Date(date).toLocaleDateString();
+  }
 }
