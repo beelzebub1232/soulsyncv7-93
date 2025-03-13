@@ -7,6 +7,7 @@ import { Check, MessageCircle, HelpCircle, Clock, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface PendingQuestion {
   id: string;

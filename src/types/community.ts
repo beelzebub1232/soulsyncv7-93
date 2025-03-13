@@ -23,6 +23,35 @@ export interface PostData {
   isLiked?: boolean;
 }
 
+export interface ForumPost {
+  id: string;
+  title: string;
+  content: string;
+  categoryId: string;
+  categoryName: string;
+  author: string;
+  authorId: string;
+  authorRole?: string;
+  date: Date;
+  replies: number;
+  isAnonymous?: boolean;
+  likes: number;
+  images?: string[];
+  videoLinks?: string[];
+}
+
+export interface ForumReply {
+  id: string;
+  postId: string;
+  content: string;
+  author: string;
+  authorId: string;
+  authorRole?: string;
+  date: Date;
+  isAnonymous?: boolean;
+  likes: number;
+}
+
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved';
 
 export interface Report {
@@ -33,4 +62,25 @@ export interface Report {
   reason: string;
   date: Date;
   status: ReportStatus;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'reply' | 'like' | 'report' | 'verification';
+  content: string;
+  relatedId: string;
+  date: Date;
+  read: boolean;
+}
+
+export interface ProfessionalVerification {
+  id: string;
+  userId: string;
+  name: string;
+  occupation: string;
+  documentUrl: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedDate: Date;
+  reviewedDate?: Date;
 }
