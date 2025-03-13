@@ -5,7 +5,7 @@ import { useUser } from "@/contexts/UserContext";
 import { Navigate, Outlet } from "react-router-dom";
 
 export function AppLayout() {
-  const { isAuthenticated, isLoading } = useUser();
+  const { isAuthenticated, isLoading, user } = useUser();
   
   // Show loading state
   if (isLoading) {
@@ -22,6 +22,11 @@ export function AppLayout() {
   // Redirect to auth if not logged in
   if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
+  }
+  
+  // Redirect admins to admin dashboard
+  if (user?.role === 'admin') {
+    return <Navigate to="/admin" replace />;
   }
   
   return (

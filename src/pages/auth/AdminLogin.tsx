@@ -37,7 +37,7 @@ export default function AdminLogin() {
         title: "Admin Access Granted",
         description: "Welcome to the admin dashboard",
       });
-      navigate("/community");
+      navigate("/admin");
     } catch (error) {
       toast({
         variant: "destructive",
