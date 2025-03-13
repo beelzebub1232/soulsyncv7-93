@@ -1,3 +1,4 @@
+
 import { useUser } from "@/contexts/UserContext";
 import { Navigate, Outlet } from "react-router-dom";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -24,7 +25,7 @@ export function AdminLayout() {
   }
   return <div className="flex h-screen flex-col bg-background">
       <AdminHeader />
-      <main className="flex-1 overflow-y-auto pt-14 pb-20 px-4 py-0">
+      <main className="flex-1 overflow-y-auto pt-0 pb-20 px-4">
         <Outlet />
       </main>
       <AdminBottomNav />
