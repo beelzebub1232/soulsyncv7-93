@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { UserRole } from "@/contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
-export function Register() {
+interface RegisterProps {
+  initialRole?: UserRole;
+}
+
+export function Register({ initialRole = 'user' }: RegisterProps) {
   const { register } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -19,11 +23,18 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("user");
+  const [role, setRole] = useState<UserRole>(initialRole);
   const [occupation, setOccupation] = useState("");
   const [identityDocument, setIdentityDocument] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Update role when initialRole changes
+  useEffect(() => {
+    if (initialRole) {
+      setRole(initialRole);
+    }
+  }, [initialRole]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,19 +71,16 @@ export function Register() {
     try {
       await register(username, email, password, role, occupation, identityDocument);
       
-      if (role === "professional") {
-        toast({
-          title: "Registration pending",
-          description: "Your professional account is pending admin verification.",
-        });
-        navigate("/auth");
-      } else {
-        toast({
-          title: "Account created!",
-          description: "Welcome to SoulSync!",
-        });
-        navigate("/");
-      }
+      toast({
+        title: "Account created!",
+        description: role === "professional" 
+          ? "Your professional account is pending admin verification." 
+          : "You can now sign in with your credentials.",
+      });
+      
+      // Always redirect to login page, regardless of user type
+      navigate("/auth", { state: { initialMode: "login" } });
+      
     } catch (error) {
       toast({
         variant: "destructive",
@@ -163,7 +171,6 @@ export function Register() {
       <div className="space-y-2">
         <Label>I am registering as a:</Label>
         <RadioGroup 
-          defaultValue="user" 
           value={role}
           onValueChange={(value) => setRole(value as UserRole)}
           className="flex gap-4"

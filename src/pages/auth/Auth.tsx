@@ -1,15 +1,23 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Login } from "./Login";
 import { Register } from "./Register";
 import { cn } from "@/lib/utils";
-import { Heart, ShieldCheck, UserCheck } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Heart, ShieldCheck } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Auth() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Handle initial mode and role from location state
+  useEffect(() => {
+    const state = location.state as { initialMode?: "login" | "register", role?: "user" | "professional" } | null;
+    if (state?.initialMode) {
+      setMode(state.initialMode);
+    }
+  }, [location]);
   
   return (
     <div className="min-h-full flex flex-col">
@@ -55,32 +63,14 @@ export default function Auth() {
           </div>
           
           <div className="bg-card px-4 py-8 sm:px-8 shadow sm:rounded-xl sm:px-8 border border-border/50 animate-enter">
-            {mode === "login" ? <Login /> : <Register />}
+            {mode === "login" ? (
+              <Login />
+            ) : (
+              <Register initialRole={location.state?.role || 'user'} />
+            )}
           </div>
           
           <div className="mt-4 text-center space-y-3">
-            <div className="flex justify-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-2"
-                onClick={() => navigate('/auth/professional')}
-              >
-                <UserCheck className="h-4 w-4" />
-                <span className="text-xs">Professional Login</span>
-              </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-2"
-                onClick={() => navigate('/auth/admin')}
-              >
-                <ShieldCheck className="h-4 w-4" />
-                <span className="text-xs">Admin Login</span>
-              </Button>
-            </div>
-            
             <p className="text-xs text-muted-foreground">
               By continuing, you agree to our Terms of Service and Privacy Policy.
             </p>

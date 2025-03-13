@@ -61,7 +61,7 @@ export default function ProfessionalVerifications() {
     verifyProfessional(id);
     toast({
       title: "Professional Approved",
-      description: "The professional account has been verified.",
+      description: "The professional account has been verified and can now log in.",
     });
   };
 
@@ -89,35 +89,28 @@ export default function ProfessionalVerifications() {
             <div className="divide-y">
               {pendingProfessionals.map((professional) => (
                 <div key={professional.id} className="p-4 hover:bg-muted/30">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10 shrink-0">
                         <AvatarFallback className="bg-blue-600">{professional.username.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
                         <h3 className="font-medium">{professional.username}</h3>
                         <p className="text-sm text-muted-foreground">{professional.occupation}</p>
+                        <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Mail className="h-3.5 w-3.5" />
+                          <span className="truncate">{professional.email}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="flex items-center gap-1.5">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="truncate">{professional.email}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Briefcase className="h-4 w-4 text-muted-foreground" />
-                        <span>{professional.occupation}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 sm:items-end">
                       {professional.identityDocument && (
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => handleViewDocument(professional)}
-                          className="w-full"
+                          className="w-full sm:w-auto"
                         >
                           <FileText className="h-4 w-4 mr-2" />
                           View Document

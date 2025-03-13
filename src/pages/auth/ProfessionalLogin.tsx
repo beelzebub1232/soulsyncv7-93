@@ -5,8 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Mail, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export default function ProfessionalLogin() {
@@ -48,6 +48,11 @@ export default function ProfessionalLogin() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRegisterClick = () => {
+    // Navigate to main auth page and set professional mode
+    navigate('/auth', { state: { initialMode: 'register', role: 'professional' } });
   };
   
   return (
@@ -133,16 +138,12 @@ export default function ProfessionalLogin() {
                 <span className="text-muted-foreground">
                   Don't have a professional account?{" "}
                 </span>
-                <a 
-                  href="/auth" 
+                <button 
+                  onClick={handleRegisterClick}
                   className="text-blue-600 hover:text-blue-500 hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate("/auth");
-                  }}
                 >
                   Register here
-                </a>
+                </button>
               </div>
             </form>
           </div>
@@ -155,16 +156,8 @@ export default function ProfessionalLogin() {
                 className="flex items-center gap-2"
                 onClick={() => navigate('/auth')}
               >
-                <span className="text-xs">User Login</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="flex items-center gap-2"
-                onClick={() => navigate('/auth/admin')}
-              >
-                <ShieldCheck className="h-4 w-4" />
-                <span className="text-xs">Admin Login</span>
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span className="text-xs">Back to Login</span>
               </Button>
             </div>
             

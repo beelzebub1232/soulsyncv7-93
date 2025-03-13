@@ -123,10 +123,15 @@ export default function AdminLogin() {
           </div>
           
           <div className="mt-4 text-center">
-            <Link to="/auth" className="inline-flex items-center text-sm text-primary hover:underline">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center text-sm text-primary hover:underline"
+              onClick={() => navigate('/auth')}
+            >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Back to main login
-            </Link>
+            </Button>
           </div>
         </div>
       </div>
