@@ -36,6 +36,8 @@ export function ProfessionalReportedContent() {
           contentId: "post123",
           contentType: "post",
           reportedBy: "user456",
+          reportedByName: "John Doe",
+          targetUserId: "user789",
           reason: "Inappropriate content that may trigger anxiety",
           date: new Date(Date.now() - 4 * 60 * 60 * 1000),
           status: "pending"
@@ -45,6 +47,8 @@ export function ProfessionalReportedContent() {
           contentId: "reply789",
           contentType: "reply",
           reportedBy: "user123",
+          reportedByName: "Jane Smith",
+          targetUserId: "user456",
           reason: "Potentially harmful advice regarding medication",
           date: new Date(Date.now() - 12 * 60 * 60 * 1000),
           status: "pending"
