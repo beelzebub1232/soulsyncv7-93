@@ -24,9 +24,13 @@ export function useInsights(userId?: string) {
     
     loadInsightsData();
     
-    // Listen for storage changes
+    // Listen for storage changes for user-specific data
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key && (e.key.startsWith('soulsync_') || e.key === 'soulsync_moods')) {
+      if (e.key && (
+        e.key.startsWith('soulsync_') || 
+        e.key === `soulsync_moods_${userId}` || 
+        e.key === 'soulsync_moods'
+      )) {
         loadInsightsData();
       }
     };

@@ -17,8 +17,15 @@ export function useInsightsDataFetcher() {
     }
     
     try {
-      const moodStorageKey = `soulsync_moods`;
-      const storedMoods = localStorage.getItem(moodStorageKey);
+      // Try to use user-specific mood data first, fall back to global if none
+      const userMoodStorageKey = `soulsync_moods_${userId}`;
+      const globalMoodStorageKey = `soulsync_moods`;
+      
+      let storedMoods = localStorage.getItem(userMoodStorageKey);
+      if (!storedMoods) {
+        // Fall back to global mood data if user-specific doesn't exist
+        storedMoods = localStorage.getItem(globalMoodStorageKey);
+      }
       
       const journalStorageKey = `soulsync_journal_${userId}`;
       const storedJournals = localStorage.getItem(journalStorageKey);
@@ -40,7 +47,7 @@ export function useInsightsDataFetcher() {
       };
       
       // Get mood engagement rate
-      const moodEngagementRate = getMoodEngagementRate(storedMoods);
+      const moodEngagementRate = storedMoods ? getMoodEngagementRate(storedMoods) : 0;
       
       // Calculate activity level
       const activityLevel = calculateActivityLevel(

@@ -18,9 +18,16 @@ import { isWithinInterval } from 'date-fns';
 
 export function fetchInsightsData(selectedDate: Date, userId: string): InsightsData {
   try {
-    // Load mood entries from localStorage
-    const moodStorageKey = `soulsync_moods`;
-    const storedMoods = localStorage.getItem(moodStorageKey);
+    // Load mood entries from localStorage - try user-specific first
+    const userMoodStorageKey = `soulsync_moods_${userId}`;
+    const globalMoodStorageKey = `soulsync_moods`;
+    
+    let storedMoods = localStorage.getItem(userMoodStorageKey);
+    if (!storedMoods) {
+      // Fall back to global mood data
+      storedMoods = localStorage.getItem(globalMoodStorageKey);
+    }
+    
     let moodEntries: MoodEntry[] = [];
     
     if (storedMoods) {
