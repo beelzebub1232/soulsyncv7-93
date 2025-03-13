@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
@@ -104,7 +103,7 @@ export function AdminPostItem({ post, onDelete }: AdminPostItemProps) {
             {post.isAnonymous ? 'Anonymous' : post.author}
             {post.authorRole === 'professional' && (
               <span className="ml-1.5 inline-flex items-center">
-                <CheckCircle className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                <BadgeCheck className="w-3.5 h-3.5 text-blue-600 fill-blue-600 stroke-white" />
               </span>
             )}
             {post.authorRole === 'admin' && (
@@ -127,7 +126,6 @@ export function AdminPostItem({ post, onDelete }: AdminPostItemProps) {
           {post.content}
         </div>
         
-        {/* Show image thumbnails if available */}
         {post.images && post.images.length > 0 && (
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {post.images.map((img, i) => (

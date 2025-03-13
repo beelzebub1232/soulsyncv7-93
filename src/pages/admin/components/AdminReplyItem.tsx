@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from "date-fns";
 import { MoreVertical, Trash, Flag, User, Shield, CheckCircle } from "lucide-react";
 import { ForumReply } from "@/types/community";
@@ -132,7 +131,7 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
               </span>
               {reply.authorRole === 'professional' && (
                 <span className="flex items-center">
-                  <CheckCircle className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                  <BadgeCheck className="w-3.5 h-3.5 text-blue-600 fill-blue-600 stroke-white" />
                 </span>
               )}
               {reply.authorRole === 'admin' && (

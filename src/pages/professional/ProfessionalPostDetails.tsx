@@ -477,7 +477,7 @@ export default function ProfessionalPostDetails() {
                     {post.author}
                   </span>
                   {post.authorRole === "professional" && (
-                    <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600" />
+                    <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600 stroke-white" />
                   )}
                 </div>
               )}
@@ -552,7 +552,7 @@ export default function ProfessionalPostDetails() {
                               {reply.author}
                             </span>
                             {reply.authorRole === "professional" && (
-                              <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600" />
+                              <BadgeCheck className="h-4 w-4 text-blue-600 fill-blue-600 stroke-white" />
                             )}
                           </div>
                         )}
