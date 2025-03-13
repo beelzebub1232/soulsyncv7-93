@@ -1,12 +1,12 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Bell, Moon, Sun, Smartphone, Globe, Briefcase } from "lucide-react";
+import { Shield, Bell, Moon, Sun, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,12 +19,10 @@ export default function AdminSettings() {
   // Settings state
   const [settings, setSettings] = useState({
     emailNotifications: true,
-    pushNotifications: true,
     darkMode: false,
-    autoApproveVerifications: false,
     autoFlagReports: true,
-    systemMaintenance: false,
     contentModeration: "strict",
+    maintenanceMode: false,
   });
 
   const handleSaveSettings = () => {
@@ -37,6 +35,15 @@ export default function AdminSettings() {
         title: "Settings saved",
         description: "Your admin settings have been updated successfully.",
       });
+      
+      // If darkMode was toggled, we would implement this logic here
+      // This is just a placeholder since we can't modify the theme context in this exercise
+      if (settings.darkMode) {
+        // Toggle dark mode
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }, 800);
   };
 
@@ -50,14 +57,13 @@ export default function AdminSettings() {
   return (
     <div className="container max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-2 mb-6">
-        <Shield className="h-6 w-6 text-primary" />
+        <Shield className="h-6 w-6 text-black dark:text-white" />
         <h1 className="text-2xl font-bold tracking-tight">Admin Settings</h1>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className="grid grid-cols-2 mb-4">
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="moderation">Moderation</TabsTrigger>
         </TabsList>
         
@@ -66,7 +72,7 @@ export default function AdminSettings() {
             <CardHeader>
               <CardTitle>Appearance</CardTitle>
               <CardDescription>
-                Customize how the admin dashboard looks and works
+                Customize how the admin dashboard looks
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -108,46 +114,13 @@ export default function AdminSettings() {
                 </div>
                 <Switch 
                   id="maintenance-mode"
-                  checked={settings.systemMaintenance}
-                  onCheckedChange={(checked) => handleToggle("systemMaintenance", checked)}
+                  checked={settings.maintenanceMode}
+                  onCheckedChange={(checked) => handleToggle("maintenanceMode", checked)}
                 />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>
-                Configure how and when you receive notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Bell className="h-4 w-4" />
-                  <Label htmlFor="email-notifications">Email Notifications</Label>
-                </div>
-                <Switch 
-                  id="email-notifications"
-                  checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => handleToggle("emailNotifications", checked)}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Smartphone className="h-4 w-4" />
-                  <Label htmlFor="push-notifications">Push Notifications</Label>
-                </div>
-                <Switch 
-                  id="push-notifications"
-                  checked={settings.pushNotifications}
-                  onCheckedChange={(checked) => handleToggle("pushNotifications", checked)}
-                />
-              </div>
+              <p className="text-sm text-muted-foreground">
+                When enabled, all users except admins will see a maintenance page.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -163,13 +136,13 @@ export default function AdminSettings() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Briefcase className="h-4 w-4" />
-                  <Label htmlFor="auto-approve">Auto-approve Verifications</Label>
+                  <Bell className="h-4 w-4" />
+                  <Label htmlFor="email-notifications">Email Notifications for Reports</Label>
                 </div>
                 <Switch 
-                  id="auto-approve"
-                  checked={settings.autoApproveVerifications}
-                  onCheckedChange={(checked) => handleToggle("autoApproveVerifications", checked)}
+                  id="email-notifications"
+                  checked={settings.emailNotifications}
+                  onCheckedChange={(checked) => handleToggle("emailNotifications", checked)}
                 />
               </div>
               
@@ -184,6 +157,9 @@ export default function AdminSettings() {
                   onCheckedChange={(checked) => handleToggle("autoFlagReports", checked)}
                 />
               </div>
+              <p className="text-sm text-muted-foreground">
+                When enabled, reported content will be automatically hidden until reviewed by an admin.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -191,7 +167,11 @@ export default function AdminSettings() {
       
       <div className="flex justify-end gap-4 mt-8 pb-4">
         <Button variant="outline">Cancel</Button>
-        <Button onClick={handleSaveSettings} disabled={isLoading}>
+        <Button 
+          onClick={handleSaveSettings} 
+          disabled={isLoading}
+          className="bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+        >
           {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </div>

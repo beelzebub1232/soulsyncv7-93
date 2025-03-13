@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
@@ -46,17 +47,22 @@ export function AdminHeader() {
       });
     });
     
-    const reportCount = 3;
-    for (let i = 0; i < reportCount; i++) {
-      generatedNotifications.push({
-        id: `report_${i}`,
-        title: 'Content Report',
-        message: `A post has been reported for review.`,
-        type: 'report',
-        read: false,
-        timestamp: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 48),
-      });
-    }
+    // Add actual reports instead of random data
+    const storedReports = localStorage.getItem('soulsync_reports') ? 
+      JSON.parse(localStorage.getItem('soulsync_reports') || '[]') : [];
+    
+    storedReports.forEach((report: any, index: number) => {
+      if (index < 5) { // Limit to 5 reports for notification
+        generatedNotifications.push({
+          id: `report_${report.id || index}`,
+          title: 'Content Report',
+          message: `A ${report.contentType || 'post'} has been reported for review.`,
+          type: 'report',
+          read: false,
+          timestamp: new Date(report.date || Date.now() - Math.random() * 1000 * 60 * 60 * 48),
+        });
+      }
+    });
     
     generatedNotifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
@@ -80,11 +86,11 @@ export function AdminHeader() {
   };
   
   return (
-    <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-border/50 shadow-sm py-3 px-4 md:px-6">
+    <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-border/50 shadow-sm py-3 px-4 md:px-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="flex items-center md:hidden">
-            <ShieldCheck className="h-6 w-6 text-primary mr-2" />
+            <ShieldCheck className="h-6 w-6 text-black dark:text-white mr-2" />
           </div>
           <h1 className="text-lg md:text-xl font-bold text-gray-800 dark:text-white">
             <span className="hidden md:inline">SoulSync</span> Admin
@@ -114,7 +120,9 @@ export function AdminHeader() {
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.avatar} alt={user?.username} />
-                  <AvatarFallback className="bg-primary text-white">{user?.username.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="bg-black text-white dark:bg-white dark:text-black">
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -167,7 +175,7 @@ export function AdminHeader() {
                           "p-3 rounded-lg border flex gap-3 cursor-pointer",
                           notification.read 
                             ? "bg-background border-border/50"
-                            : "bg-muted/30 border-primary/20"
+                            : "bg-muted/30 border-black/20 dark:border-white/20"
                         )}
                         onClick={() => markAsRead(notification.id)}
                       >

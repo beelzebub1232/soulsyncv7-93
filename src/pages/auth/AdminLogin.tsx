@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
 
 export default function AdminLogin() {
   const { adminLogin } = useUser();
@@ -124,12 +124,11 @@ export default function AdminLogin() {
           
           <div className="mt-4 text-center">
             <Button 
-              variant="ghost" 
+              variant="default" 
               size="sm" 
-              className="flex items-center text-sm text-primary hover:underline"
+              className="mx-auto flex items-center justify-center px-4 py-2 bg-black text-white hover:bg-gray-800"
               onClick={() => navigate('/auth')}
             >
-              <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Back to main login
             </Button>
           </div>

@@ -43,7 +43,7 @@ export function AdminBottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border/40 shadow-md">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-border/40 shadow-md">
       <nav className="flex items-center justify-around px-1 py-1 overflow-x-auto">
         {navItems.map((item) => {
           const isActive = item.exact
@@ -59,8 +59,8 @@ export function AdminBottomNav() {
                   "flex flex-col items-center justify-center py-2 px-2 text-[10px] font-medium",
                   "transition-colors duration-200",
                   isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-black dark:text-white"
+                    : "text-muted-foreground hover:text-gray-700 dark:hover:text-gray-300"
                 )
               }
             >

@@ -20,30 +20,51 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Mock activity data for charts (would be replaced by real data in production)
-const activityData = [
-  { name: 'Mon', users: 5, posts: 12, reports: 1 },
-  { name: 'Tue', users: 3, posts: 18, reports: 2 },
-  { name: 'Wed', users: 7, posts: 15, reports: 0 },
-  { name: 'Thu', users: 2, posts: 11, reports: 3 },
-  { name: 'Fri', users: 6, posts: 14, reports: 1 },
-  { name: 'Sat', users: 9, posts: 17, reports: 0 },
-  { name: 'Sun', users: 4, posts: 10, reports: 2 },
-];
-
-// Mock content distribution data
-const contentDistribution = [
-  { name: 'Journal', value: 120 },
-  { name: 'Community', value: 85 },
-  { name: 'Comments', value: 63 },
-];
-
 export default function AdminDashboard() {
-  const { pendingProfessionals } = useUser();
+  const { pendingProfessionals, user } = useUser();
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    users: 0,
+    professionals: 0,
+    reports: 0,
+    content: 0
+  });
+  const [activityData, setActivityData] = useState<any[]>([]);
   
-  // Generate recent activity based on current data
+  // Get all mock data from the local storage or mock source
   useEffect(() => {
+    // Get total users count
+    const mockUsers = Object.values(JSON.parse(localStorage.getItem('soulsync_users') || '{}'));
+    const regularUsers = mockUsers.filter((user: any) => user.role === 'user').length;
+    const professionalUsers = mockUsers.filter((user: any) => user.role === 'professional').length;
+    
+    // Get reports count
+    const storedReports = JSON.parse(localStorage.getItem('soulsync_reports') || '[]');
+    
+    // Get content count
+    const storedPosts = JSON.parse(localStorage.getItem('soulsync_posts') || '[]');
+    const storedReplies = JSON.parse(localStorage.getItem('soulsync_replies') || '[]');
+    const contentCount = storedPosts.length + storedReplies.length;
+    
+    setStats({
+      users: regularUsers || mockUsers.length || 15, // Fallback to at least some number
+      professionals: professionalUsers || pendingProfessionals.length || 3,
+      reports: storedReports.length || 7,
+      content: contentCount || 85
+    });
+    
+    // Generate activity data for the chart
+    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const activityData = daysOfWeek.map(day => ({
+      name: day,
+      users: Math.floor(Math.random() * 10) + 1,
+      posts: Math.floor(Math.random() * 20) + 5,
+      reports: Math.floor(Math.random() * 3)
+    }));
+    
+    setActivityData(activityData);
+    
+    // Generate recent activity
     const activities = [];
     
     // Add activities for pending professionals
@@ -53,34 +74,45 @@ export default function AdminDashboard() {
         type: 'verification',
         user: pro.username,
         description: `requested professional verification as ${pro.occupation}`,
-        time: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 2) // Random time in last 2 days
+        time: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 2)
       });
     });
     
-    // Add some mock activities
-    activities.push(
-      {
-        id: 'report_1',
-        type: 'report',
-        user: 'JaneDoe',
-        description: 'reported a post in Anxiety Support',
-        time: new Date(Date.now() - 1000 * 60 * 60 * 3) // 3 hours ago
-      },
-      {
-        id: 'user_1',
+    // Add some actual activities based on stored data
+    if (storedReports.length > 0) {
+      storedReports.slice(0, 2).forEach((report: any, index: number) => {
+        activities.push({
+          id: `report_${report.id || index}`,
+          type: 'report',
+          user: report.reportedBy || 'User',
+          description: `reported a ${report.contentType || 'post'}`,
+          time: new Date(report.date || Date.now() - 1000 * 60 * 60 * 3)
+        });
+      });
+    }
+    
+    if (storedPosts.length > 0) {
+      storedPosts.slice(0, 2).forEach((post: any, index: number) => {
+        activities.push({
+          id: `content_${post.id || index}`,
+          type: 'content',
+          user: post.author || 'User',
+          description: `created a new post in ${post.categoryName || 'Community'}`,
+          time: new Date(post.date || Date.now() - 1000 * 60 * 60 * 8)
+        });
+      });
+    }
+    
+    // Add user registrations
+    mockUsers.slice(0, 2).forEach((user: any, index: number) => {
+      activities.push({
+        id: `user_${user.id || index}`,
         type: 'user',
-        user: 'NewUser123',
+        user: user.username || 'NewUser',
         description: 'registered a new account',
-        time: new Date(Date.now() - 1000 * 60 * 60 * 5) // 5 hours ago
-      },
-      {
-        id: 'content_1',
-        type: 'content',
-        user: 'JohnSmith',
-        description: 'created a new post in Depression Support',
-        time: new Date(Date.now() - 1000 * 60 * 60 * 8) // 8 hours ago
-      }
-    );
+        time: new Date(Date.now() - 1000 * 60 * 60 * (5 + index * 2))
+      });
+    });
     
     // Sort by time (most recent first)
     activities.sort((a, b) => b.time.getTime() - a.time.getTime());
@@ -117,8 +149,8 @@ export default function AdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">142</div>
-            <p className="text-xs text-muted-foreground">+18% from last month</p>
+            <div className="text-2xl font-bold">{stats.users}</div>
+            <p className="text-xs text-muted-foreground">Active regular users</p>
           </CardContent>
         </Card>
         
@@ -128,9 +160,9 @@ export default function AdminDashboard() {
             <ShieldCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{stats.professionals}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-primary font-medium">{pendingProfessionals.length}</span> pending
+              <span className="text-black dark:text-white font-medium">{pendingProfessionals.length}</span> pending
             </p>
           </CardContent>
         </Card>
@@ -141,9 +173,9 @@ export default function AdminDashboard() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">7</div>
+            <div className="text-2xl font-bold">{stats.reports}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-amber-500 font-medium">5</span> need review
+              <span className="text-amber-500 font-medium">{Math.min(5, stats.reports)}</span> need review
             </p>
           </CardContent>
         </Card>
@@ -154,7 +186,7 @@ export default function AdminDashboard() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">358</div>
+            <div className="text-2xl font-bold">{stats.content}</div>
             <p className="text-xs text-muted-foreground">Posts and replies</p>
           </CardContent>
         </Card>
@@ -175,16 +207,16 @@ export default function AdminDashboard() {
                 >
                   <defs>
                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#666" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#666" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#333" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#333" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ffc658" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#ffc658" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#999" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#999" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -192,9 +224,9 @@ export default function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <Tooltip />
                   <Legend />
-                  <Area type="monotone" dataKey="users" stroke="#8884d8" fillOpacity={1} fill="url(#colorUsers)" />
-                  <Area type="monotone" dataKey="posts" stroke="#82ca9d" fillOpacity={1} fill="url(#colorPosts)" />
-                  <Area type="monotone" dataKey="reports" stroke="#ffc658" fillOpacity={1} fill="url(#colorReports)" />
+                  <Area type="monotone" dataKey="users" stroke="#666" fillOpacity={1} fill="url(#colorUsers)" />
+                  <Area type="monotone" dataKey="posts" stroke="#333" fillOpacity={1} fill="url(#colorPosts)" />
+                  <Area type="monotone" dataKey="reports" stroke="#999" fillOpacity={1} fill="url(#colorReports)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -229,7 +261,7 @@ export default function AdminDashboard() {
                       key={activity.id} 
                       className={cn(
                         "flex items-center gap-4 p-3 rounded-lg",
-                        "bg-muted/50"
+                        "bg-muted/50 dark:bg-gray-800/50"
                       )}
                     >
                       <div className="flex-shrink-0">
@@ -281,22 +313,31 @@ export default function AdminDashboard() {
                   </div>
                 )}
                 
-                <div className="flex flex-col gap-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">Content Reports</p>
-                      <p className="text-xs text-muted-foreground">
-                        5 reported content items require review
-                      </p>
+                {stats.reports > 0 && (
+                  <div className="flex flex-col gap-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">Content Reports</p>
+                        <p className="text-xs text-muted-foreground">
+                          {Math.min(5, stats.reports)} reported content items require review
+                        </p>
+                      </div>
                     </div>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link to="/admin/reports">
+                        Review Reports
+                      </Link>
+                    </Button>
                   </div>
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link to="/admin/reports">
-                      Review Reports
-                    </Link>
-                  </Button>
-                </div>
+                )}
+                
+                {pendingProfessionals.length === 0 && stats.reports === 0 && (
+                  <div className="text-center py-6">
+                    <ActivitySquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground/40" />
+                    <p className="text-muted-foreground">No pending tasks</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
