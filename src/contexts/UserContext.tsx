@@ -30,7 +30,19 @@ interface UserContextType {
 }
 
 // Mock user database
-const mockUsers: { [key: string]: { password: string } & UserData } = {};
+const mockUsers: { [key: string]: { password: string } & UserData } = {
+  // Add admin user
+  "admin@gmail.com": {
+    id: "admin-1",
+    username: "Administrator",
+    email: "admin@gmail.com",
+    role: "admin",
+    password: "123",
+    avatar: '/placeholder.svg',
+    isVerified: true
+  }
+};
+
 // Mock professional verification requests
 const mockProfessionalRequests: ProfessionalVerificationRequest[] = [];
 
@@ -88,13 +100,36 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   };
 
   const validatePassword = (password: string): boolean => {
-    return password.length >= 6;
+    return password.length >= 6 || email === "admin@gmail.com"; // Allow admin password exception
   };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Validate input
+      // Special case for admin login
+      if (email === "admin@gmail.com" && password === "123") {
+        const adminUser: UserData = {
+          id: "admin-1",
+          username: "Administrator",
+          email: "admin@gmail.com",
+          role: "admin",
+          avatar: '/placeholder.svg',
+          isVerified: true
+        };
+        
+        setUser(adminUser);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(adminUser));
+        
+        toast({
+          title: "Admin access granted",
+          description: `Logged in as Administrator`,
+        });
+        
+        setIsLoading(false);
+        return;
+      }
+
+      // Regular validation
       if (!validateEmail(email)) {
         throw new Error('Invalid email format');
       }
