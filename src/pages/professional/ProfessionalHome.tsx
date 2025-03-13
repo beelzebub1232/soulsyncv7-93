@@ -1,4 +1,3 @@
-
 import { useUser } from "@/contexts/UserContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
   Clock,
   HelpCircle,
   Shield,
-  ChartLineUp,
+  ChartLine,
   FileCheck,
   Award,
   ArrowUpRight
@@ -117,7 +116,7 @@ export default function ProfessionalHome() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="rounded-full bg-pro-light p-3">
-                <ChartLineUp className="h-6 w-6 text-pro-primary" />
+                <ChartLine className="h-6 w-6 text-pro-primary" />
               </div>
               <ArrowUpRight className="h-4 w-4 text-green-500" />
             </div>
@@ -196,9 +195,7 @@ export default function ProfessionalHome() {
             <div className="space-y-4">
               {dashboardData?.pendingQuestions > 0 && (
                 <div className="flex justify-between items-center p-4 bg-amber-50 rounded-lg">
-                  <div className="flex items
-
--center gap-2">
+                  <div className="flex items-center gap-2">
                     <HelpCircle className="h-4 w-4 text-amber-500" />
                     <span>{dashboardData.pendingQuestions} questions need answers</span>
                   </div>
