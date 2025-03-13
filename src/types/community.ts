@@ -1,4 +1,3 @@
-
 export interface ForumCategory {
   id: string;
   name: string;
@@ -32,6 +31,7 @@ export interface ForumPost {
   author: string;
   authorId: string;
   authorRole?: string;
+  authorAvatar?: string;
   date: Date;
   replies: number;
   isAnonymous?: boolean;
@@ -49,6 +49,7 @@ export interface ForumReply {
   author: string;
   authorId: string;
   authorRole?: string;
+  authorAvatar?: string;
   date: Date;
   isAnonymous?: boolean;
   likes: number;
@@ -74,11 +75,12 @@ export interface Report {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'reply' | 'like' | 'report' | 'verification';
+  type: 'reply' | 'like' | 'report' | 'verification' | 'system' | 'user';
   content: string;
   relatedId: string;
   date: Date;
   read: boolean;
+  url?: string;
 }
 
 export interface ProfessionalVerification {

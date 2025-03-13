@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 export type UserRole = 'user' | 'professional' | 'admin';
@@ -28,12 +27,11 @@ interface UserContextType {
   pendingProfessionals: UserData[];
   verifyProfessional: (professionalId: string) => void;
   rejectProfessional: (professionalId: string) => void;
+  registeredUsers: UserData[];
 }
 
-// Mock user database - store key in localStorage so it persists across sessions
 const MOCK_USERS_STORAGE_KEY = 'soulsync_users_mock_db';
 
-// Initialize mock users with admin user
 const initializeMockUsers = () => {
   const storedUsers = localStorage.getItem(MOCK_USERS_STORAGE_KEY);
   
@@ -45,7 +43,6 @@ const initializeMockUsers = () => {
     }
   }
   
-  // Default admin user if no stored users
   return {
     'admin@gmail.com': {
       id: 'admin-1',
@@ -76,19 +73,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [pendingProfessionals, setPendingProfessionals] = useState<UserData[]>([]);
   const { toast } = useToast();
 
-  // Save mockUsers to localStorage whenever it changes
+  const registeredUsers = useMemo(() => {
+    return Object.values(mockUsers).map(user => ({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role as UserRole,
+      avatar: user.avatar,
+      isVerified: user.isVerified,
+      occupation: user.occupation,
+      identityDocument: user.identityDocument,
+      lastActive: new Date(),
+      joinDate: new Date()
+    }));
+  }, [mockUsers]);
+
   useEffect(() => {
     localStorage.setItem(MOCK_USERS_STORAGE_KEY, JSON.stringify(mockUsers));
   }, [mockUsers]);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const loadUser = () => {
       try {
         const savedUser = localStorage.getItem(STORAGE_KEY);
         if (savedUser) {
           const parsedUser = JSON.parse(savedUser);
-          // Validate stored user data
           if (parsedUser && parsedUser.email && parsedUser.id) {
             setUser(parsedUser);
           } else {
@@ -96,7 +105,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           }
         }
         
-        // Load pending professionals from localStorage
         const savedPendingProfessionals = localStorage.getItem(PENDING_PROFESSIONALS_KEY);
         if (savedPendingProfessionals) {
           setPendingProfessionals(JSON.parse(savedPendingProfessionals));
@@ -112,7 +120,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     loadUser();
   }, []);
 
-  // Check for notifications on login
   useEffect(() => {
     if (user && user.role === 'professional') {
       const approvedNotifications = localStorage.getItem(APPROVED_NOTIFICATIONS_KEY);
@@ -125,7 +132,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
               description: "Your professional account has been approved by an admin.",
             });
             
-            // Remove notification after showing
             const updatedNotifications = notifications.filter(id => id !== user.id);
             localStorage.setItem(APPROVED_NOTIFICATIONS_KEY, JSON.stringify(updatedNotifications));
           }
@@ -148,7 +154,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Validate input
       if (!validateEmail(email)) {
         throw new Error('Invalid email format');
       }
@@ -156,13 +161,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error('Password must be at least 6 characters');
       }
 
-      // Check if user exists
       const storedUser = mockUsers[email];
       if (!storedUser || storedUser.password !== password) {
         throw new Error('Invalid credentials');
       }
 
-      // Don't allow admin or professional login through regular login
       if (storedUser.role === 'admin') {
         throw new Error('Please use the admin login');
       }
@@ -204,7 +207,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const professionalLogin = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Validate input
       if (!validateEmail(email)) {
         throw new Error('Invalid email format');
       }
@@ -212,20 +214,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error('Password must be at least 6 characters');
       }
 
-      // Check if professional exists
       const storedUser = mockUsers[email];
       if (!storedUser || storedUser.password !== password) {
         console.log("Invalid credentials: User not found or password mismatch");
         throw new Error('Invalid credentials');
       }
 
-      // Verify it's a professional account
       if (storedUser.role !== 'professional') {
         console.log("Not a professional account:", storedUser.role);
         throw new Error('This login is only for professional accounts');
       }
       
-      // Check if the professional is verified
       if (!storedUser.isVerified) {
         console.log("Professional not verified:", storedUser.isVerified);
         throw new Error('Your account is pending verification. Please wait for admin approval.');
@@ -265,7 +264,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const adminLogin = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Admin validation
       if (email !== 'admin@gmail.com') {
         throw new Error('Invalid admin credentials');
       }
@@ -314,7 +312,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   ) => {
     setIsLoading(true);
     try {
-      // Validate input
       if (!username.trim()) {
         throw new Error('Username is required');
       }
@@ -325,17 +322,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         throw new Error('Password must be at least 6 characters');
       }
 
-      // Check if user already exists
       if (mockUsers[email]) {
         throw new Error('Email already registered');
       }
 
-      // For professional role, require occupation
       if (role === 'professional' && !occupation) {
         throw new Error('Occupation is required for professional accounts');
       }
 
-      // Create new user
       const newUser = {
         id: crypto.randomUUID(),
         username,
@@ -343,18 +337,16 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         role,
         password,
         avatar: '/placeholder.svg',
-        isVerified: role === 'user', // Regular users are auto-verified
+        isVerified: role === 'user',
         occupation,
         identityDocument,
       };
 
-      // Add user to mockUsers
       const updatedMockUsers = { ...mockUsers, [email]: newUser };
       setMockUsers(updatedMockUsers);
       console.log("User registered:", newUser);
       console.log("Updated mockUsers:", updatedMockUsers);
 
-      // If professional, add to pending list
       if (role === 'professional') {
         const professionalData: UserData = {
           id: newUser.id,
@@ -383,8 +375,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         title: "Account created!",
         description: "You can now sign in with your credentials.",
       });
-      
-      // Don't auto-login for regular users
     } catch (error) {
       toast({
         variant: "destructive",
@@ -400,7 +390,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
-    // Clear app-specific data
     localStorage.removeItem('soulsync_moods');
     localStorage.removeItem('soulsync_habits');
     localStorage.removeItem('soulsync_journal');
@@ -417,7 +406,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       setUser(updatedUser);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUser));
       
-      // Update mock database
       if (mockUsers[user.email]) {
         const updatedMockUsers = { 
           ...mockUsers, 
@@ -439,7 +427,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if (professional) {
       console.log("Found professional to verify:", professional);
       
-      // Update the professional's verified status in mockUsers
       if (mockUsers[professional.email]) {
         const updatedMockUsers = {
           ...mockUsers,
@@ -452,13 +439,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.log("Updated professional verification status in mockUsers:", updatedMockUsers[professional.email]);
       } else {
         console.error("Professional not found in mockUsers:", professional.email);
-        // This is a critical error - professional is in pending list but not in mockUsers
-        // Re-add them to mockUsers with a default password
         const updatedMockUsers = {
           ...mockUsers,
           [professional.email]: {
             ...professional,
-            password: 'password123', // Default password as fallback
+            password: 'password123',
             isVerified: true
           }
         };
@@ -466,7 +451,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.log("Re-added professional to mockUsers:", updatedMockUsers[professional.email]);
       }
       
-      // Store notification for the professional to see when they log in
       try {
         const notifications = JSON.parse(localStorage.getItem(APPROVED_NOTIFICATIONS_KEY) || '[]');
         notifications.push(professional.id);
@@ -477,7 +461,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         localStorage.setItem(APPROVED_NOTIFICATIONS_KEY, JSON.stringify([professional.id]));
       }
       
-      // Update pending professionals list
       const updatedPending = pendingProfessionals.filter(p => p.id !== professionalId);
       setPendingProfessionals(updatedPending);
       localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
@@ -496,11 +479,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const updatedPending = pendingProfessionals.filter(p => p.id !== professionalId);
     
     if (professional) {
-      // Remove from mock users
       const { [professional.email]: _, ...restMockUsers } = mockUsers;
       setMockUsers(restMockUsers);
       
-      // Update pending professionals list
       setPendingProfessionals(updatedPending);
       localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
       
@@ -509,7 +490,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         description: `${professional.username}'s professional application has been rejected.`,
       });
     } else {
-      // Still update the pending list even if professional wasn't found
       setPendingProfessionals(updatedPending);
       localStorage.setItem(PENDING_PROFESSIONALS_KEY, JSON.stringify(updatedPending));
     }
@@ -529,7 +509,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         updateUser,
         pendingProfessionals,
         verifyProfessional,
-        rejectProfessional
+        rejectProfessional,
+        registeredUsers
       }}
     >
       {children}
