@@ -1,4 +1,3 @@
-
 import { useUser } from "@/contexts/UserContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, UserCircle, BadgeCheck } from "lucide-react";
+import { LogOut, Settings, ShieldCheck } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -42,9 +41,8 @@ export function ProfessionalHeader() {
                 className="relative p-1 rounded-full h-9 w-9 flex items-center justify-center"
               >
                 <Avatar className="h-8 w-8 ring-2 ring-pro-primary/20">
-                  <AvatarImage src={user?.avatar} />
                   <AvatarFallback className="bg-gradient-to-br from-pro-primary to-pro-secondary text-white">
-                    {user?.username?.charAt(0).toUpperCase()}
+                    <ShieldCheck className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
               </Button>
