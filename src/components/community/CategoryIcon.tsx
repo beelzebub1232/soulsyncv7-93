@@ -1,5 +1,5 @@
 
-import { Heart, Brain, Flame, Globe, Book, MessageSquare } from "lucide-react";
+import { Heart, Brain, Flame, Globe, Book, MessageSquare, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CategoryIconProps {
@@ -22,6 +22,8 @@ export function CategoryIcon({ categoryId, className }: CategoryIconProps) {
         return <Globe className={cn("h-5 w-5", className)} />;
       case 'community':
         return <MessageSquare className={cn("h-5 w-5", className)} />;
+      case 'verified':
+        return <CheckCircle2 className={cn("h-5 w-5", className)} />;
       default:
         return <Heart className={cn("h-5 w-5", className)} />;
     }

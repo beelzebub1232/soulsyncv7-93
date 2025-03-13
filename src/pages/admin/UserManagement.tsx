@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Users, Search, MoreVertical, UserX, UserCog, Mail, AlertTriangle, User } from "lucide-react";
+import { Users, Search, MoreVertical, UserX, UserCog, Mail, AlertTriangle, User, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,31 +15,24 @@ export default function UserManagement() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState<any[]>([]);
-  const { verifyProfessional, rejectProfessional } = useUser();
+  const { verifyProfessional, rejectProfessional, registeredUsers } = useUser();
 
-  // Load user data from localStorage
+  // Load user data
   useEffect(() => {
-    // Get users from localStorage
-    const mockUsersData = localStorage.getItem('soulsync_users_mock_db');
-    let mockUsers = [];
-    
-    if (mockUsersData) {
-      const parsedUsers = JSON.parse(mockUsersData);
-      mockUsers = Object.values(parsedUsers);
+    if (registeredUsers && registeredUsers.length > 0) {
+      // Convert date strings to Date objects
+      const processedUsers = registeredUsers.map((user: any) => ({
+        ...user,
+        lastActive: user.lastActive instanceof Date ? user.lastActive : new Date(user.lastActive || Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7),
+        joinDate: user.joinDate instanceof Date ? user.joinDate : new Date(user.joinDate || Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30)
+      }));
+      
+      // Sort alphabetically by username
+      processedUsers.sort((a: any, b: any) => a.username.localeCompare(b.username));
+      
+      setUsers(processedUsers);
     }
-
-    // Convert date strings to Date objects
-    const processedUsers = mockUsers.map((user: any) => ({
-      ...user,
-      lastActive: user.lastActive instanceof Date ? user.lastActive : new Date(user.lastActive || Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7),
-      joinDate: user.joinDate instanceof Date ? user.joinDate : new Date(user.joinDate || Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 30)
-    }));
-    
-    // Sort alphabetically by username
-    processedUsers.sort((a: any, b: any) => a.username.localeCompare(b.username));
-    
-    setUsers(processedUsers);
-  }, []);
+  }, [registeredUsers]);
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -59,10 +52,17 @@ export default function UserManagement() {
   );
 
   const handleSuspendUser = (userId: string) => {
+    // Find the user
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    // Toggle suspension status
+    const newStatus = !user.isSuspended;
+    
     // In a real app, this would call an API to suspend the user
     const updatedUsers = users.map(user => {
       if (user.id === userId) {
-        return { ...user, isSuspended: true };
+        return { ...user, isSuspended: newStatus };
       }
       return user;
     });
@@ -77,10 +77,9 @@ export default function UserManagement() {
     
     localStorage.setItem('soulsync_users_mock_db', JSON.stringify(usersObj));
     
-    const user = users.find(u => u.id === userId);
     toast({
-      title: "User suspended",
-      description: `${user?.username || 'User'} has been suspended.`
+      title: newStatus ? "User suspended" : "User unsuspended",
+      description: `${user?.username || 'User'} has been ${newStatus ? 'suspended' : 'unsuspended'}.`
     });
   };
 
@@ -103,6 +102,28 @@ export default function UserManagement() {
         return u;
       });
       setUsers(updatedUsers);
+      
+      // Add notification for the professional
+      const notification = {
+        id: crypto.randomUUID(),
+        title: 'Professional Verification',
+        content: 'Your professional status has been verified.',
+        type: 'verification',
+        read: false,
+        date: new Date(),
+        userId: userId
+      };
+      
+      // Get existing notifications
+      const savedNotifications = localStorage.getItem(`soulsync_notifications_${userId}`);
+      let notifications = [];
+      
+      if (savedNotifications) {
+        notifications = JSON.parse(savedNotifications);
+      }
+      
+      notifications.push(notification);
+      localStorage.setItem(`soulsync_notifications_${userId}`, JSON.stringify(notifications));
     } else {
       toast({
         title: "Manage roles",
@@ -113,18 +134,64 @@ export default function UserManagement() {
 
   const handleContactUser = (userId: string) => {
     const user = users.find(u => u.id === userId);
+    
     toast({
       title: "Contact user",
       description: `Mail composition for ${user?.username || 'User'} would open here.`
     });
+    
+    // Add notification for the user
+    const notification = {
+      id: crypto.randomUUID(),
+      title: 'New Admin Message',
+      content: 'You have received a new message from the admin team.',
+      type: 'user',
+      read: false,
+      date: new Date(),
+      userId: userId
+    };
+    
+    // Get existing notifications
+    const savedNotifications = localStorage.getItem(`soulsync_notifications_${userId}`);
+    let notifications = [];
+    
+    if (savedNotifications) {
+      notifications = JSON.parse(savedNotifications);
+    }
+    
+    notifications.push(notification);
+    localStorage.setItem(`soulsync_notifications_${userId}`, JSON.stringify(notifications));
   };
 
   const handleWarnUser = (userId: string) => {
     const user = users.find(u => u.id === userId);
+    
     toast({
       title: "Warning sent",
       description: `A warning has been sent to ${user?.username || 'User'}.`
     });
+    
+    // Add notification for the user
+    const notification = {
+      id: crypto.randomUUID(),
+      title: 'Warning',
+      content: 'You have received a warning from the admin team.',
+      type: 'system',
+      read: false,
+      date: new Date(),
+      userId: userId
+    };
+    
+    // Get existing notifications
+    const savedNotifications = localStorage.getItem(`soulsync_notifications_${userId}`);
+    let notifications = [];
+    
+    if (savedNotifications) {
+      notifications = JSON.parse(savedNotifications);
+    }
+    
+    notifications.push(notification);
+    localStorage.setItem(`soulsync_notifications_${userId}`, JSON.stringify(notifications));
   };
 
   return (
@@ -139,7 +206,7 @@ export default function UserManagement() {
         <Input placeholder="Search users..." className="pl-9" value={searchTerm} onChange={handleSearch} />
       </div>
       
-      <Card>
+      <Card className="max-w-full overflow-hidden">
         <CardHeader className="py-4">
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -147,94 +214,94 @@ export default function UserManagement() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="h-[calc(100vh-20rem)]">
-            <div className="divide-y">
+          <ScrollArea className="h-[calc(100vh-20rem)] w-full">
+            <div className="divide-y w-full">
               {filteredUsers.length === 0 ? (
                 <div className="py-6 text-center text-muted-foreground">
                   No users found matching your search criteria.
                 </div>
               ) : filteredUsers.map(user => (
-                <div key={user.id} className="p-4 hover:bg-muted/50">
-                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.avatar} alt={user.username} />
-                      <AvatarFallback>
-                        {user.username ? user.username.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <div className="font-medium flex items-center gap-2">
-                            {user.username}
-                            {user.role === 'professional' && (
-                              <Badge 
-                                variant="outline" 
-                                className={`${user.isVerified ? 'bg-blue-50 text-blue-700' : 'bg-yellow-50 text-yellow-700'} dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 text-xs`}
-                              >
-                                {user.isVerified ? 'Professional' : 'Pending Verification'}
-                              </Badge>
-                            )}
-                            {user.role === 'admin' && (
-                              <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 border-purple-200 text-xs">
-                                Admin
-                              </Badge>
-                            )}
-                            {user.isSuspended && (
-                              <Badge variant="outline" className="bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 border-red-200 text-xs">
-                                Suspended
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
-                          {user.occupation && (
-                            <div className="text-xs text-muted-foreground mt-1">Occupation: {user.occupation}</div>
+                <div key={user.id} className="p-4 hover:bg-muted/50 flex flex-col sm:flex-row gap-4 items-start sm:items-center max-w-full">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.avatar} alt={user.username} />
+                    <AvatarFallback className="bg-muted">
+                      {user.role === 'admin' && <UserCog className="h-4 w-4" />}
+                      {user.role === 'professional' && <UserCheck className="h-4 w-4" />}
+                      {(user.role === 'user' || !user.role) && <User className="h-4 w-4" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="font-medium flex items-center gap-2">
+                          {user.username}
+                          {user.role === 'professional' && (
+                            <Badge 
+                              variant="outline" 
+                              className={`${user.isVerified ? 'bg-blue-50 text-blue-700' : 'bg-yellow-50 text-yellow-700'} dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 text-xs`}
+                            >
+                              {user.isVerified ? 'Professional' : 'Pending Verification'}
+                            </Badge>
+                          )}
+                          {user.role === 'admin' && (
+                            <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 border-purple-200 text-xs">
+                              Admin
+                            </Badge>
+                          )}
+                          {user.isSuspended && (
+                            <Badge variant="outline" className="bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 border-red-200 text-xs">
+                              Suspended
+                            </Badge>
                           )}
                         </div>
-                        
-                        <div className="mt-1 sm:mt-0 text-xs text-muted-foreground">
-                          <div>Joined: {formatDate(user.joinDate)}</div>
-                          <div>Last active: {formatDate(user.lastActive)}</div>
-                        </div>
+                        <div className="text-sm text-muted-foreground truncate max-w-[250px] sm:max-w-full">{user.email}</div>
+                        {user.occupation && (
+                          <div className="text-xs text-muted-foreground mt-1">Occupation: {user.occupation}</div>
+                        )}
+                      </div>
+                      
+                      <div className="mt-1 sm:mt-0 text-xs text-muted-foreground">
+                        <div>Joined: {formatDate(user.joinDate)}</div>
+                        <div>Last active: {formatDate(user.lastActive)}</div>
                       </div>
                     </div>
-                    
-                    <div className="ml-auto">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                            <span className="sr-only">Actions</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleManageRoles(user.id)}>
-                            <UserCog className="h-4 w-4 mr-2" />
-                            {user.role === 'professional' && !user.isVerified 
-                              ? 'Verify Professional' 
-                              : 'Manage Roles'
-                            }
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleContactUser(user.id)}>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Contact User
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleWarnUser(user.id)}>
-                            <AlertTriangle className="h-4 w-4 mr-2" />
-                            Send Warning
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleSuspendUser(user.id)} 
-                            className="text-destructive focus:text-destructive"
-                            disabled={user.role === 'admin'}
-                          >
-                            <UserX className="h-4 w-4 mr-2" />
-                            {user.isSuspended ? 'Unsuspend User' : 'Suspend User'}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                  </div>
+                  
+                  <div className="ml-auto">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4" />
+                          <span className="sr-only">Actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleManageRoles(user.id)}>
+                          <UserCog className="h-4 w-4 mr-2" />
+                          {user.role === 'professional' && !user.isVerified 
+                            ? 'Verify Professional' 
+                            : 'Manage Roles'
+                          }
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleContactUser(user.id)}>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Contact User
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleWarnUser(user.id)}>
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Send Warning
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleSuspendUser(user.id)} 
+                          className="text-destructive focus:text-destructive"
+                          disabled={user.role === 'admin'}
+                        >
+                          <UserX className="h-4 w-4 mr-2" />
+                          {user.isSuspended ? 'Unsuspend User' : 'Suspend User'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               ))}

@@ -23,6 +23,7 @@ import {
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { CategoryIcon } from "@/components/community/CategoryIcon";
 
 interface AdminReplyItemProps {
   reply: ForumReply;
@@ -76,7 +77,7 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
       <div className="flex justify-between items-start">
         <div className="flex gap-3 items-start">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/placeholder.svg" />
+            <AvatarImage src={reply.authorAvatar || "/placeholder.svg"} />
             <AvatarFallback>
               {reply.isAnonymous ? <User className="h-4 w-4" /> : reply.author.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -87,9 +88,9 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
                 {reply.isAnonymous ? 'Anonymous' : reply.author}
               </span>
               {reply.authorRole === 'professional' && (
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 text-[10px] py-0 h-4">
-                  Professional
-                </Badge>
+                <span className="flex items-center">
+                  <CategoryIcon categoryId="verified" className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                </span>
               )}
               {reply.authorRole === 'admin' && (
                 <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400 border-purple-200 text-[10px] py-0 h-4">
@@ -141,9 +142,15 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={(e) => {
+              e.stopPropagation();
+              setIsDeleteDialogOpen(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onDelete();
                 setIsDeleteDialogOpen(false);
               }}

@@ -54,11 +54,11 @@ export function AdminBottomNav() {
             <NavLink
               key={item.href}
               to={item.href}
-              className={({ isActive }) =>
+              className={({ isActive: linkActive }) =>
                 cn(
                   "flex flex-col items-center justify-center py-2 px-2 text-[10px] font-medium",
                   "transition-colors duration-200",
-                  isActive
+                  linkActive
                     ? "text-black dark:text-white"
                     : "text-muted-foreground hover:text-gray-700 dark:hover:text-gray-300"
                 )

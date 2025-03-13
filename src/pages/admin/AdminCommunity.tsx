@@ -7,6 +7,7 @@ import { AdminForumCategoryList } from "./components/AdminForumCategoryList";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash, Edit } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AdminCommunity() {
   const { toast } = useToast();
@@ -136,13 +137,13 @@ export default function AdminCommunity() {
       
       <Tabs defaultValue="categories" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="content">Content Management</TabsTrigger>
+          <TabsTrigger className={cn("data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black")} value="categories">Categories</TabsTrigger>
+          <TabsTrigger className={cn("data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black")} value="content">Content Management</TabsTrigger>
         </TabsList>
         
         <TabsContent value="categories" className="mt-4 pb-16">
           <div className="flex justify-end mb-4">
-            <Button onClick={handleAddCategory} className="flex items-center gap-2">
+            <Button onClick={handleAddCategory} className="flex items-center gap-2 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90">
               <Plus className="h-4 w-4" />
               Add Category
             </Button>

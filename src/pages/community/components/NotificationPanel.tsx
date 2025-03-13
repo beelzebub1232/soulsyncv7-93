@@ -4,6 +4,7 @@ import { Bell, Heart, MessageSquare, ShieldAlert, CheckCircle2 } from "lucide-re
 import { Notification } from "@/types/community";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Link } from "react-router-dom";
 
 interface NotificationPanelProps {
   notifications: Notification[];
@@ -24,15 +25,20 @@ export function NotificationPanel({ notifications, onMarkAsRead }: NotificationP
     <ScrollArea className="h-[calc(100vh-10rem)] mt-4">
       <div className="space-y-2">
         {notifications.map((notification) => (
-          <div 
+          <Link
             key={notification.id}
+            to={notification.url || '#'}
             className={cn(
-              "p-3 rounded-lg transition-colors",
+              "p-3 rounded-lg transition-colors block",
               notification.read ? "bg-accent/50" : "bg-accent"
             )}
             onClick={() => {
               if (!notification.read) {
                 onMarkAsRead(notification.id);
+              }
+              if (!notification.url) {
+                // Prevent navigation if there's no URL
+                return;
               }
             }}
           >
@@ -48,7 +54,13 @@ export function NotificationPanel({ notifications, onMarkAsRead }: NotificationP
                   <ShieldAlert className="h-5 w-5 text-orange-500" />
                 )}
                 {notification.type === 'verification' && (
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  <CheckCircle2 className="h-5 w-5 text-green-500 fill-green-500" />
+                )}
+                {notification.type === 'system' && (
+                  <Bell className="h-5 w-5 text-yellow-500" />
+                )}
+                {notification.type === 'user' && (
+                  <Bell className="h-5 w-5 text-purple-500" />
                 )}
               </div>
               <div className="flex-1">
@@ -66,7 +78,7 @@ export function NotificationPanel({ notifications, onMarkAsRead }: NotificationP
                 <div className="w-2 h-2 rounded-full bg-mindscape-primary self-start mt-2" />
               )}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </ScrollArea>

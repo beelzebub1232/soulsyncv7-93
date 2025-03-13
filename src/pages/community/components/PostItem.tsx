@@ -1,7 +1,7 @@
 
 import { ForumPost } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Heart, Calendar, CheckCircle2, Edit, Trash2, Link2, Youtube } from "lucide-react";
+import { MessageSquare, Heart, Calendar, Edit, Trash2, Link2, Youtube } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CategoryIcon } from "@/components/community/CategoryIcon";
 
 interface PostItemProps {
   post: ForumPost;
@@ -99,7 +100,10 @@ export function PostItem({ post, onLike, onEdit, onDelete, isLiked = false }: Po
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
                     aria-label="Delete post"
                   >
@@ -114,10 +118,16 @@ export function PostItem({ post, onLike, onEdit, onDelete, isLiked = false }: Po
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}>
+                      Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction 
                       onClick={(e) => {
                         e.stopPropagation();
+                        e.preventDefault();
                         handleDelete(e);
                       }}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -191,7 +201,7 @@ export function PostItem({ post, onLike, onEdit, onDelete, isLiked = false }: Po
                 {post.author}
               </span>
               {post.authorRole === "professional" && (
-                <CheckCircle2 className="h-3 w-3 text-blue-600 fill-blue-600" />
+                <CategoryIcon categoryId="verified" className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
               )}
             </div>
           )}

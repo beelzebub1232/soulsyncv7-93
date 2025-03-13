@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Bell, LogOut, User, ShieldCheck, AlertTriangle, Settings } from "lucide-react";
+import { Bell, LogOut, UserCog, ShieldCheck, AlertTriangle, Settings, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-// Sample notification type
+// Notification type
 type AdminNotification = {
   id: string;
   title: string;
@@ -27,6 +27,7 @@ type AdminNotification = {
   type: 'verification' | 'report' | 'user' | 'system';
   read: boolean;
   timestamp: Date;
+  url?: string;
 };
 
 export function AdminHeader() {
@@ -37,6 +38,7 @@ export function AdminHeader() {
   useEffect(() => {
     const generatedNotifications: AdminNotification[] = [];
     
+    // Add notifications for pending professionals
     pendingProfessionals.forEach(professional => {
       generatedNotifications.push({
         id: `prof_${professional.id}`,
@@ -45,15 +47,16 @@ export function AdminHeader() {
         type: 'verification',
         read: false,
         timestamp: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24),
+        url: '/admin/verifications'
       });
     });
     
-    // Add actual reports instead of random data
-    const storedReports = localStorage.getItem('soulsync_reports') ? 
-      JSON.parse(localStorage.getItem('soulsync_reports') || '[]') : [];
+    // Add actual reports
+    const storedReports = localStorage.getItem('soulsync_reported_content') ? 
+      JSON.parse(localStorage.getItem('soulsync_reported_content') || '[]') : [];
     
     storedReports.forEach((report: any, index: number) => {
-      if (index < 5) { // Limit to 5 reports for notification
+      if (report.status === 'pending') { // Only show pending reports
         generatedNotifications.push({
           id: `report_${report.id || index}`,
           title: 'Content Report',
@@ -61,9 +64,26 @@ export function AdminHeader() {
           type: 'report',
           read: false,
           timestamp: new Date(report.date || Date.now() - Math.random() * 1000 * 60 * 60 * 48),
+          url: '/admin/reports'
         });
       }
     });
+    
+    // Get notifications from storage
+    const storedNotifications = localStorage.getItem('soulsync_admin_notifications');
+    if (storedNotifications) {
+      try {
+        const parsedNotifications = JSON.parse(storedNotifications);
+        parsedNotifications.forEach((notification: any) => {
+          generatedNotifications.push({
+            ...notification,
+            timestamp: new Date(notification.timestamp)
+          });
+        });
+      } catch (error) {
+        console.error('Failed to parse admin notifications:', error);
+      }
+    }
     
     generatedNotifications.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
@@ -78,12 +98,27 @@ export function AdminHeader() {
         notification.id === id ? {...notification, read: true} : notification
       )
     );
+    
+    // Update stored notifications
+    const updatedNotifications = notifications.map(notification => 
+      notification.id === id ? {...notification, read: true} : notification
+    );
+    
+    localStorage.setItem('soulsync_admin_notifications', 
+      JSON.stringify(updatedNotifications.filter(n => !n.id.startsWith('prof_') && !n.id.startsWith('report_')))
+    );
   };
   
   const markAllAsRead = () => {
     setNotifications(prev => 
       prev.map(notification => ({...notification, read: true}))
     );
+    
+    // Update stored notifications
+    const filteredNotifications = notifications.filter(n => !n.id.startsWith('prof_') && !n.id.startsWith('report_'));
+    const updatedNotifications = filteredNotifications.map(notification => ({...notification, read: true}));
+    
+    localStorage.setItem('soulsync_admin_notifications', JSON.stringify(updatedNotifications));
   };
   
   return (
@@ -122,7 +157,7 @@ export function AdminHeader() {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.avatar} alt={user?.username} />
                   <AvatarFallback className="bg-black text-white dark:bg-white dark:text-black">
-                    <User className="h-4 w-4" />
+                    <UserCog className="h-4 w-4" />
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -176,15 +211,21 @@ export function AdminHeader() {
                 ) : (
                   <div className="space-y-3">
                     {notifications.map((notification) => (
-                      <div 
+                      <Link
                         key={notification.id}
+                        to={notification.url || '#'}
                         className={cn(
-                          "p-3 rounded-lg border flex gap-3 cursor-pointer",
+                          "p-3 rounded-lg border flex gap-3 block cursor-pointer",
                           notification.read 
                             ? "bg-background border-border/50"
                             : "bg-muted/30 border-black/20 dark:border-white/20"
                         )}
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => {
+                          markAsRead(notification.id);
+                          if (!notification.url) {
+                            setNotificationOpen(false);
+                          }
+                        }}
                       >
                         <div className="flex-shrink-0 mt-1">
                           <div className={cn(
@@ -209,7 +250,7 @@ export function AdminHeader() {
                           </div>
                           <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 )}
