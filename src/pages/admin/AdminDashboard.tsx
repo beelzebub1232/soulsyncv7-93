@@ -1,27 +1,17 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, ShieldCheck, AlertTriangle, FileText, ActivitySquare } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
-import { 
-  AreaChart, 
-  BarChart,
-  Area, 
-  Bar,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Legend
-} from "recharts";
+import { AreaChart, BarChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
 export default function AdminDashboard() {
-  const { pendingProfessionals, user } = useUser();
+  const {
+    pendingProfessionals,
+    user
+  } = useUser();
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [stats, setStats] = useState({
     users: 0,
@@ -30,29 +20,29 @@ export default function AdminDashboard() {
     content: 0
   });
   const [activityData, setActivityData] = useState<any[]>([]);
-  
+
   // Get all mock data from the local storage or mock source
   useEffect(() => {
     // Get total users count
     const mockUsers = Object.values(JSON.parse(localStorage.getItem('soulsync_users') || '{}'));
     const regularUsers = mockUsers.filter((user: any) => user.role === 'user').length;
     const professionalUsers = mockUsers.filter((user: any) => user.role === 'professional').length;
-    
+
     // Get reports count
     const storedReports = JSON.parse(localStorage.getItem('soulsync_reports') || '[]');
-    
+
     // Get content count
     const storedPosts = JSON.parse(localStorage.getItem('soulsync_posts') || '[]');
     const storedReplies = JSON.parse(localStorage.getItem('soulsync_replies') || '[]');
     const contentCount = storedPosts.length + storedReplies.length;
-    
     setStats({
-      users: regularUsers || mockUsers.length || 15, // Fallback to at least some number
+      users: regularUsers || mockUsers.length || 15,
+      // Fallback to at least some number
       professionals: professionalUsers || pendingProfessionals.length || 3,
       reports: storedReports.length || 7,
       content: contentCount || 85
     });
-    
+
     // Generate activity data for the chart
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const activityData = daysOfWeek.map(day => ({
@@ -61,12 +51,11 @@ export default function AdminDashboard() {
       posts: Math.floor(Math.random() * 20) + 5,
       reports: Math.floor(Math.random() * 3)
     }));
-    
     setActivityData(activityData);
-    
+
     // Generate recent activity
     const activities = [];
-    
+
     // Add activities for pending professionals
     pendingProfessionals.forEach(pro => {
       activities.push({
@@ -77,7 +66,7 @@ export default function AdminDashboard() {
         time: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 2)
       });
     });
-    
+
     // Add some actual activities based on stored data
     if (storedReports.length > 0) {
       storedReports.slice(0, 2).forEach((report: any, index: number) => {
@@ -90,7 +79,6 @@ export default function AdminDashboard() {
         });
       });
     }
-    
     if (storedPosts.length > 0) {
       storedPosts.slice(0, 2).forEach((post: any, index: number) => {
         activities.push({
@@ -102,7 +90,7 @@ export default function AdminDashboard() {
         });
       });
     }
-    
+
     // Add user registrations
     mockUsers.slice(0, 2).forEach((user: any, index: number) => {
       activities.push({
@@ -113,19 +101,17 @@ export default function AdminDashboard() {
         time: new Date(Date.now() - 1000 * 60 * 60 * (5 + index * 2))
       });
     });
-    
+
     // Sort by time (most recent first)
     activities.sort((a, b) => b.time.getTime() - a.time.getTime());
-    
     setRecentActivity(activities);
   }, [pendingProfessionals]);
-  
+
   // Format time for display
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMin = Math.floor(diffMs / (1000 * 60));
-    
     if (diffMin < 60) {
       return `${diffMin} min ago`;
     } else if (diffMin < 60 * 24) {
@@ -134,11 +120,9 @@ export default function AdminDashboard() {
       return `${Math.floor(diffMin / (60 * 24))} days ago`;
     }
   };
-  
-  return (
-    <div className="space-y-4 pt-2">
+  return <div className="space-y-4 pt-2">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight mb-1">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight mb-1 py-[3px] my-[-55px]">Admin Dashboard</h1>
         <p className="text-muted-foreground">Overview of the SoulSync platform administration.</p>
       </div>
       
@@ -201,26 +185,32 @@ export default function AdminDashboard() {
           <CardContent className="p-0">
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={activityData}
-                  margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-                >
+                <AreaChart data={activityData} margin={{
+                top: 10,
+                right: 10,
+                left: -10,
+                bottom: 0
+              }}>
                   <defs>
                     <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4A80B8" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#4A80B8" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#4A80B8" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#4A80B8" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorPosts" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#57A773" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#57A773" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#57A773" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#57A773" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorReports" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#E8871E" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#E8871E" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#E8871E" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#E8871E" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="name" tick={{
+                  fontSize: 10
+                }} />
+                  <YAxis tick={{
+                  fontSize: 10
+                }} />
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <Tooltip />
                   <Legend />
@@ -250,20 +240,10 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentActivity.length === 0 ? (
-                  <div className="text-center py-6">
+                {recentActivity.length === 0 ? <div className="text-center py-6">
                     <ActivitySquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground/40" />
                     <p className="text-muted-foreground">No recent activity</p>
-                  </div>
-                ) : (
-                  recentActivity.slice(0, 5).map((activity) => (
-                    <div 
-                      key={activity.id} 
-                      className={cn(
-                        "flex items-center gap-4 p-3 rounded-lg",
-                        "bg-muted/50 dark:bg-gray-800/50"
-                      )}
-                    >
+                  </div> : recentActivity.slice(0, 5).map(activity => <div key={activity.id} className={cn("flex items-center gap-4 p-3 rounded-lg", "bg-muted/50 dark:bg-gray-800/50")}>
                       <div className="flex-shrink-0">
                         {activity.type === 'verification' && <ShieldCheck className="h-5 w-5 text-blue-500" />}
                         {activity.type === 'report' && <AlertTriangle className="h-5 w-5 text-red-500" />}
@@ -276,9 +256,7 @@ export default function AdminDashboard() {
                         </p>
                         <p className="text-xs text-muted-foreground">{formatTime(activity.time)}</p>
                       </div>
-                    </div>
-                  ))
-                )}
+                    </div>)}
               </div>
             </CardContent>
           </Card>
@@ -294,8 +272,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {pendingProfessionals.length > 0 && (
-                  <div className="flex flex-col gap-4 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                {pendingProfessionals.length > 0 && <div className="flex flex-col gap-4 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
                     <div className="flex items-center gap-3">
                       <ShieldCheck className="h-5 w-5 text-amber-600 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -310,11 +287,9 @@ export default function AdminDashboard() {
                         Review Verifications
                       </Link>
                     </Button>
-                  </div>
-                )}
+                  </div>}
                 
-                {stats.reports > 0 && (
-                  <div className="flex flex-col gap-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                {stats.reports > 0 && <div className="flex flex-col gap-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
                     <div className="flex items-center gap-3">
                       <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -329,20 +304,16 @@ export default function AdminDashboard() {
                         Review Reports
                       </Link>
                     </Button>
-                  </div>
-                )}
+                  </div>}
                 
-                {pendingProfessionals.length === 0 && stats.reports === 0 && (
-                  <div className="text-center py-6">
+                {pendingProfessionals.length === 0 && stats.reports === 0 && <div className="text-center py-6">
                     <ActivitySquare className="h-12 w-12 mx-auto mb-2 text-muted-foreground/40" />
                     <p className="text-muted-foreground">No pending tasks</p>
-                  </div>
-                )}
+                  </div>}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 }
