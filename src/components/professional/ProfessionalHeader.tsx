@@ -52,7 +52,7 @@ export function ProfessionalHeader() {
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center gap-1">
                     <p className="text-sm font-medium">{user?.username}</p>
-                    <BadgeCheck className="w-4 h-4 text-pro-primary fill-pro-primary stroke-white" />
+                    <ShieldCheck className="w-4 h-4 text-pro-primary fill-pro-primary stroke-white" />
                   </div>
                   <p className="text-xs text-muted-foreground truncate">
                     {user?.email}
