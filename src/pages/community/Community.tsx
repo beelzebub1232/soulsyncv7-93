@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +12,7 @@ import { ReportedContent } from "./components/ReportedContent";
 
 export default function Community() {
   const { user } = useUser();
-  const [categories] = useState<ForumCategory[]>([
+  const [categories, setCategories] = useState<ForumCategory[]>([
     {
       id: "anxiety",
       name: "Anxiety Support",
@@ -25,7 +25,7 @@ export default function Community() {
       id: "depression",
       name: "Depression",
       description: "A safe space to talk about depression and coping strategies",
-      icon: "heart",
+      icon: "brain",
       posts: 18,
       color: "bg-purple-100"
     },
@@ -33,7 +33,7 @@ export default function Community() {
       id: "mindfulness",
       name: "Mindfulness",
       description: "Share mindfulness practices and meditation techniques",
-      icon: "heart",
+      icon: "flame",
       posts: 32,
       color: "bg-green-100"
     },
@@ -41,7 +41,7 @@ export default function Community() {
       id: "stress",
       name: "Stress Management",
       description: "Tips and discussions about managing stress in daily life",
-      icon: "heart",
+      icon: "book",
       posts: 15,
       color: "bg-orange-100"
     },
@@ -49,14 +49,35 @@ export default function Community() {
       id: "general",
       name: "General Discussions",
       description: "Open discussions about mental wellness and self-care",
-      icon: "heart",
+      icon: "globe",
       posts: 42,
       color: "bg-gray-100"
     }
   ]);
 
+  // Count posts per category from localStorage
+  useEffect(() => {
+    const updatedCategories = [...categories];
+    let needsUpdate = false;
+    
+    for (const category of updatedCategories) {
+      const savedPosts = localStorage.getItem(`soulsync_posts_${category.id}`);
+      if (savedPosts) {
+        const posts = JSON.parse(savedPosts);
+        if (posts.length !== category.posts) {
+          category.posts = posts.length;
+          needsUpdate = true;
+        }
+      }
+    }
+    
+    if (needsUpdate) {
+      setCategories(updatedCategories);
+    }
+  }, []);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <CommunityHeader />
       
       {user?.role === "admin" ? (
@@ -72,7 +93,7 @@ export default function Community() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Forum Categories</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-3 sm:px-4">
                 {categories.length > 0 ? (
                   <ForumCategoryList categories={categories} />
                 ) : (
@@ -102,7 +123,7 @@ export default function Community() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Forum Categories</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-3 sm:px-4">
                 {categories.length > 0 ? (
                   <ForumCategoryList categories={categories} />
                 ) : (
@@ -121,7 +142,7 @@ export default function Community() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Forum Categories</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-4">
             {categories.length > 0 ? (
               <ForumCategoryList categories={categories} />
             ) : (

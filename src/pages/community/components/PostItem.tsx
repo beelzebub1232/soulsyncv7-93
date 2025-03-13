@@ -4,24 +4,52 @@ import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Heart, Calendar, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface PostItemProps {
   post: ForumPost;
+  onLike?: (postId: string) => void;
+  isLiked?: boolean;
 }
 
-export function PostItem({ post }: PostItemProps) {
+export function PostItem({ post, onLike, isLiked = false }: PostItemProps) {
+  const { user } = useUser();
+  const { toast } = useToast();
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to like posts",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (onLike) {
+      onLike(post.id);
+    }
+  };
+
   return (
     <Link 
       to={`/community/post/${post.id}`}
-      className="block card-primary p-4 hover:shadow-md transition-all"
+      className="block card-primary p-3 sm:p-4 hover:shadow-md transition-all"
     >
-      <div className="flex justify-between items-start">
-        <h3 className="font-medium">{post.title}</h3>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Heart className="h-3.5 w-3.5" />
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+        <h3 className="font-medium text-sm sm:text-base line-clamp-2">{post.title}</h3>
+        <div className="flex items-center gap-3 self-end sm:self-auto">
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-1.5 text-xs ${isLiked ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'} transition-colors`}
+          >
+            <Heart className={`h-3.5 w-3.5 ${isLiked ? 'fill-red-500' : ''}`} />
             <span>{post.likes}</span>
-          </div>
+          </button>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <MessageSquare className="h-3.5 w-3.5" />
             <span>{post.replies}</span>
@@ -29,9 +57,27 @@ export function PostItem({ post }: PostItemProps) {
         </div>
       </div>
       
-      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+      <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
         {post.content}
       </p>
+      
+      {post.images && post.images.length > 0 && (
+        <div className="mt-2 flex gap-1 overflow-x-auto">
+          {post.images.map((img, idx) => (
+            <div key={idx} className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
+              <img src={img} alt="" className="h-full w-full object-cover" />
+            </div>
+          ))}
+        </div>
+      )}
+      
+      {post.videoLinks && post.videoLinks.length > 0 && (
+        <div className="mt-2 text-xs text-blue-500">
+          <span className="flex items-center gap-1">
+            <span>Has video content</span>
+          </span>
+        </div>
+      )}
       
       <div className="flex justify-between items-center mt-3">
         <div className="flex items-center gap-1">
