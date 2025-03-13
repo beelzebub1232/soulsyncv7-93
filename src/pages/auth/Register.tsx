@@ -65,14 +65,16 @@ export function Register() {
           title: "Registration pending",
           description: "Your professional account is pending admin verification.",
         });
-        navigate("/auth");
       } else {
         toast({
           title: "Account created!",
-          description: "Welcome to SoulSync!",
+          description: "Welcome to SoulSync! Please sign in with your credentials.",
         });
-        navigate("/");
       }
+      
+      // Always redirect to login page after registration
+      navigate("/auth");
+      
     } catch (error) {
       toast({
         variant: "destructive",

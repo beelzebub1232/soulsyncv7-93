@@ -58,18 +58,30 @@ export default function ProfessionalVerifications() {
   };
 
   const handleApprove = (id: string) => {
+    // Find the professional before removing them from the list
+    const professional = pendingProfessionals.find(p => p.id === id);
+    
+    // Verify the professional
     verifyProfessional(id);
+    
+    // Show confirmation toast
     toast({
       title: "Professional Approved",
-      description: "The professional account has been verified.",
+      description: `${professional?.username}'s account has been verified and can now login.`,
     });
   };
 
   const handleReject = (id: string) => {
+    // Find the professional before removing them from the list
+    const professional = pendingProfessionals.find(p => p.id === id);
+    
+    // Reject the professional
     rejectProfessional(id);
+    
+    // Show confirmation toast
     toast({
       title: "Professional Rejected",
-      description: "The professional verification request has been rejected.",
+      description: `${professional?.username}'s verification request has been rejected.`,
     });
   };
 
@@ -85,14 +97,16 @@ export default function ProfessionalVerifications() {
           <CardTitle>Pending Verification Requests ({pendingProfessionals.length})</CardTitle>
         </CardHeader>
         <CardContent className="px-0 py-0">
-          <ScrollArea className="h-[calc(100vh-16rem)]">
+          <ScrollArea className="h-[calc(100vh-16rem)] md:h-[550px]">
             <div className="divide-y">
               {pendingProfessionals.map((professional) => (
                 <div key={professional.id} className="p-4 hover:bg-muted/30">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-blue-600">{professional.username.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-blue-600">
+                          {professional.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <h3 className="font-medium">{professional.username}</h3>
@@ -100,7 +114,7 @@ export default function ProfessionalVerifications() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                       <div className="flex items-center gap-1.5">
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <span className="truncate">{professional.email}</span>
