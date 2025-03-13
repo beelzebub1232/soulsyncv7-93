@@ -1,7 +1,7 @@
 
 import { ForumPost } from "@/types/community";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Heart, Calendar, CheckCircle2 } from "lucide-react";
+import { MessageSquare, Heart, Calendar, CheckCircle2, Youtube, Link2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
@@ -34,6 +34,34 @@ export function PostItem({ post, onLike, isLiked = false }: PostItemProps) {
       onLike(post.id);
     }
   };
+  
+  // Function to check if a link is from YouTube
+  const isYouTubeLink = (url: string) => {
+    return url.includes("youtube.com") || url.includes("youtu.be");
+  };
+  
+  // Get the correct media preview text
+  const getMediaPreviewText = () => {
+    if (post.images && post.images.length > 0) {
+      return post.videoLinks && post.videoLinks.length > 0 
+        ? "Has images and links" 
+        : "Has images";
+    } else if (post.videoLinks && post.videoLinks.length > 0) {
+      // Check if any of the links are YouTube
+      const hasYouTube = post.videoLinks.some(link => isYouTubeLink(link));
+      const hasOtherLinks = post.videoLinks.some(link => !isYouTubeLink(link));
+      
+      if (hasYouTube && hasOtherLinks) {
+        return "Has videos and links";
+      } else if (hasYouTube) {
+        return "Has video content";
+      } else {
+        return "Has links";
+      }
+    }
+    
+    return null;
+  };
 
   return (
     <Link 
@@ -41,7 +69,10 @@ export function PostItem({ post, onLike, isLiked = false }: PostItemProps) {
       className="block card-primary p-3 sm:p-4 hover:shadow-md transition-all"
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-        <h3 className="font-medium text-sm sm:text-base line-clamp-2">{post.title}</h3>
+        <h3 className="font-medium text-sm sm:text-base line-clamp-2">
+          {post.title}
+          {post.isEdited && <span className="text-xs text-muted-foreground ml-1">(edited)</span>}
+        </h3>
         <div className="flex items-center gap-3 self-end sm:self-auto">
           <button
             onClick={handleLike}
@@ -71,10 +102,16 @@ export function PostItem({ post, onLike, isLiked = false }: PostItemProps) {
         </div>
       )}
       
-      {post.videoLinks && post.videoLinks.length > 0 && (
+      {getMediaPreviewText() && (
         <div className="mt-2 text-xs text-blue-500">
           <span className="flex items-center gap-1">
-            <span>Has video content</span>
+            {post.videoLinks && post.videoLinks.some(link => isYouTubeLink(link)) && (
+              <Youtube className="h-3 w-3" />
+            )}
+            {post.videoLinks && post.videoLinks.some(link => !isYouTubeLink(link)) && (
+              <Link2 className="h-3 w-3" />
+            )}
+            <span>{getMediaPreviewText()}</span>
           </span>
         </div>
       )}

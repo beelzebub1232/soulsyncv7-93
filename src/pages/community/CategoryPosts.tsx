@@ -4,12 +4,25 @@ import { useParams, Link } from "react-router-dom";
 import { ForumPost, ForumCategory } from "@/types/community";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Plus, Heart, MessageSquare, Brain, Flame, Book, Globe } from "lucide-react";
+import { ChevronLeft, Plus, Heart, MessageSquare, Brain, Flame, Book, Globe, Pencil, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@/contexts/UserContext";
 import { NewPostSheet } from "./components/NewPostSheet";
 import { PostItem } from "./components/PostItem";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 export default function CategoryPosts() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -19,6 +32,11 @@ export default function CategoryPosts() {
   const [category, setCategory] = useState<ForumCategory | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [likedPosts, setLikedPosts] = useState<string[]>([]);
+  const [editingPost, setEditingPost] = useState<ForumPost | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
   
   // Get category icon
   const getCategoryIcon = () => {
@@ -66,7 +84,7 @@ export default function CategoryPosts() {
         name: "Anxiety Support",
         description: "Discuss anxiety management techniques and share experiences",
         icon: "heart",
-        posts: 24,
+        posts: 0,
         color: "bg-blue-100"
       },
       {
@@ -74,7 +92,7 @@ export default function CategoryPosts() {
         name: "Depression",
         description: "A safe space to talk about depression and coping strategies",
         icon: "brain",
-        posts: 18,
+        posts: 0,
         color: "bg-purple-100"
       },
       {
@@ -82,7 +100,7 @@ export default function CategoryPosts() {
         name: "Mindfulness",
         description: "Share mindfulness practices and meditation techniques",
         icon: "flame",
-        posts: 32,
+        posts: 0,
         color: "bg-green-100"
       },
       {
@@ -90,7 +108,7 @@ export default function CategoryPosts() {
         name: "Stress Management",
         description: "Tips and discussions about managing stress in daily life",
         icon: "book",
-        posts: 15,
+        posts: 0,
         color: "bg-orange-100"
       },
       {
@@ -98,7 +116,7 @@ export default function CategoryPosts() {
         name: "General Discussions",
         description: "Open discussions about mental wellness and self-care",
         icon: "globe",
-        posts: 42,
+        posts: 0,
         color: "bg-gray-100"
       }
     ];
@@ -107,55 +125,48 @@ export default function CategoryPosts() {
     setCategory(foundCategory || null);
   }, [categoryId]);
   
-  // Load posts from localStorage and merge with mock data
+  // Load posts from localStorage
   useEffect(() => {
     if (categoryId) {
-      // Get saved posts from localStorage
-      const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
-      let userPosts: ForumPost[] = savedPosts ? JSON.parse(savedPosts) : [];
-      
-      // Convert date strings back to Date objects
-      userPosts = userPosts.map(post => ({
-        ...post,
-        date: new Date(post.date)
-      }));
-      
-      // Mock posts as fallback
-      const mockPosts: ForumPost[] = [
-        {
-          id: "post1",
-          title: "How to handle anxiety during presentations?",
-          content: "I struggle with severe anxiety when giving presentations at work. Any tips that have worked for you?",
-          categoryId: categoryId,
-          categoryName: category?.name || "",
-          author: "Anonymous",
-          authorId: "user123",
-          authorRole: "user",
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-          replies: 0,
-          isAnonymous: true,
-          likes: 0
-        },
-        {
-          id: "post2",
-          title: "Breathing techniques that helped me",
-          content: "I've been practicing these breathing exercises for the past month and they've made a huge difference.",
-          categoryId: categoryId,
-          categoryName: category?.name || "",
-          author: "Dr. Emily Chen",
-          authorId: "prof123",
-          authorRole: "professional",
-          date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-          replies: 0,
-          isAnonymous: false,
-          likes: 0
+      // Load posts from localStorage
+      const loadPosts = () => {
+        const savedPosts = localStorage.getItem(`soulsync_posts_${categoryId}`);
+        if (savedPosts) {
+          // Convert date strings back to Date objects
+          const parsedPosts = JSON.parse(savedPosts).map((post: any) => ({
+            ...post,
+            date: new Date(post.date)
+          }));
+          setPosts(parsedPosts);
+        } else {
+          // Initialize with empty array if no posts exist
+          localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify([]));
+          setPosts([]);
         }
-      ];
+      };
       
-      // If we have user posts, use those; otherwise use mock posts
-      setPosts(userPosts.length > 0 ? userPosts : mockPosts);
+      // Load posts initially
+      loadPosts();
+      
+      // Set up event listener for storage changes
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === `soulsync_posts_${categoryId}`) {
+          loadPosts();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Custom event for post updates
+      const handlePostsUpdated = () => loadPosts();
+      window.addEventListener('postsUpdated', handlePostsUpdated);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('postsUpdated', handlePostsUpdated);
+      };
     }
-  }, [categoryId, category]);
+  }, [categoryId]);
   
   // Handle liking a post
   const handleLikePost = (postId: string) => {
@@ -172,38 +183,36 @@ export default function CategoryPosts() {
     const isLiked = likedPosts.includes(postId);
     
     // Update likedPosts state
+    let updatedLikedPosts: string[];
     if (isLiked) {
-      setLikedPosts(prev => prev.filter(id => id !== postId));
+      updatedLikedPosts = likedPosts.filter(id => id !== postId);
+      setLikedPosts(updatedLikedPosts);
     } else {
-      setLikedPosts(prev => [...prev, postId]);
+      updatedLikedPosts = [...likedPosts, postId];
+      setLikedPosts(updatedLikedPosts);
     }
     
+    // Save liked posts to localStorage
+    localStorage.setItem(`soulsync_liked_posts_${user.id}`, JSON.stringify(updatedLikedPosts));
+    
     // Update post likes count
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            likes: isLiked ? Math.max(0, post.likes - 1) : post.likes + 1
-          };
-        }
-        return post;
-      })
-    );
+    const updatedPosts = posts.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          likes: isLiked ? Math.max(0, post.likes - 1) : post.likes + 1
+        };
+      }
+      return post;
+    });
+    
+    setPosts(updatedPosts);
     
     // Save the updated posts to localStorage
-    setTimeout(() => {
-      const updatedPosts = posts.map(post => {
-        if (post.id === postId) {
-          return {
-            ...post,
-            likes: isLiked ? Math.max(0, post.likes - 1) : post.likes + 1
-          };
-        }
-        return post;
-      });
-      localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
-    }, 100);
+    localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('postsUpdated'));
     
     toast({
       title: isLiked ? "Post unliked" : "Post liked",
@@ -219,12 +228,92 @@ export default function CategoryPosts() {
     // Save to localStorage
     localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
     
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('postsUpdated'));
+    
     setIsNewPostOpen(false);
     
     toast({
       title: "Post created",
       description: "Your post has been published successfully",
     });
+  };
+  
+  const handleEditPost = (post: ForumPost) => {
+    setEditingPost(post);
+    setEditTitle(post.title);
+    setEditContent(post.content);
+    setIsEditDialogOpen(true);
+  };
+  
+  const handleSaveEdit = () => {
+    if (!editingPost) return;
+    
+    const updatedPosts = posts.map(post => {
+      if (post.id === editingPost.id) {
+        return {
+          ...post,
+          title: editTitle,
+          content: editContent,
+          isEdited: true
+        };
+      }
+      return post;
+    });
+    
+    setPosts(updatedPosts);
+    localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
+    
+    // Update post in replies storage too
+    const savedReplies = localStorage.getItem(`soulsync_replies_${editingPost.id}`);
+    if (savedReplies) {
+      // No need to modify replies, but we want to trigger updates
+      localStorage.setItem(`soulsync_replies_${editingPost.id}`, savedReplies);
+    }
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('postsUpdated'));
+    
+    setIsEditDialogOpen(false);
+    setEditingPost(null);
+    
+    toast({
+      title: "Post updated",
+      description: "Your post has been updated successfully",
+    });
+  };
+  
+  const confirmDeletePost = (postId: string) => {
+    setPostToDelete(postId);
+  };
+  
+  const handleDeletePost = () => {
+    if (!postToDelete) return;
+    
+    // Remove post from state
+    const updatedPosts = posts.filter(post => post.id !== postToDelete);
+    setPosts(updatedPosts);
+    
+    // Save to localStorage
+    localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
+    
+    // Remove replies for this post
+    localStorage.removeItem(`soulsync_replies_${postToDelete}`);
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new CustomEvent('postsUpdated'));
+    
+    setPostToDelete(null);
+    
+    toast({
+      title: "Post deleted",
+      description: "Your post has been deleted successfully",
+    });
+  };
+  
+  const canUserEditPost = (post: ForumPost) => {
+    if (!user) return false;
+    return post.authorId === user.id;
   };
   
   if (!category) {
@@ -236,7 +325,7 @@ export default function CategoryPosts() {
   }
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-16">
       <div className="flex justify-between items-center">
         <Link to="/community" className="flex items-center text-muted-foreground hover:text-foreground">
           <ChevronLeft className="h-4 w-4 mr-1" />
@@ -255,7 +344,7 @@ export default function CategoryPosts() {
       <Card className="border-border/50">
         <CardHeader className="pb-3 pt-4 px-4">
           <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${category.color}`}>
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${category.color}`}>
               {getCategoryIcon()}
             </div>
             <div>
@@ -268,12 +357,34 @@ export default function CategoryPosts() {
           {posts.length > 0 ? (
             <div className="space-y-3">
               {posts.map(post => (
-                <PostItem 
-                  key={post.id} 
-                  post={post} 
-                  onLike={handleLikePost}
-                  isLiked={likedPosts.includes(post.id)}
-                />
+                <div key={post.id} className="relative">
+                  <PostItem 
+                    post={post} 
+                    onLike={handleLikePost}
+                    isLiked={likedPosts.includes(post.id)}
+                  />
+                  
+                  {canUserEditPost(post) && (
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7"
+                        onClick={() => handleEditPost(post)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7"
+                        onClick={() => confirmDeletePost(post.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           ) : (
@@ -289,6 +400,62 @@ export default function CategoryPosts() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Edit Post Dialog */}
+      <AlertDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Edit Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Make changes to your post.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="edit-title" className="text-sm font-medium">Title</label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="edit-content" className="text-sm font-medium">Content</label>
+              <Textarea
+                id="edit-content"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={6}
+              />
+            </div>
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveEdit}>Save Changes</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Delete Post Confirmation Dialog */}
+      <AlertDialog open={!!postToDelete} onOpenChange={(open) => !open && setPostToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePost} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <NewPostSheet 
         isOpen={isNewPostOpen} 
