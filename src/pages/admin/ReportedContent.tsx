@@ -42,6 +42,12 @@ export default function ReportedContent() {
           ...report,
           date: new Date(report.date)
         }));
+        
+        // Sort by date (newest first)
+        processedReports.sort((a: Report, b: Report) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        
         setReports(processedReports);
       } catch (error) {
         console.error('Failed to parse reported content:', error);
@@ -54,6 +60,37 @@ export default function ReportedContent() {
       localStorage.setItem('soulsync_reported_content', JSON.stringify([]));
     }
   }, []);
+
+  const createNotification = (userId: string, type: 'admin', content: string, relatedId: string) => {
+    try {
+      // Get existing notifications
+      const savedNotifications = localStorage.getItem('soulsync_notifications');
+      let notifications = [];
+      
+      if (savedNotifications) {
+        notifications = JSON.parse(savedNotifications);
+      }
+      
+      // Add new notification
+      const newNotification = {
+        id: crypto.randomUUID(),
+        userId: userId,
+        type: type,
+        content: content,
+        relatedId: relatedId,
+        date: new Date(),
+        read: false,
+        url: `/community/post/${relatedId}`
+      };
+      
+      notifications.push(newNotification);
+      
+      // Save back to localStorage
+      localStorage.setItem('soulsync_notifications', JSON.stringify(notifications));
+    } catch (error) {
+      console.error('Failed to create notification:', error);
+    }
+  };
 
   const handleApproveReport = (id: string) => {
     // Mark the report as resolved
@@ -74,6 +111,16 @@ export default function ReportedContent() {
           const posts = JSON.parse(savedPosts);
           const updatedPosts = posts.filter((post: any) => post.id !== report.contentId);
           localStorage.setItem(postsStorageKey, JSON.stringify(updatedPosts));
+          
+          // Update category post count
+          const savedCategories = localStorage.getItem('soulsync_forum_categories');
+          if (savedCategories) {
+            const categories = JSON.parse(savedCategories);
+            const updatedCategories = categories.map((c: any) => 
+              c.id === report.categoryId ? {...c, posts: updatedPosts.length} : c
+            );
+            localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
+          }
         }
       }
       // If it's a reply
@@ -84,8 +131,29 @@ export default function ReportedContent() {
           const replies = JSON.parse(savedReplies);
           const updatedReplies = replies.filter((reply: any) => reply.id !== report.contentId);
           localStorage.setItem(repliesStorageKey, JSON.stringify(updatedReplies));
+          
+          // Update post reply count
+          if (report.postId && report.categoryId) {
+            const postsStorageKey = `soulsync_posts_${report.categoryId}`;
+            const savedPosts = localStorage.getItem(postsStorageKey);
+            if (savedPosts) {
+              const posts = JSON.parse(savedPosts);
+              const updatedPosts = posts.map((post: any) => 
+                post.id === report.postId ? {...post, replies: updatedReplies.length} : post
+              );
+              localStorage.setItem(postsStorageKey, JSON.stringify(updatedPosts));
+            }
+          }
         }
       }
+      
+      // Send notification to reported user
+      createNotification(
+        report.targetUserId, 
+        'admin', 
+        `Your ${report.contentType} has been removed by an admin.`,
+        report.contentType === 'post' ? report.contentId : (report.postId || '')
+      );
     }
     
     toast({
@@ -95,11 +163,22 @@ export default function ReportedContent() {
   };
 
   const handleDismissReport = (id: string) => {
+    const report = reports.find(r => r.id === id);
     const updatedReports = reports.map(r => 
       r.id === id ? {...r, status: 'reviewed' as 'reviewed'} : r
     );
     setReports(updatedReports);
     localStorage.setItem('soulsync_reported_content', JSON.stringify(updatedReports));
+    
+    if (report) {
+      // Send notification to reported user
+      createNotification(
+        report.targetUserId, 
+        'admin', 
+        `Your ${report.contentType} was reported but has been kept after review.`,
+        report.contentType === 'post' ? report.contentId : (report.postId || '')
+      );
+    }
     
     toast({
       title: "Report dismissed",
@@ -171,8 +250,12 @@ export default function ReportedContent() {
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(report.date, { addSuffix: true })}
+                            {formatDistanceToNow(new Date(report.date), { addSuffix: true })}
                           </p>
+                        </div>
+                        
+                        <div className="mt-1 text-sm">
+                          <p><span className="font-medium">Reported by:</span> {report.reportedByName || 'Anonymous'}</p>
                         </div>
                         
                         <div className="mt-2 p-3 bg-muted/50 rounded-md">
@@ -230,7 +313,7 @@ export default function ReportedContent() {
               {selectedReport?.contentType === 'post' ? 'Reported Post' : 'Reported Reply'}
             </DialogTitle>
             <DialogDescription>
-              Reported by: {selectedReport?.reportedBy}
+              Reported by: {selectedReport?.reportedByName || 'User'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -244,13 +327,13 @@ export default function ReportedContent() {
                     <MessageSquare className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm mb-1 font-medium">Content:</p>
-                      <p className="text-sm">{selectedReport.content}</p>
+                      <p className="text-sm whitespace-pre-wrap">{selectedReport.content}</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="p-3 bg-muted rounded-md">
-                  <p className="text-sm mb-1.5"><strong>Date:</strong> {selectedReport.date.toLocaleDateString()}</p>
+                  <p className="text-sm mb-1.5"><strong>Date:</strong> {new Date(selectedReport.date).toLocaleDateString()}</p>
                   <p className="text-sm"><strong>Reason:</strong> {selectedReport.reason}</p>
                 </div>
               </>
@@ -279,7 +362,7 @@ export default function ReportedContent() {
                 </Button>
                 <Button 
                   variant="default"
-                  className="bg-red-600 hover:bg-red-700 flex-1"
+                  className="bg-red-600 hover:bg-red-700 text-white flex-1"
                   onClick={() => {
                     handleApproveReport(selectedReport.id);
                     setContentDialogOpen(false);

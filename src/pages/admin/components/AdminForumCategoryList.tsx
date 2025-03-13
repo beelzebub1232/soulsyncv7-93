@@ -20,8 +20,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminForumCategoryListProps {
   categories: ForumCategory[];
@@ -29,6 +30,34 @@ interface AdminForumCategoryListProps {
 }
 
 export function AdminForumCategoryList({ categories, onDeletePosts }: AdminForumCategoryListProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleDeleteClick = (e: React.MouseEvent, categoryId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedCategoryId(categoryId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleMessageClick = (e: React.MouseEvent, categoryId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toast({
+      title: "Message Feature",
+      description: "The message feature will be available in the next update.",
+    });
+  };
+
+  const confirmDelete = () => {
+    if (selectedCategoryId) {
+      onDeletePosts(selectedCategoryId);
+      setDeleteDialogOpen(false);
+      setSelectedCategoryId(null);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 gap-5">
       {categories.map((category) => (
@@ -51,53 +80,20 @@ export function AdminForumCategoryList({ categories, onDeletePosts }: AdminForum
                 <span className="text-xs text-muted-foreground whitespace-nowrap">{category.posts} posts</span>
                 
                 <div className="flex gap-2">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
-                        <Trash className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete all posts?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete all posts in {category.name}? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={(e) => {
-                          e.stopPropagation();
-                        }}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                          className="bg-destructive text-destructive-foreground"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onDeletePosts(category.id);
-                          }}
-                        >
-                          Delete All
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7"
+                    onClick={(e) => handleDeleteClick(e, category.id)}
+                  >
+                    <Trash className="h-4 w-4 text-destructive" />
+                  </Button>
                   
                   <Button
                     variant="ghost" 
                     size="icon" 
                     className="h-7 w-7"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
+                    onClick={(e) => handleMessageClick(e, category.id)}
                   >
                     <MessageSquare className="h-4 w-4" />
                   </Button>
@@ -111,6 +107,26 @@ export function AdminForumCategoryList({ categories, onDeletePosts }: AdminForum
           </div>
         </Link>
       ))}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete all posts?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete all posts in this category? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground"
+              onClick={confirmDelete}
+            >
+              Delete All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

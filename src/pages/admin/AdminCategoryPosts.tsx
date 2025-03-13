@@ -39,7 +39,9 @@ export default function AdminCategoryPosts() {
           date: new Date(post.date)
         }));
         // Sort by date (newest first)
-        processedPosts.sort((a: ForumPost, b: ForumPost) => b.date.getTime() - a.date.getTime());
+        processedPosts.sort((a: ForumPost, b: ForumPost) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
         setPosts(processedPosts);
       } catch (error) {
         console.error('Failed to parse posts:', error);
@@ -51,36 +53,48 @@ export default function AdminCategoryPosts() {
   }, [categoryId]);
 
   const handleDeletePost = (postId: string) => {
-    // Update posts state
-    const updatedPosts = posts.filter(post => post.id !== postId);
-    setPosts(updatedPosts);
-    
-    // Update localStorage
-    if (categoryId) {
-      localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
+    try {
+      // Update posts state
+      const updatedPosts = posts.filter(post => post.id !== postId);
+      setPosts(updatedPosts);
       
-      // Update category post count
-      const savedCategories = localStorage.getItem('soulsync_forum_categories');
-      if (savedCategories) {
-        const categories = JSON.parse(savedCategories);
-        const updatedCategories = categories.map((c: any) => 
-          c.id === categoryId ? {...c, posts: updatedPosts.length} : c
-        );
-        localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
+      // Update localStorage
+      if (categoryId) {
+        localStorage.setItem(`soulsync_posts_${categoryId}`, JSON.stringify(updatedPosts));
+        
+        // Update category post count
+        const savedCategories = localStorage.getItem('soulsync_forum_categories');
+        if (savedCategories) {
+          const categories = JSON.parse(savedCategories);
+          const updatedCategories = categories.map((c: any) => 
+            c.id === categoryId ? {...c, posts: updatedPosts.length} : c
+          );
+          localStorage.setItem('soulsync_forum_categories', JSON.stringify(updatedCategories));
+        }
       }
+      
+      toast({
+        title: "Post deleted",
+        description: "The post has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+      });
     }
-    
-    toast({
-      title: "Post deleted",
-      description: "The post has been successfully deleted.",
-    });
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <Link to="/admin/community" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-1">
+          <Link 
+            to="/admin/community" 
+            className="inline-flex items-center text-sm px-4 py-2 rounded-full bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 mb-2"
+          >
             <ArrowLeft className="h-3.5 w-3.5 mr-1" />
             Back to categories
           </Link>

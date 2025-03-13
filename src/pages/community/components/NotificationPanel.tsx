@@ -1,7 +1,7 @@
 
 import { formatDistanceToNow } from "date-fns";
-import { Bell, Heart, MessageSquare, ShieldAlert, CheckCircle2 } from "lucide-react";
-import { Notification } from "@/types/community";
+import { Bell, Heart, MessageSquare, ShieldAlert, CheckCircle2, User, Shield } from "lucide-react";
+import { Notification, NotificationType } from "@/types/community";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
@@ -10,6 +10,28 @@ interface NotificationPanelProps {
   notifications: Notification[];
   onMarkAsRead: (id: string) => void;
 }
+
+// Helper function to get icon based on notification type
+const getNotificationIcon = (type: NotificationType) => {
+  switch (type) {
+    case 'reply':
+      return <MessageSquare className="h-5 w-5 text-blue-500" />;
+    case 'like':
+      return <Heart className="h-5 w-5 text-red-500" />;
+    case 'report':
+      return <ShieldAlert className="h-5 w-5 text-orange-500" />;
+    case 'verification':
+      return <CheckCircle2 className="h-5 w-5 text-green-500 fill-green-500" />;
+    case 'system':
+      return <Bell className="h-5 w-5 text-yellow-500" />;
+    case 'user':
+      return <User className="h-5 w-5 text-purple-500" />;
+    case 'admin':
+      return <Shield className="h-5 w-5 text-indigo-500" />;
+    default:
+      return <Bell className="h-5 w-5 text-gray-500" />;
+  }
+};
 
 export function NotificationPanel({ notifications, onMarkAsRead }: NotificationPanelProps) {
   if (notifications.length === 0) {
@@ -32,36 +54,18 @@ export function NotificationPanel({ notifications, onMarkAsRead }: NotificationP
               "p-3 rounded-lg transition-colors block",
               notification.read ? "bg-accent/50" : "bg-accent"
             )}
-            onClick={() => {
+            onClick={(e) => {
               if (!notification.read) {
                 onMarkAsRead(notification.id);
               }
               if (!notification.url) {
-                // Prevent navigation if there's no URL
-                return;
+                e.preventDefault(); // Prevent navigation if there's no URL
               }
             }}
           >
             <div className="flex gap-3">
               <div className="mt-1">
-                {notification.type === 'reply' && (
-                  <MessageSquare className="h-5 w-5 text-blue-500" />
-                )}
-                {notification.type === 'like' && (
-                  <Heart className="h-5 w-5 text-red-500" />
-                )}
-                {notification.type === 'report' && (
-                  <ShieldAlert className="h-5 w-5 text-orange-500" />
-                )}
-                {notification.type === 'verification' && (
-                  <CheckCircle2 className="h-5 w-5 text-green-500 fill-green-500" />
-                )}
-                {notification.type === 'system' && (
-                  <Bell className="h-5 w-5 text-yellow-500" />
-                )}
-                {notification.type === 'user' && (
-                  <Bell className="h-5 w-5 text-purple-500" />
-                )}
+                {getNotificationIcon(notification.type)}
               </div>
               <div className="flex-1">
                 <p className={cn(
@@ -71,7 +75,7 @@ export function NotificationPanel({ notifications, onMarkAsRead }: NotificationP
                   {notification.content}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formatDistanceToNow(notification.date, { addSuffix: true })}
+                  {formatDistanceToNow(new Date(notification.date), { addSuffix: true })}
                 </p>
               </div>
               {!notification.read && (

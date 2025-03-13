@@ -1,3 +1,4 @@
+
 export interface ForumCategory {
   id: string;
   name: string;
@@ -40,6 +41,7 @@ export interface ForumPost {
   videoLinks?: string[];
   isEdited?: boolean;
   lastEditedDate?: Date;
+  isHidden?: boolean;
 }
 
 export interface ForumReply {
@@ -55,6 +57,7 @@ export interface ForumReply {
   likes: number;
   isEdited?: boolean;
   lastEditedDate?: Date;
+  isHidden?: boolean;
 }
 
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved';
@@ -64,6 +67,8 @@ export interface Report {
   contentId: string;
   contentType: 'post' | 'reply';
   reportedBy: string;
+  reportedByName: string;
+  targetUserId: string;
   reason: string;
   date: Date;
   status: ReportStatus;
@@ -72,10 +77,12 @@ export interface Report {
   postId?: string;
 }
 
+export type NotificationType = 'reply' | 'like' | 'report' | 'verification' | 'system' | 'user' | 'admin';
+
 export interface Notification {
   id: string;
   userId: string;
-  type: 'reply' | 'like' | 'report' | 'verification' | 'system' | 'user';
+  type: NotificationType;
   content: string;
   relatedId: string;
   date: Date;

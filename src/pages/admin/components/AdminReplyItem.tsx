@@ -1,6 +1,6 @@
 
 import { formatDistanceToNow } from "date-fns";
-import { MoreVertical, Trash, Flag, User } from "lucide-react";
+import { MoreVertical, Trash, Flag, User, Shield, CheckCircle } from "lucide-react";
 import { ForumReply } from "@/types/community";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,7 +23,7 @@ import {
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CategoryIcon } from "@/components/community/CategoryIcon";
+import { useUser } from "@/contexts/UserContext";
 
 interface AdminReplyItemProps {
   reply: ForumReply;
@@ -33,9 +33,10 @@ interface AdminReplyItemProps {
 export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useUser();
   
   const getFormattedDate = (date: Date) => {
-    return formatDistanceToNow(date, { addSuffix: true });
+    return formatDistanceToNow(new Date(date), { addSuffix: true });
   };
 
   const handleReportReply = () => {
@@ -44,7 +45,9 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
       id: crypto.randomUUID(),
       contentId: reply.id,
       contentType: 'reply',
-      reportedBy: 'admin-1',
+      reportedBy: user?.id || 'admin-1',
+      reportedByName: user?.username || 'Admin',
+      targetUserId: reply.authorId,
       reason: 'Flagged by admin for review',
       date: new Date(),
       status: 'pending',
@@ -66,10 +69,50 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
     // Save back to localStorage
     localStorage.setItem('soulsync_reported_content', JSON.stringify(reports));
     
+    // Create notification for the author
+    createNotification(reply.authorId, 'report', 'Your reply has been reported and is under review.');
+    
     toast({
       title: "Reply reported",
       description: "This reply has been flagged for review.",
     });
+  };
+
+  const createNotification = (userId: string, type: 'report' | 'system', content: string) => {
+    // Get existing notifications
+    const savedNotifications = localStorage.getItem('soulsync_notifications');
+    let notifications = [];
+    
+    if (savedNotifications) {
+      notifications = JSON.parse(savedNotifications);
+    }
+    
+    // Add new notification
+    const newNotification = {
+      id: crypto.randomUUID(),
+      userId: userId,
+      type: type,
+      content: content,
+      relatedId: reply.id,
+      date: new Date(),
+      read: false,
+      url: `/community/post/${reply.postId}`
+    };
+    
+    notifications.push(newNotification);
+    
+    // Save back to localStorage
+    localStorage.setItem('soulsync_notifications', JSON.stringify(notifications));
+  };
+
+  // Function to get user role icon
+  const getUserRoleIcon = () => {
+    if (reply.authorRole === 'professional') {
+      return <CheckCircle className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />;
+    } else if (reply.authorRole === 'admin') {
+      return <Shield className="w-3.5 h-3.5 text-purple-600" />;
+    }
+    return null;
   };
 
   return (
@@ -89,7 +132,7 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
               </span>
               {reply.authorRole === 'professional' && (
                 <span className="flex items-center">
-                  <CategoryIcon categoryId="verified" className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
+                  <CheckCircle className="w-3.5 h-3.5 text-blue-600 fill-blue-600" />
                 </span>
               )}
               {reply.authorRole === 'admin' && (
@@ -142,18 +185,11 @@ export function AdminReplyItem({ reply, onDelete }: AdminReplyItemProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={(e) => {
-              e.stopPropagation();
-              setIsDeleteDialogOpen(false);
-            }}>
+            <AlertDialogCancel>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-                setIsDeleteDialogOpen(false);
-              }}
+              onClick={onDelete}
               className="bg-destructive text-destructive-foreground"
             >
               Delete
