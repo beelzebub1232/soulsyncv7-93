@@ -7,27 +7,25 @@ import { ProfessionalBottomNav } from "@/components/professional/ProfessionalBot
 export function ProfessionalLayout() {
   const { user, isLoading } = useUser();
   
-  // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-full flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pro-primary to-pro-secondary">
         <div className="animate-pulse-soft text-center">
-          <div className="h-10 w-10 rounded-full bg-blue-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="h-12 w-12 rounded-full bg-white/20 mx-auto mb-4 animate-bounce-soft"></div>
+          <p className="text-white/80">Loading...</p>
         </div>
       </div>
     );
   }
   
-  // Redirect to auth if not logged in or not a professional
   if (!user || user.role !== 'professional') {
     return <Navigate to="/auth/professional" replace />;
   }
   
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <ProfessionalHeader />
-      <main className="flex-1 overflow-y-auto pt-16 pb-20 px-4">
+      <main className="flex-1 overflow-y-auto pt-16 pb-20 px-4 container max-w-7xl mx-auto">
         <Outlet />
       </main>
       <ProfessionalBottomNav />
