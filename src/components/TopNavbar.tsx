@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
 import { Bell, AlertCircle, User, Settings, Heart, Plus, X } from "lucide-react";
@@ -10,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TopNavbarProps {
   className?: string;
@@ -71,7 +71,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
     }
   ]);
   
-  // Load emergency contacts from local storage
   useEffect(() => {
     const storedContacts = localStorage.getItem('soulsync_emergency_contacts');
     if (storedContacts) {
@@ -79,14 +78,12 @@ export function TopNavbar({ className }: TopNavbarProps) {
     }
   }, []);
   
-  // Save emergency contacts to local storage when changed
   useEffect(() => {
     if (emergencyContacts.length > 0) {
       localStorage.setItem('soulsync_emergency_contacts', JSON.stringify(emergencyContacts));
     }
   }, [emergencyContacts]);
   
-  // Handle adding a new emergency contact
   const handleAddContact = () => {
     if (!newContact.name || !newContact.phone) {
       toast({
@@ -112,7 +109,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
     });
   };
   
-  // Handle removing an emergency contact
   const handleRemoveContact = (id: string) => {
     setEmergencyContacts(emergencyContacts.filter(contact => contact.id !== id));
     
@@ -122,7 +118,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
     });
   };
   
-  // Handle clearing all notifications
   const handleClearNotifications = () => {
     setNotifications([]);
     
@@ -132,7 +127,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
     });
   };
   
-  // Get unread notifications count
   const unreadCount = notifications.filter(n => !n.read).length;
   
   const handleLogout = () => {
@@ -150,7 +144,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
         "fixed top-0 left-0 right-0 z-50 h-14 px-3 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50",
         className
       )}>
-        {/* Crisis Button (Left) - more compact */}
         <button 
           onClick={() => setCrisisOpen(true)}
           className="h-8 px-2 bg-crisis text-white rounded-full flex items-center justify-center gap-1 text-xs font-medium hover:bg-crisis-hover transition-colors"
@@ -160,7 +153,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
           <span className="mr-0.5">Help</span>
         </button>
         
-        {/* App Name (Center) */}
         <Link to="/" className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2">
           <div className="h-7 w-7 rounded-full bg-mindscape-primary flex items-center justify-center">
             <Heart className="h-4 w-4 text-white" />
@@ -168,7 +160,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
           <h1 className="text-base font-display font-medium">SoulSync</h1>
         </Link>
         
-        {/* Right Side - Notifications & Profile */}
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setNotificationsOpen(true)}
@@ -186,20 +177,11 @@ export function TopNavbar({ className }: TopNavbarProps) {
             className="w-8 h-8 rounded-full border-2 border-mindscape-primary hover:bg-mindscape-light transition-colors overflow-hidden flex items-center justify-center"
             aria-label="Profile"
           >
-            {user?.avatar ? (
-              <img 
-                src={user.avatar} 
-                alt="Profile" 
-                className="w-full h-full object-cover rounded-full" 
-              />
-            ) : (
-              <User className="h-4 w-4" />
-            )}
+            <User className="h-4 w-4" />
           </button>
         </div>
       </nav>
       
-      {/* Profile Drawer */}
       <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
         <SheetContent side="right" className="glassmorphism">
           <SheetHeader>
@@ -207,16 +189,9 @@ export function TopNavbar({ className }: TopNavbarProps) {
           </SheetHeader>
           <div className="py-6 flex flex-col items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-mindscape-light flex items-center justify-center overflow-hidden border-2 border-mindscape-primary">
-              {user?.avatar ? (
-                <img 
-                  src={user.avatar} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover" 
-                />
-              ) : (
-                <User className="h-10 w-10 text-mindscape-primary" />
-              )}
+              <User className="h-10 w-10 text-mindscape-primary" />
             </div>
+            
             <div className="text-center">
               <h3 className="font-semibold text-lg">{user?.username || 'Guest'}</h3>
               <p className="text-sm text-muted-foreground">{user?.email || 'Not signed in'}</p>
@@ -244,7 +219,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
         </SheetContent>
       </Sheet>
       
-      {/* Crisis Help Sheet */}
       <Sheet open={crisisOpen} onOpenChange={setCrisisOpen}>
         <SheetContent side="left" className="glassmorphism border-r border-crisis/30">
           <SheetHeader>
@@ -315,7 +289,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
         </SheetContent>
       </Sheet>
       
-      {/* Notifications Sheet */}
       <Sheet open={notificationsOpen} onOpenChange={setNotificationsOpen}>
         <SheetContent side="right" className="glassmorphism">
           <SheetHeader>
@@ -368,7 +341,6 @@ export function TopNavbar({ className }: TopNavbarProps) {
         </SheetContent>
       </Sheet>
       
-      {/* Add Contact Dialog */}
       <Dialog open={addContactOpen} onOpenChange={setAddContactOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
