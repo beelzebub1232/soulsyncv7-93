@@ -55,3 +55,36 @@ export interface CommunityNotification {
   read: boolean;
   targetId?: string; // ID of post, reply, etc.
 }
+
+// Add missing types below
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'reply' | 'like' | 'report' | 'verification';
+  content: string;
+  relatedId: string;
+  date: Date;
+  read: boolean;
+}
+
+export interface ProfessionalVerification {
+  id: string;
+  userId: string;
+  name: string;
+  occupation: string;
+  documentUrl: string;
+  status: 'pending' | 'approved' | 'rejected';
+  submittedDate: Date;
+  reviewedDate?: Date;
+}
+
+export interface Report {
+  id: string;
+  contentId: string;
+  contentType: 'post' | 'reply';
+  reportedBy: string;
+  reason: string;
+  date: Date;
+  status: 'pending' | 'reviewed' | 'resolved';
+}
