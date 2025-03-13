@@ -58,19 +58,15 @@ export default function ProfessionalVerifications() {
   };
 
   const handleApprove = (id: string) => {
-    // Call the verifyProfessional function from UserContext
     verifyProfessional(id);
-    
     toast({
       title: "Professional Approved",
-      description: "The professional account has been verified and notified.",
+      description: "The professional account has been verified.",
     });
   };
 
   const handleReject = (id: string) => {
-    // Call the rejectProfessional function from UserContext
     rejectProfessional(id);
-    
     toast({
       title: "Professional Rejected",
       description: "The professional verification request has been rejected.",
