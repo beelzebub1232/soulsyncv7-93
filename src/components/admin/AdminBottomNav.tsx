@@ -7,7 +7,7 @@ import {
   Users, 
   ShieldCheck, 
   AlertTriangle, 
-  Settings
+  MessageSquare
 } from 'lucide-react';
 
 export function AdminBottomNav() {
@@ -31,14 +31,14 @@ export function AdminBottomNav() {
       icon: ShieldCheck
     },
     {
+      href: '/admin/community',
+      label: 'Community',
+      icon: MessageSquare
+    },
+    {
       href: '/admin/reports',
       label: 'Reports',
       icon: AlertTriangle
-    },
-    {
-      href: '/admin/settings',
-      label: 'Settings',
-      icon: Settings
     }
   ];
 
