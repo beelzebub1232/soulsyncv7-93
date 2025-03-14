@@ -26,7 +26,6 @@ import Insights from "@/pages/insights/Insights";
 import HabitTracker from "@/pages/habit-tracker/HabitTracker";
 import Settings from "@/pages/profile/Settings";
 import NotFound from "./pages/NotFound";
-import Mindful from "@/pages/mindful/Mindful";
 
 // Admin Pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -90,7 +89,6 @@ const App = () => (
               <Route index element={<Home />} />
               <Route path="journal" element={<Journal />} />
               <Route path="community" element={<Community />} />
-              <Route path="mindful" element={<Mindful />} />
               <Route path="community/category/:categoryId" element={<CategoryPosts />} />
               <Route path="community/post/:postId" element={<PostDetails />} />
               <Route path="insights" element={<Insights />} />
