@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +23,7 @@ import Journal from "@/pages/journal/Journal";
 import Community from "@/pages/community/Community";
 import CategoryPosts from "@/pages/community/CategoryPosts";
 import PostDetails from "@/pages/community/PostDetails";
+import Mindful from "@/pages/mindful/Mindful";
 import Insights from "@/pages/insights/Insights";
 import HabitTracker from "@/pages/habit-tracker/HabitTracker";
 import Settings from "@/pages/profile/Settings";
@@ -91,6 +93,7 @@ const App = () => (
               <Route path="community" element={<Community />} />
               <Route path="community/category/:categoryId" element={<CategoryPosts />} />
               <Route path="community/post/:postId" element={<PostDetails />} />
+              <Route path="mindful" element={<Mindful />} />
               <Route path="insights" element={<Insights />} />
               <Route path="habit-tracker" element={<HabitTracker />} />
               <Route path="profile/settings" element={<Settings />} />
