@@ -1,12 +1,16 @@
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Pause, Play, RotateCcw } from "lucide-react";
+import { motion } from "framer-motion";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { BreathingExerciseType } from "../../types";
+
+// Import our new components
+import BreathingCircle from "./components/BreathingCircle";
+import BreathingControls from "./components/BreathingControls";
+import BreathingProgress from "./components/BreathingProgress";
+import BreathingFeedback from "./components/BreathingFeedback";
 
 interface BreathingSessionProps {
   exercise: BreathingExerciseType;
@@ -21,12 +25,6 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   const [circleSize, setCircleSize] = useState(150);
   const breathingTimerRef = useRef<number | null>(null);
   
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   useEffect(() => {
     let interval: number | null = null;
     
@@ -105,14 +103,8 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
     setIsPlaying(true);
   };
   
-  const getInstructionText = () => {
-    switch (currentStep) {
-      case "inhale": return "Breathe In";
-      case "hold-in": return "Hold";
-      case "exhale": return "Breathe Out";
-      case "hold-out": return "Hold";
-      default: return "";
-    }
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
   };
   
   return (
@@ -126,80 +118,39 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
         <X className="h-5 w-5" />
       </Button>
       
-      <h2 className="text-xl font-semibold mb-6 text-center">{exercise.name}</h2>
+      <motion.h2 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-xl font-semibold mb-6 text-center"
+      >
+        {exercise.name}
+      </motion.h2>
       
-      <div className="relative flex items-center justify-center mb-8">
-        <motion.div
-          animate={{ width: circleSize, height: circleSize }}
-          transition={{ duration: currentStep === "inhale" ? exercise.pattern.inhale : exercise.pattern.exhale, ease: "easeInOut" }}
-          className={cn(
-            "rounded-full flex items-center justify-center",
-            exercise.color === "blue" && "bg-blue-100/50",
-            exercise.color === "purple" && "bg-purple-100/50",
-            exercise.color === "green" && "bg-green-100/50"
-          )}
-        >
-          <motion.div
-            animate={{ 
-              width: circleSize * 0.7, 
-              height: circleSize * 0.7 
-            }}
-            transition={{ duration: currentStep === "inhale" ? exercise.pattern.inhale : exercise.pattern.exhale, ease: "easeInOut" }}
-            className={cn(
-              "rounded-full flex items-center justify-center",
-              exercise.color === "blue" && "bg-blue-200/50",
-              exercise.color === "purple" && "bg-purple-200/50",
-              exercise.color === "green" && "bg-green-200/50"
-            )}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="text-xl font-medium"
-              >
-                {getInstructionText()}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-      </div>
+      <BreathingCircle 
+        currentStep={currentStep}
+        circleSize={circleSize}
+        exercise={exercise}
+      />
+      
+      <BreathingFeedback 
+        currentStep={currentStep} 
+        remainingTime={timeRemaining}
+        color={exercise.color}
+      />
       
       <div className="text-center space-y-4 w-full max-w-md">
-        <div className="flex justify-between text-sm text-muted-foreground mb-2">
-          <span>Time Remaining: {formatTime(timeRemaining)}</span>
-          <span>Breath Cycles: {breathCount}</span>
-        </div>
-        
-        <Progress 
-          value={(timeRemaining / (exercise.duration * 60)) * 100} 
-          className="h-2" 
-          indicatorClassName={cn(
-            exercise.color === "blue" && "bg-blue-500",
-            exercise.color === "purple" && "bg-purple-500",
-            exercise.color === "green" && "bg-green-500"
-          )}
+        <BreathingProgress
+          timeRemaining={timeRemaining}
+          totalDuration={exercise.duration * 60}
+          breathCount={breathCount}
+          color={exercise.color}
         />
         
-        <div className="flex gap-2 justify-center mt-6">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsPlaying(!isPlaying)}
-          >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={resetSession}
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-        </div>
+        <BreathingControls 
+          isPlaying={isPlaying}
+          onPlayPause={togglePlayPause}
+          onReset={resetSession}
+        />
       </div>
     </div>
   );
