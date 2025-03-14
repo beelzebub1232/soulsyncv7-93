@@ -8,10 +8,11 @@ import FilterSection from "./filters/FilterSection";
 import SearchBar from "./filters/SearchBar";
 import ExerciseCard from "./cards/ExerciseCard";
 import EmptyState from "./EmptyState";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 
 export default function BreathingExercises() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
-  const [favoriteExercises, setFavoriteExercises] = useState<string[]>([]);
+  const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("breathing-favorites", []);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
