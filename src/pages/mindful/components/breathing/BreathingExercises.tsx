@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { Lungs, Clock, Timer, Wind, Play, Heart } from "lucide-react";
+import { Wind, Clock, Timer, Play, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import BreathingSession from "./BreathingSession";
@@ -36,7 +35,7 @@ export default function BreathingExercises() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-mindscape-tertiary flex items-center gap-2">
-          <Lungs className="h-5 w-5 text-mindscape-primary" />
+          <Wind className="h-5 w-5 text-mindscape-primary" />
           Breathing Exercises
         </h2>
         <span className="text-sm text-muted-foreground">Choose an exercise to begin</span>
