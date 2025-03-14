@@ -1,6 +1,7 @@
+
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, MessageSquare, BarChart2 } from "lucide-react";
+import { Home, BookOpen, MessageSquare, BarChart2, Feather } from "lucide-react";
 
 interface BottomNavbarProps {
   className?: string;
@@ -24,6 +25,11 @@ export function BottomNavbar({ className }: BottomNavbarProps) {
       label: "Community",
       icon: MessageSquare,
       href: "/community"
+    },
+    {
+      label: "Mindful",
+      icon: Feather,
+      href: "/mindful"
     },
     {
       label: "Insights",
