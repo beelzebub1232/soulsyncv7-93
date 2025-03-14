@@ -8,8 +8,10 @@ import MindfulnessExercises from "./components/mindfulness/MindfulnessExercises"
 import MentalHealthQuiz from "./components/quiz/MentalHealthQuiz";
 import ProgressTracker from "./components/progress/ProgressTracker";
 import { AnimatePresence, motion } from "framer-motion";
-import { Flower, Sparkles } from "lucide-react";
+import { Brain, Flower, Heart, Shield, CloudSun } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { mindfulSummaryStats } from "./data/summaryData";
 
 export default function Mindful() {
   const { user } = useUser();
@@ -18,6 +20,43 @@ export default function Mindful() {
   return (
     <div className="space-y-6">
       <MindfulHeader username={user?.username || 'Friend'} />
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {mindfulSummaryStats.map(stat => (
+          <Card 
+            key={stat.id}
+            className={cn(
+              "overflow-hidden border-border/50 transition-all hover:shadow-md",
+              stat.color === "purple" && "bg-gradient-to-br from-purple-50/30 to-transparent",
+              stat.color === "blue" && "bg-gradient-to-br from-blue-50/30 to-transparent",
+              stat.color === "orange" && "bg-gradient-to-br from-orange-50/30 to-transparent",
+              stat.color === "green" && "bg-gradient-to-br from-green-50/30 to-transparent"
+            )}
+          >
+            <CardContent className="p-4 flex items-start gap-3">
+              <div className={cn(
+                "p-2 rounded-full",
+                stat.color === "purple" && "bg-purple-100",
+                stat.color === "blue" && "bg-blue-100",
+                stat.color === "orange" && "bg-orange-100",
+                stat.color === "green" && "bg-green-100"
+              )}>
+                <stat.icon className={cn(
+                  "h-5 w-5",
+                  stat.color === "purple" && "text-purple-600",
+                  stat.color === "blue" && "text-blue-600",
+                  stat.color === "orange" && "text-orange-500",
+                  stat.color === "green" && "text-green-600"
+                )} />
+              </div>
+              <div className="space-y-0.5">
+                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardDescription className="text-xs line-clamp-2">{stat.description}</CardDescription>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       
       <div className="relative">
         <div className="absolute -z-10 top-1/3 left-1/4 w-40 h-40 rounded-full bg-purple-100/20 blur-3xl"></div>
