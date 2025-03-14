@@ -28,10 +28,12 @@ export default function Mindful() {
     <ScrollArea className="h-full">
       <div className="container p-4 space-y-6 pb-24">
         <MindfulHeader />
-        <BreathingExercises />
-        <MindfulnessExercises />
-        <MentalHealthQuiz />
-        <ProgressTracking />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <BreathingExercises />
+          <MindfulnessExercises />
+          <MentalHealthQuiz />
+          <ProgressTracking />
+        </div>
       </div>
     </ScrollArea>
   );
