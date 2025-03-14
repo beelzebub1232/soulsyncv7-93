@@ -1,157 +1,192 @@
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { ChevronLeft, Pause, Play } from "lucide-react";
 import { BreathingExerciseType } from "../../types";
-
-// Import our new components
 import BreathingCircle from "./components/BreathingCircle";
-import BreathingControls from "./components/BreathingControls";
 import BreathingProgress from "./components/BreathingProgress";
+import BreathingControls from "./components/BreathingControls";
 import BreathingFeedback from "./components/BreathingFeedback";
+import { toast } from "sonner";
 
 interface BreathingSessionProps {
   exercise: BreathingExerciseType;
   onClose: () => void;
+  onComplete?: () => void;
 }
 
-export default function BreathingSession({ exercise, onClose }: BreathingSessionProps) {
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [currentStep, setCurrentStep] = useState("inhale");
-  const [timeRemaining, setTimeRemaining] = useState(exercise.duration * 60);
-  const [breathCount, setBreathCount] = useState(0);
-  const [circleSize, setCircleSize] = useState(150);
-  const breathingTimerRef = useRef<number | null>(null);
+export default function BreathingSession({ exercise, onClose, onComplete }: BreathingSessionProps) {
+  const [timeLeft, setTimeLeft] = useState(exercise.duration * 60);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPhase, setCurrentPhase] = useState<"inhale" | "hold-in" | "exhale" | "hold-out">("inhale");
+  const [phaseTimeLeft, setPhaseTimeLeft] = useState(exercise.pattern.inhale);
+  const [completed, setCompleted] = useState(false);
+  const [cycles, setCycles] = useState(0);
   
-  useEffect(() => {
-    let interval: number | null = null;
-    
-    if (isPlaying) {
-      interval = window.setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            clearInterval(interval!);
-            toast({
-              title: "Exercise Complete",
-              description: `Great job! You've completed ${exercise.name}.`,
-            });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isPlaying, exercise.name]);
+  const animationRef = useRef<number | null>(null);
+  const lastTime = useRef<number | null>(null);
   
-  useEffect(() => {
-    if (!isPlaying) {
-      if (breathingTimerRef.current) {
-        clearTimeout(breathingTimerRef.current);
-        breathingTimerRef.current = null;
-      }
+  const totalSeconds = exercise.duration * 60;
+  const progress = 100 - (timeLeft / totalSeconds) * 100;
+  
+  // Handle breathing animation and time updates
+  const animate = (time: number) => {
+    if (lastTime.current === null) {
+      lastTime.current = time;
+      animationRef.current = requestAnimationFrame(animate);
       return;
     }
     
-    const breathingCycle = () => {
-      // Inhale
-      setCurrentStep("inhale");
-      setCircleSize(250);
+    const deltaTime = time - lastTime.current;
+    
+    if (deltaTime >= 1000) { // Update every second
+      // Update total time
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // Session complete
+          setIsPlaying(false);
+          setCompleted(true);
+          toast.success("Breathing session completed!");
+          return 0;
+        }
+        return prev - 1;
+      });
       
-      breathingTimerRef.current = window.setTimeout(() => {
-        // Hold after inhale
-        setCurrentStep("hold-in");
-        
-        breathingTimerRef.current = window.setTimeout(() => {
-          // Exhale
-          setCurrentStep("exhale");
-          setCircleSize(150);
-          
-          breathingTimerRef.current = window.setTimeout(() => {
-            // Hold after exhale
-            setCurrentStep("hold-out");
-            
-            breathingTimerRef.current = window.setTimeout(() => {
-              // Complete one breath cycle
-              setBreathCount(prev => prev + 1);
-              breathingCycle();
-            }, exercise.pattern.holdOut * 1000);
-          }, exercise.pattern.exhale * 1000);
-        }, exercise.pattern.holdIn * 1000);
-      }, exercise.pattern.inhale * 1000);
-    };
+      // Update phase time
+      setPhaseTimeLeft(prev => {
+        if (prev <= 1) {
+          // Phase complete, move to next phase
+          switch (currentPhase) {
+            case "inhale":
+              setCurrentPhase("hold-in");
+              return exercise.pattern.holdIn;
+            case "hold-in":
+              setCurrentPhase("exhale");
+              return exercise.pattern.exhale;
+            case "exhale":
+              setCurrentPhase("hold-out");
+              return exercise.pattern.holdOut;
+            case "hold-out":
+              setCurrentPhase("inhale");
+              setCycles(prev => prev + 1);
+              return exercise.pattern.inhale;
+          }
+        }
+        return prev - 1;
+      });
+      
+      lastTime.current = time;
+    }
     
-    breathingCycle();
-    
-    return () => {
-      if (breathingTimerRef.current) {
-        clearTimeout(breathingTimerRef.current);
-      }
-    };
-  }, [isPlaying, exercise.pattern]);
-  
-  const resetSession = () => {
-    setTimeRemaining(exercise.duration * 60);
-    setBreathCount(0);
-    setCurrentStep("inhale");
-    setCircleSize(150);
-    setIsPlaying(true);
+    if (isPlaying && !completed) {
+      animationRef.current = requestAnimationFrame(animate);
+    }
   };
   
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+  useEffect(() => {
+    if (isPlaying && !completed) {
+      lastTime.current = null;
+      animationRef.current = requestAnimationFrame(animate);
+    }
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPlaying, completed]);
+  
+  const handleComplete = () => {
+    if (onComplete) {
+      onComplete();
+    } else {
+      onClose();
+    }
+  };
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
   
   return (
-    <div className="flex flex-col items-center justify-center h-[60vh] relative">
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="absolute top-0 right-0"
-        onClick={onClose}
-      >
-        <X className="h-5 w-5" />
-      </Button>
+    <div className="h-full space-y-4">
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 rounded-full"
+          onClick={onClose}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span className="sr-only">Back</span>
+        </Button>
+        <h2 className="text-lg font-semibold">{exercise.name}</h2>
+      </div>
       
-      <motion.h2 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-xl font-semibold mb-6 text-center"
-      >
-        {exercise.name}
-      </motion.h2>
-      
-      <BreathingCircle 
-        currentStep={currentStep}
-        circleSize={circleSize}
-        exercise={exercise}
+      <BreathingProgress 
+        progress={progress} 
+        timeLeft={formatTime(timeLeft)}
+        cycles={cycles}
       />
       
-      <BreathingFeedback 
-        currentStep={currentStep} 
-        remainingTime={timeRemaining}
-        color={exercise.color}
-      />
-      
-      <div className="text-center space-y-4 w-full max-w-md">
-        <BreathingProgress
-          timeRemaining={timeRemaining}
-          totalDuration={exercise.duration * 60}
-          breathCount={breathCount}
-          color={exercise.color}
+      <div className="flex flex-col items-center justify-center py-4">
+        <BreathingCircle 
+          phase={currentPhase}
+          pattern={exercise.pattern}
+          isPlaying={isPlaying}
+        />
+        
+        <BreathingFeedback 
+          phase={currentPhase} 
+          timeLeft={phaseTimeLeft}
         />
         
         <BreathingControls 
-          isPlaying={isPlaying}
-          onPlayPause={togglePlayPause}
-          onReset={resetSession}
+          isPlaying={isPlaying} 
+          onPlayPause={() => setIsPlaying(!isPlaying)}
         />
       </div>
+      
+      <div className="mt-4 p-4 bg-background/80 rounded-xl border border-border/50">
+        <h3 className="text-sm font-medium mb-2">Breathing Pattern</h3>
+        <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+          <div className="flex justify-between">
+            <span>Inhale</span>
+            <span className="font-medium">{exercise.pattern.inhale}s</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Hold</span>
+            <span className="font-medium">{exercise.pattern.holdIn}s</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Exhale</span>
+            <span className="font-medium">{exercise.pattern.exhale}s</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Hold</span>
+            <span className="font-medium">{exercise.pattern.holdOut}s</span>
+          </div>
+        </div>
+      </div>
+      
+      {completed && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl p-6 max-w-md w-full border border-border shadow-lg">
+            <h2 className="text-xl font-semibold mb-3 text-center">Session Complete!</h2>
+            <p className="text-center text-muted-foreground mb-6">
+              You've completed the {exercise.name} breathing session. Great job!
+            </p>
+            <Button 
+              className="w-full bg-mindscape-primary hover:bg-mindscape-primary/90"
+              onClick={handleComplete}
+            >
+              Continue
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

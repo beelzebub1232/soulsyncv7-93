@@ -84,3 +84,11 @@ export interface MindfulStat {
   icon: LucideIcon;
   color: string;
 }
+
+// Insights Integration Types
+export interface MindfulnessSession {
+  id: string;
+  date: string;
+  exerciseName: string;
+  minutes: number;
+}
