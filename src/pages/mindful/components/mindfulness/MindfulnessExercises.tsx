@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lotus, Timer, PlayCircle } from "lucide-react";
+import { Flower, Timer, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function MindfulnessExercises() {
@@ -21,7 +21,7 @@ export function MindfulnessExercises() {
     <Card className="overflow-hidden">
       <CardHeader className="space-y-1">
         <div className="flex items-center gap-2">
-          <Lotus className="h-5 w-5 text-mindscape-primary" />
+          <Flower className="h-5 w-5 text-mindscape-primary" />
           <CardTitle>Mindfulness Practices</CardTitle>
         </div>
       </CardHeader>
