@@ -83,4 +83,9 @@ export interface MindfulStat {
   description: string;
   icon: LucideIcon;
   color: string;
+  benefits: string[];
+  howItWorks: string;
 }
+
+// Export all icons used in the mindfulSummaryStats
+export { Brain, Heart, Shield, CloudSun } from "lucide-react";

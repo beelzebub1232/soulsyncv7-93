@@ -1,29 +1,35 @@
 
 import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Flower, Clock, Filter, ScanFace, XCircle } from "lucide-react";
+import { Flower, Clock, Filter, ScanFace } from "lucide-react";
 import MindfulnessSession from "./MindfulnessSession";
 import { mindfulnessExercises } from "../../data/mindfulnessExercises";
-import FilterSection from "./filters/FilterSection";
-import SearchBar from "./filters/SearchBar";
+import FilterSection from "../shared/FilterSection";
+import SearchBar from "../shared/SearchBar";
 import ExerciseCard from "./cards/ExerciseCard";
 import EmptyState from "./EmptyState";
-import { useLocalStorage } from "../../hooks/useLocalStorage";
+import * as mindfulStorage from "../../services/mindfulStorage";
 
 export default function MindfulnessExercises() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
-  const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("mindfulness-favorites", []);
+  const [favoriteExercises, setFavoriteExercises] = useState<string[]>([]);
   const [activeFocusFilter, setActiveFocusFilter] = useState<string | null>(null);
   const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState(mindfulnessExercises);
   
+  useEffect(() => {
+    // Get favorites from persistent storage
+    setFavoriteExercises(mindfulStorage.getMindfulnessFavorites());
+  }, []);
+  
   const toggleFavorite = (id: string) => {
-    if (favoriteExercises.includes(id)) {
-      setFavoriteExercises(favoriteExercises.filter(exerciseId => exerciseId !== id));
-    } else {
-      setFavoriteExercises([...favoriteExercises, id]);
-    }
+    const newFavorites = favoriteExercises.includes(id)
+      ? favoriteExercises.filter(exerciseId => exerciseId !== id)
+      : [...favoriteExercises, id];
+    
+    setFavoriteExercises(newFavorites);
+    mindfulStorage.saveMindfulnessFavorites(newFavorites);
   };
 
   const focusFilters = [
@@ -84,6 +90,11 @@ export default function MindfulnessExercises() {
     setSearchQuery("");
   };
 
+  const handleSessionComplete = (exerciseId: string, durationMinutes: number) => {
+    mindfulStorage.logExerciseCompletion(exerciseId, "mindfulness", durationMinutes);
+    setActiveSession(null);
+  };
+
   if (activeSession) {
     const exercise = mindfulnessExercises.find(ex => ex.id === activeSession);
     if (!exercise) return null;
@@ -92,6 +103,7 @@ export default function MindfulnessExercises() {
       <MindfulnessSession 
         exercise={exercise} 
         onClose={() => setActiveSession(null)} 
+        onComplete={handleSessionComplete}
       />
     );
   }
@@ -110,6 +122,7 @@ export default function MindfulnessExercises() {
       <SearchBar 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        placeholder="Search mindfulness exercises..."
       />
       
       <div className="space-y-3">
@@ -138,7 +151,7 @@ export default function MindfulnessExercises() {
           className="text-mindscape-primary text-sm font-medium flex items-center gap-1"
           onClick={clearFilters}
         >
-          <XCircle className="h-4 w-4" />
+          <Filter className="h-4 w-4" />
           Clear all filters
         </button>
       )}
