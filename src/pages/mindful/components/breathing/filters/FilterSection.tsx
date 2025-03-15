@@ -1,7 +1,7 @@
 
-import { Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface FilterOption {
   label: string;
@@ -29,22 +29,24 @@ export default function FilterSection({
         {icon}
         <span className="text-sm font-medium">{title}</span>
       </div>
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {options.map((filter) => (
-          <Badge
-            key={filter.label}
-            variant={activeFilter === filter.value ? "default" : "outline"}
-            className={cn(
-              "cursor-pointer px-3 py-1 rounded-full",
-              activeFilter === filter.value &&
-                "bg-mindscape-primary hover:bg-mindscape-primary/90"
-            )}
-            onClick={() => onFilterChange(filter.value)}
-          >
-            {filter.label}
-          </Badge>
-        ))}
-      </div>
+      <ScrollArea className="pb-1">
+        <div className="flex gap-2 pb-1">
+          {options.map((filter) => (
+            <Badge
+              key={filter.label}
+              variant={activeFilter === filter.value ? "default" : "outline"}
+              className={cn(
+                "cursor-pointer rounded-full whitespace-nowrap",
+                activeFilter === filter.value &&
+                  "bg-mindscape-primary hover:bg-mindscape-primary/90"
+              )}
+              onClick={() => onFilterChange(filter.value)}
+            >
+              {filter.label}
+            </Badge>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

@@ -10,11 +10,11 @@ export default function MindfulHeader({ username }: MindfulHeaderProps) {
   return (
     <header className="pt-2 bg-gradient-to-r from-mindscape-light/30 to-transparent p-4 rounded-xl relative overflow-hidden">
       <div className="relative z-10">
-        <h1 className="text-2xl font-bold font-display text-mindscape-primary flex items-center gap-2">
-          Welcome to Mindful, {username}!
-          <Flower className="h-5 w-5 text-mindscape-primary animate-pulse" />
+        <h1 className="text-xl font-bold font-display text-mindscape-primary flex items-center gap-2">
+          <span className="truncate">Welcome to Mindful, {username}!</span>
+          <Flower className="h-5 w-5 text-mindscape-primary animate-pulse shrink-0" />
         </h1>
-        <p className="text-muted-foreground">Find peace, reduce stress, and improve your mental well-being</p>
+        <p className="text-sm text-muted-foreground">Find peace and improve your well-being</p>
       </div>
       
       {/* Animated shapes */}

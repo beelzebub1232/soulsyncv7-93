@@ -12,10 +12,10 @@ export default function SearchBar({ searchQuery, onSearchChange }: SearchBarProp
     <div className="relative">
       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
       <Input
-        placeholder="Search mindfulness exercises..."
+        placeholder="Search exercises..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 w-full"
+        className="pl-10 w-full h-9 text-sm"
       />
       {searchQuery && (
         <button

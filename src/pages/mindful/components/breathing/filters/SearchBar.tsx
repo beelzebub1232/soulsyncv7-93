@@ -15,7 +15,7 @@ export default function SearchBar({ searchQuery, onSearchChange }: SearchBarProp
         placeholder="Search exercises..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 w-full"
+        className="pl-10 w-full h-9 text-sm"
       />
       {searchQuery && (
         <button

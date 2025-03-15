@@ -9,6 +9,7 @@ import SearchBar from "./filters/SearchBar";
 import ExerciseCard from "./cards/ExerciseCard";
 import EmptyState from "./EmptyState";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function BreathingExercises() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
@@ -34,10 +35,10 @@ export default function BreathingExercises() {
   ];
 
   const durationFilters = [
-    { label: "All Durations", value: null },
-    { label: "Quick (< 5 min)", value: "quick" },
-    { label: "Medium (5-7 min)", value: "medium" },
-    { label: "Long (> 7 min)", value: "long" }
+    { label: "All", value: null },
+    { label: "< 5 min", value: "quick" },
+    { label: "5-7 min", value: "medium" },
+    { label: "> 7 min", value: "long" }
   ];
 
   // Filter exercises whenever filter, search, or favorites change
@@ -96,13 +97,13 @@ export default function BreathingExercises() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-mindscape-tertiary flex items-center gap-2">
           <Wind className="h-5 w-5 text-mindscape-primary" />
           Breathing Exercises
         </h2>
-        <span className="text-sm text-muted-foreground">Choose an exercise to begin</span>
+        <span className="text-xs text-muted-foreground">Choose to begin</span>
       </div>
       
       {/* Search Bar */}
@@ -111,42 +112,60 @@ export default function BreathingExercises() {
         onSearchChange={setSearchQuery}
       />
       
-      <div className="space-y-3">
-        {/* Level Filters */}
-        <FilterSection
-          title="Level"
-          icon={<Filter className="h-4 w-4 text-muted-foreground" />}
-          options={filters}
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-        />
-        
-        {/* Duration Filters */}
-        <FilterSection
-          title="Duration"
-          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
-          options={durationFilters}
-          activeFilter={activeDurationFilter}
-          onFilterChange={setActiveDurationFilter}
-        />
-      </div>
+      {/* Filters accordion for mobile */}
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="filters" className="border-b-0">
+          <AccordionTrigger className="py-2 text-sm">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span>Filters</span>
+              {(activeFilter || activeDurationFilter) && (
+                <span className="bg-mindscape-primary/20 text-mindscape-primary text-xs px-2 py-0.5 rounded-full">
+                  Active
+                </span>
+              )}
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3 py-2">
+              {/* Level Filters */}
+              <FilterSection
+                title="Level"
+                icon={<Filter className="h-4 w-4 text-muted-foreground" />}
+                options={filters}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+              />
+              
+              {/* Duration Filters */}
+              <FilterSection
+                title="Duration"
+                icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+                options={durationFilters}
+                activeFilter={activeDurationFilter}
+                onFilterChange={setActiveDurationFilter}
+              />
+              
+              {/* Clear Filters Button */}
+              {(activeFilter || activeDurationFilter || searchQuery) && (
+                <button 
+                  className="text-mindscape-primary text-sm font-medium flex items-center gap-1 mt-2"
+                  onClick={clearFilters}
+                >
+                  <XCircle className="h-4 w-4" />
+                  Clear all filters
+                </button>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
       
-      {/* Clear Filters Button */}
-      {(activeFilter || activeDurationFilter || searchQuery) && (
-        <button 
-          className="text-mindscape-primary text-sm font-medium flex items-center gap-1"
-          onClick={clearFilters}
-        >
-          <XCircle className="h-4 w-4" />
-          Clear all filters
-        </button>
-      )}
-      
-      <ScrollArea className="h-[calc(100vh-420px)]">
+      <ScrollArea className="h-[calc(100vh-370px)]">
         {filteredExercises.length === 0 ? (
           <EmptyState onClearFilters={clearFilters} />
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3">
             {filteredExercises.map((exercise) => (
               <ExerciseCard
                 key={exercise.id}

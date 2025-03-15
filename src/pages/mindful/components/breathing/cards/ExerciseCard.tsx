@@ -29,9 +29,9 @@ export default function ExerciseCard({
         exercise.color === "green" && "bg-gradient-to-br from-green-50 to-transparent border-green-200/50"
       )}
     >
-      <CardHeader className="pb-2">
+      <CardHeader className="px-4 py-3 pb-0">
         <div className="flex justify-between items-start">
-          <CardTitle className="text-lg font-semibold">{exercise.name}</CardTitle>
+          <CardTitle className="text-base font-semibold">{exercise.name}</CardTitle>
           <button 
             onClick={(e) => {
               e.stopPropagation();
@@ -45,32 +45,32 @@ export default function ExerciseCard({
             )} />
           </button>
         </div>
-        <CardDescription>{exercise.description}</CardDescription>
+        <CardDescription className="text-xs mt-1 line-clamp-2">{exercise.description}</CardDescription>
       </CardHeader>
-      <CardContent className="pb-2">
-        <div className="flex gap-4 text-sm text-muted-foreground">
+      <CardContent className="px-4 py-2">
+        <div className="flex gap-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
+            <Clock className="h-3.5 w-3.5" />
             <span>{exercise.duration} min</span>
           </div>
           <div className="flex items-center gap-1">
-            <Wind className="h-4 w-4" />
+            <Wind className="h-3.5 w-3.5" />
             <span>{exercise.level}</span>
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="px-4 py-3 pt-0">
         <button 
           className={cn(
-            buttonVariants({ variant: "default", size: "sm" }),
-            "w-full flex items-center justify-center gap-2",
+            "w-full flex items-center justify-center gap-2 text-sm py-1.5 rounded-md",
+            "text-white transition-colors",
             exercise.color === "blue" && "bg-blue-500 hover:bg-blue-600",
             exercise.color === "purple" && "bg-purple-500 hover:bg-purple-600",
             exercise.color === "green" && "bg-green-500 hover:bg-green-600"
           )}
           onClick={() => onStartSession(exercise.id)}
         >
-          <Play className="h-4 w-4" />
+          <Play className="h-3.5 w-3.5" />
           Start Exercise
         </button>
       </CardFooter>

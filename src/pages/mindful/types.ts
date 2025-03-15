@@ -83,4 +83,6 @@ export interface MindfulStat {
   description: string;
   icon: LucideIcon;
   color: string;
+  benefits: string[];
+  research: string;
 }
