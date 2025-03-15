@@ -142,7 +142,7 @@ export function MoodSuggestions() {
   }
   
   return (
-    <Card className="p-4 bg-gradient-to-r from-mindscape-light/20 to-transparent">
+    <Card className="p-4 bg-gradient-to-r from-mindscape-light/20 to-transparent w-full">
       <div className="mb-3">
         <h2 className="text-lg font-semibold text-mindscape-tertiary">Recommended for You</h2>
         <p className="text-xs text-muted-foreground">Based on your current mood</p>
@@ -153,14 +153,14 @@ export function MoodSuggestions() {
           <Button
             key={index}
             variant="outline"
-            className="h-auto flex items-center justify-start gap-2.5 p-2.5 border border-mindscape-light hover:bg-mindscape-light/20"
+            className="h-auto flex items-center justify-start gap-2.5 p-2.5 border border-mindscape-light hover:bg-mindscape-light/20 w-full"
             asChild
           >
-            <Link to={suggestion.path}>
-              <div className="rounded-full p-2 bg-white/50 min-w-[36px] flex items-center justify-center">
+            <Link to={suggestion.path} className="w-full">
+              <div className="rounded-full p-2 bg-white/50 min-w-[36px] flex items-center justify-center shrink-0">
                 {suggestion.icon}
               </div>
-              <div className="text-left flex-1 overflow-hidden">
+              <div className="text-left flex-1 overflow-hidden max-w-full">
                 <h3 className="font-medium text-sm truncate">{suggestion.title}</h3>
                 <p className="text-xs text-muted-foreground line-clamp-1">{suggestion.description}</p>
               </div>
