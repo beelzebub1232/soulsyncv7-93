@@ -142,27 +142,27 @@ export function MoodSuggestions() {
   }
   
   return (
-    <Card className="p-5 md:p-6 bg-gradient-to-r from-mindscape-light/20 to-transparent">
-      <div className="mb-4">
+    <Card className="p-4 bg-gradient-to-r from-mindscape-light/20 to-transparent">
+      <div className="mb-3">
         <h2 className="text-lg font-semibold text-mindscape-tertiary">Recommended for You</h2>
-        <p className="text-sm text-muted-foreground">Based on your current mood</p>
+        <p className="text-xs text-muted-foreground">Based on your current mood</p>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="flex flex-col gap-2.5">
         {suggestions.map((suggestion, index) => (
           <Button
             key={index}
             variant="outline"
-            className="h-auto flex items-center justify-start gap-3 p-3 border border-mindscape-light hover:bg-mindscape-light/20"
+            className="h-auto flex items-center justify-start gap-2.5 p-2.5 border border-mindscape-light hover:bg-mindscape-light/20"
             asChild
           >
             <Link to={suggestion.path}>
-              <div className="rounded-full p-2 bg-white/50">
+              <div className="rounded-full p-2 bg-white/50 min-w-[36px] flex items-center justify-center">
                 {suggestion.icon}
               </div>
-              <div className="text-left">
-                <h3 className="font-medium text-sm">{suggestion.title}</h3>
-                <p className="text-xs text-muted-foreground">{suggestion.description}</p>
+              <div className="text-left flex-1 overflow-hidden">
+                <h3 className="font-medium text-sm truncate">{suggestion.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-1">{suggestion.description}</p>
               </div>
             </Link>
           </Button>
