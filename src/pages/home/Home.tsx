@@ -5,6 +5,7 @@ import { DailyMotivation } from "./components/DailyMotivation";
 import { UpcomingHabits } from "./components/upcoming-habits";
 import { RecentJournals } from "./components/RecentJournals";
 import { WeeklyInsights } from "./components/weekly-insights";
+import { MoodSuggestions } from "./components/mood-suggestions";
 import { LightbulbIcon, SparklesIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -48,6 +49,9 @@ export default function Home() {
         <div className="absolute -z-10 bottom-8 right-8 w-32 h-32 rounded-full bg-blue-100/30 blur-xl"></div>
         <DailyMotivation />
       </div>
+      
+      {/* New Mood Suggestions component */}
+      <MoodSuggestions />
       
       <div className="space-y-4 bg-gradient-to-br from-blue-50/50 to-transparent p-5 rounded-xl shadow-sm">
         <div className="flex items-center justify-between">
