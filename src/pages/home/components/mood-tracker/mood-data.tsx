@@ -54,28 +54,28 @@ export const moods: Mood[] = [
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <CircleOff className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <Battery className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-blue-600",
     bgColor: "bg-blue-50 border-blue-200" 
   },
   { 
     value: "tired", 
     label: "Tired", 
-    icon: <Battery className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <Clock className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-gray-500",
     bgColor: "bg-gray-50 border-gray-200" 
   },
   { 
     value: "stressed", 
     label: "Stressed", 
-    icon: <Clock className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <Flame className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-orange-500",
     bgColor: "bg-orange-50 border-orange-100" 
   },
   { 
     value: "anxious", 
     label: "Anxious", 
-    icon: <AlertCircle className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <CloudRain className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-indigo-500",
     bgColor: "bg-indigo-50 border-indigo-200" 
   },
