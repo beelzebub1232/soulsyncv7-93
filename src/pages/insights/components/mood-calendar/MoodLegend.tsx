@@ -2,22 +2,31 @@
 import React from 'react';
 
 export function MoodLegend() {
-  const moodTypes = [
-    { value: 'amazing', color: 'bg-green-400', label: 'Amazing' },
-    { value: 'good', color: 'bg-green-300', label: 'Good' },
-    { value: 'okay', color: 'bg-blue-300', label: 'Okay' },
-    { value: 'sad', color: 'bg-orange-300', label: 'Sad' },
-    { value: 'awful', color: 'bg-red-300', label: 'Awful' }
+  const moodColors = [
+    { label: 'Amazing', color: 'bg-green-400' },
+    { label: 'Good', color: 'bg-green-300' },
+    { label: 'Peaceful', color: 'bg-green-200' },
+    { label: 'Calm', color: 'bg-blue-200' },
+    { label: 'Energetic', color: 'bg-amber-300' },
+    { label: 'Okay', color: 'bg-blue-300' },
+    { label: 'Tired', color: 'bg-gray-300' },
+    { label: 'Stressed', color: 'bg-orange-200' },
+    { label: 'Anxious', color: 'bg-indigo-300' },
+    { label: 'Sad', color: 'bg-orange-300' },
+    { label: 'Angry', color: 'bg-red-400' },
+    { label: 'Awful', color: 'bg-red-300' },
   ];
 
   return (
-    <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2">
-      {moodTypes.map(mood => (
-        <div key={mood.value} className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${mood.color}`}></div>
-          <span className="text-xs">{mood.label}</span>
-        </div>
-      ))}
+    <div className="mt-4">
+      <div className="flex flex-wrap gap-2 text-xs">
+        {moodColors.map((mood) => (
+          <div key={mood.label} className="flex items-center gap-1">
+            <div className={`w-3 h-3 rounded-full ${mood.color}`}></div>
+            <span>{mood.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -65,11 +65,24 @@ export function getMoodColorClass(mood?: MoodEntry): string {
     case 'amazing':
       return 'bg-green-400';
     case 'good':
+    case 'peaceful':
       return 'bg-green-300';
+    case 'calm':
+      return 'bg-blue-200';
+    case 'energetic':
+      return 'bg-amber-300';
     case 'okay':
       return 'bg-blue-300';
+    case 'tired':
+      return 'bg-gray-300';
+    case 'stressed':
+      return 'bg-orange-200';
+    case 'anxious':
+      return 'bg-indigo-300';
     case 'sad':
       return 'bg-orange-300';
+    case 'angry':
+      return 'bg-red-400';
     case 'awful':
       return 'bg-red-300';
     default:

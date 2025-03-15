@@ -42,7 +42,14 @@ export interface InsightsData {
 export const MOOD_SCORES: Record<string, number> = {
   "amazing": 5,
   "good": 4,
+  "peaceful": 4,
+  "calm": 4,
+  "energetic": 4,
   "okay": 3,
   "sad": 2,
+  "tired": 2,
+  "stressed": 2,
+  "anxious": 2,
+  "angry": 1,
   "awful": 1
 };

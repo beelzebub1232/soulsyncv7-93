@@ -24,8 +24,15 @@ export function WeeklySummary({
     switch(mood.toLowerCase()) {
       case 'amazing': return '😄';
       case 'good': return '🙂';
+      case 'peaceful': return '😌';
+      case 'calm': return '😊';
+      case 'energetic': return '⚡';
       case 'okay': return '😐';
+      case 'tired': return '😴';
+      case 'stressed': return '😓';
+      case 'anxious': return '😰';
       case 'sad': return '😔';
+      case 'angry': return '😠';
       case 'awful': return '😞';
       default: return '❓';
     }
@@ -41,11 +48,22 @@ export function WeeklySummary({
       case 'amazing':
         return 'Your mood has been excellent this week! Keep up with whatever you\'re doing.';
       case 'good':
+      case 'peaceful':
+      case 'calm':
         return 'Your mood tends to improve on days you complete your morning meditation habit.';
+      case 'energetic':
+        return 'Your energy levels have been high this week. Great for productivity and exercise!';
       case 'okay':
         return 'Try increasing your mindfulness minutes to help improve your mood.';
+      case 'tired':
+        return 'Consider adjusting your sleep schedule and adding more relaxation to your routine.';
+      case 'stressed':
+      case 'anxious':
+        return 'Try breathing exercises and mindfulness to help reduce stress and anxiety.';
       case 'sad':
         return 'Consider adding more physical activity to your routine to help boost your mood.';
+      case 'angry':
+        return 'Mindfulness exercises might help manage feelings of anger and frustration.';
       case 'awful':
         return 'Remember to be kind to yourself during difficult times. Consider reaching out to a friend or professional.';
       default:

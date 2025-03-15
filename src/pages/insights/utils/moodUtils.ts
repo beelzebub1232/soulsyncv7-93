@@ -87,7 +87,7 @@ export function calculateMoodTrend(
 export function getMoodAverageLabel(moods: MoodEntry[]): string {
   if (!moods.length) return "No Data";
   
-  const avgScore = moods.reduce((sum, entry) => sum + MOOD_SCORES[entry.value], 0) / moods.length;
+  const avgScore = moods.reduce((sum, entry) => sum + (MOOD_SCORES[entry.value] || 3), 0) / moods.length;
   
   if (avgScore >= 4.5) return "Amazing";
   if (avgScore >= 3.5) return "Good";

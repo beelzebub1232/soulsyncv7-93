@@ -13,17 +13,31 @@ interface EmotionAnalysisProps {
 export function EmotionAnalysis({ moodDistribution }: EmotionAnalysisProps) {
   const COLORS = {
     'amazing': '#4ade80', // green-400
-    'good': '#86efac',   // green-300
-    'okay': '#93c5fd',   // blue-300
-    'sad': '#fdba74',    // orange-300
-    'awful': '#fca5a5',  // red-300
+    'good': '#86efac',    // green-300
+    'peaceful': '#a7f3d0', // green-200
+    'calm': '#bae6fd',    // blue-200
+    'energetic': '#fcd34d', // amber-300
+    'okay': '#93c5fd',    // blue-300
+    'tired': '#d1d5db',   // gray-300
+    'stressed': '#fed7aa', // orange-200
+    'anxious': '#a5b4fc',  // indigo-300
+    'sad': '#fdba74',     // orange-300
+    'angry': '#f87171',   // red-400
+    'awful': '#fca5a5',   // red-300
   };
   
   const MOOD_LABELS = {
     'amazing': 'Amazing',
     'good': 'Good',
+    'peaceful': 'Peaceful',
+    'calm': 'Calm',
+    'energetic': 'Energetic',
     'okay': 'Okay',
+    'tired': 'Tired',
+    'stressed': 'Stressed',
+    'anxious': 'Anxious',
     'sad': 'Sad',
+    'angry': 'Angry',
     'awful': 'Awful',
   };
   
