@@ -2,7 +2,7 @@
 import { useUser } from '@/contexts/UserContext';
 import { MoodEntry } from '@/pages/home/components/mood-tracker/types';
 import { JournalEntry } from '@/types/journal';
-import { HabitEntry, MindfulnessSession, InsightsData, MOOD_SCORES } from '../types';
+import { HabitEntry, MindfulnessSession, InsightsData } from '../types';
 import { 
   filterMoodsByMonth,
   getRecentMoods,
@@ -105,20 +105,6 @@ export function fetchInsightsData(selectedDate: Date, userId: string): InsightsD
       isWithinInterval(new Date(entry.date), weekIntervals.current)
     );
     
-    // Calculate the mood score based on this week's moods
-    const moodScore = thisWeekMoods.length > 0 
-      ? thisWeekMoods.reduce((sum, entry) => {
-          // Use MOOD_SCORES to get the numerical value, defaulting to 3 for unknown moods
-          const scoreValue = entry.value ? (MOOD_SCORES[entry.value] || 3) : 3;
-          return sum + scoreValue;
-        }, 0) / (thisWeekMoods.length * 5) // Normalize to 0-1 range
-      : 0.6; // Default value
-    
-    // Calculate habit completion rate
-    const totalHabits = habitProgress.reduce((sum, habit) => sum + habit.total, 0);
-    const completedHabits = habitProgress.reduce((sum, habit) => sum + habit.completed, 0);
-    const habitCompletionRate = totalHabits > 0 ? completedHabits / totalHabits : 0.7; // Default to 0.7 if no habits
-    
     // Construct weekly summary
     const weeklySummary = createWeeklySummary(
       thisWeekMoods, 
@@ -127,7 +113,7 @@ export function fetchInsightsData(selectedDate: Date, userId: string): InsightsD
       totalMindfulnessMinutes
     );
     
-    // Return insights data with the added properties
+    // Return insights data
     return {
       recentMoods,
       weeklyMoodCounts,
@@ -136,9 +122,7 @@ export function fetchInsightsData(selectedDate: Date, userId: string): InsightsD
       moodTrend,
       habitProgress,
       journalCount: thisWeekJournals.length,
-      mindfulnessData: thisWeekMindfulness,
-      moodScore,
-      habitCompletionRate
+      mindfulnessData: thisWeekMindfulness
     };
     
   } catch (error) {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -14,10 +15,9 @@ import BreathingFeedback from "./components/BreathingFeedback";
 interface BreathingSessionProps {
   exercise: BreathingExerciseType;
   onClose: () => void;
-  onComplete?: (exerciseId: string, durationMinutes: number) => void;
 }
 
-export default function BreathingSession({ exercise, onClose, onComplete }: BreathingSessionProps) {
+export default function BreathingSession({ exercise, onClose }: BreathingSessionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentStep, setCurrentStep] = useState("inhale");
   const [timeRemaining, setTimeRemaining] = useState(exercise.duration * 60);
@@ -37,9 +37,6 @@ export default function BreathingSession({ exercise, onClose, onComplete }: Brea
               title: "Exercise Complete",
               description: `Great job! You've completed ${exercise.name}.`,
             });
-            if (onComplete) {
-              onComplete(exercise.id, exercise.duration);
-            }
             return 0;
           }
           return prev - 1;
@@ -50,7 +47,7 @@ export default function BreathingSession({ exercise, onClose, onComplete }: Brea
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlaying, exercise.name, exercise.id, exercise.duration, onComplete]);
+  }, [isPlaying, exercise.name]);
   
   useEffect(() => {
     if (!isPlaying) {
@@ -62,20 +59,25 @@ export default function BreathingSession({ exercise, onClose, onComplete }: Brea
     }
     
     const breathingCycle = () => {
+      // Inhale
       setCurrentStep("inhale");
       setCircleSize(250);
       
       breathingTimerRef.current = window.setTimeout(() => {
+        // Hold after inhale
         setCurrentStep("hold-in");
         
         breathingTimerRef.current = window.setTimeout(() => {
+          // Exhale
           setCurrentStep("exhale");
           setCircleSize(150);
           
           breathingTimerRef.current = window.setTimeout(() => {
+            // Hold after exhale
             setCurrentStep("hold-out");
             
             breathingTimerRef.current = window.setTimeout(() => {
+              // Complete one breath cycle
               setBreathCount(prev => prev + 1);
               breathingCycle();
             }, exercise.pattern.holdOut * 1000);

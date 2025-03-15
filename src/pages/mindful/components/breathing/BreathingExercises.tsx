@@ -4,33 +4,26 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Wind, Clock, Filter, XCircle } from "lucide-react";
 import BreathingSession from "./BreathingSession";
 import { breathingExercises } from "../../data/breathingExercises";
-import FilterSection from "../shared/FilterSection";
-import SearchBar from "../shared/SearchBar";
+import FilterSection from "./filters/FilterSection";
+import SearchBar from "./filters/SearchBar";
 import ExerciseCard from "./cards/ExerciseCard";
 import EmptyState from "./EmptyState";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
-import * as mindfulStorage from "../../services/mindfulStorage";
 
 export default function BreathingExercises() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
-  const [favoriteExercises, setFavoriteExercises] = useState<string[]>([]);
+  const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("breathing-favorites", []);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState(breathingExercises);
   
-  useEffect(() => {
-    // Get favorites from persistent storage
-    setFavoriteExercises(mindfulStorage.getBreathingFavorites());
-  }, []);
-  
   const toggleFavorite = (id: string) => {
-    const newFavorites = favoriteExercises.includes(id)
-      ? favoriteExercises.filter(exerciseId => exerciseId !== id)
-      : [...favoriteExercises, id];
-    
-    setFavoriteExercises(newFavorites);
-    mindfulStorage.saveBreathingFavorites(newFavorites);
+    if (favoriteExercises.includes(id)) {
+      setFavoriteExercises(favoriteExercises.filter(exerciseId => exerciseId !== id));
+    } else {
+      setFavoriteExercises([...favoriteExercises, id]);
+    }
   };
 
   const filters = [
@@ -90,11 +83,6 @@ export default function BreathingExercises() {
     setSearchQuery("");
   };
 
-  const handleSessionComplete = (exerciseId: string, durationMinutes: number) => {
-    mindfulStorage.logExerciseCompletion(exerciseId, "breathing", durationMinutes);
-    setActiveSession(null);
-  };
-
   if (activeSession) {
     const exercise = breathingExercises.find(ex => ex.id === activeSession);
     if (!exercise) return null;
@@ -103,7 +91,6 @@ export default function BreathingExercises() {
       <BreathingSession 
         exercise={exercise} 
         onClose={() => setActiveSession(null)} 
-        onComplete={handleSessionComplete}
       />
     );
   }
@@ -122,7 +109,6 @@ export default function BreathingExercises() {
       <SearchBar 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        placeholder="Search breathing exercises..."
       />
       
       <div className="space-y-3">

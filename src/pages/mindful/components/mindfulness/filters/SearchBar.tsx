@@ -1,5 +1,6 @@
 
-import SharedSearchBar from "../../shared/SearchBar";
+import { Search, XCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface SearchBarProps {
   searchQuery: string;
@@ -8,10 +9,22 @@ interface SearchBarProps {
 
 export default function SearchBar({ searchQuery, onSearchChange }: SearchBarProps) {
   return (
-    <SharedSearchBar 
-      searchQuery={searchQuery} 
-      onSearchChange={onSearchChange} 
-      placeholder="Search mindfulness exercises..." 
-    />
+    <div className="relative">
+      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Input
+        placeholder="Search mindfulness exercises..."
+        value={searchQuery}
+        onChange={(e) => onSearchChange(e.target.value)}
+        className="pl-10 w-full"
+      />
+      {searchQuery && (
+        <button
+          onClick={() => onSearchChange("")}
+          className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground"
+        >
+          <XCircle className="h-4 w-4" />
+        </button>
+      )}
+    </div>
   );
 }

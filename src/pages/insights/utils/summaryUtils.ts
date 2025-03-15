@@ -1,7 +1,7 @@
 
 import { MoodEntry } from '@/pages/home/components/mood-tracker/types';
 import { JournalEntry } from '@/types/journal';
-import { HabitProgress, WeeklySummary, InsightsData, MindfulnessSession, MOOD_SCORES } from '../types';
+import { HabitProgress, WeeklySummary, InsightsData, MindfulnessSession } from '../types';
 import { getMoodAverageLabel } from './moodUtils';
 
 export function createWeeklySummary(
@@ -41,10 +41,7 @@ export function getDefaultInsightsData(): InsightsData {
     moodTrend: 0,
     habitProgress: [],
     journalCount: 0,
-    mindfulnessData: [],
-    // Add the missing properties to match the InsightsData interface
-    moodScore: 0.6, // Default mood score
-    habitCompletionRate: 0.7 // Default habit completion rate
+    mindfulnessData: []
   };
 }
 

@@ -1,4 +1,5 @@
 
+import { useUser } from "@/contexts/UserContext";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MindfulHeader from "./components/MindfulHeader";
@@ -6,174 +7,127 @@ import BreathingExercises from "./components/breathing/BreathingExercises";
 import MindfulnessExercises from "./components/mindfulness/MindfulnessExercises";
 import MentalHealthQuiz from "./components/quiz/MentalHealthQuiz";
 import ProgressTracker from "./components/progress/ProgressTracker";
-import { Brain, Heart, Shield, CloudSun, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Brain, Flower, Heart, Shield, CloudSun } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { mindfulSummaryStats } from "./data/summaryData";
-import MindfulSummaryCard from "./components/shared/MindfulSummaryCard";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 
 export default function Mindful() {
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState("breathing");
   
   return (
-    <div className="container px-4 py-6 max-w-4xl mx-auto">
-      <MindfulHeader username="User" />
+    <div className="space-y-6">
+      <MindfulHeader username={user?.username || 'Friend'} />
       
-      {/* Summary Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 mt-4">
-        {mindfulSummaryStats.map((stat) => (
-          <MindfulSummaryCard key={stat.id} stat={stat} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {mindfulSummaryStats.map(stat => (
+          <Card 
+            key={stat.id}
+            className={cn(
+              "overflow-hidden border-border/50 transition-all hover:shadow-md",
+              stat.color === "purple" && "bg-gradient-to-br from-purple-50/30 to-transparent",
+              stat.color === "blue" && "bg-gradient-to-br from-blue-50/30 to-transparent",
+              stat.color === "orange" && "bg-gradient-to-br from-orange-50/30 to-transparent",
+              stat.color === "green" && "bg-gradient-to-br from-green-50/30 to-transparent"
+            )}
+          >
+            <CardContent className="p-4 flex items-start gap-3">
+              <div className={cn(
+                "p-2 rounded-full",
+                stat.color === "purple" && "bg-purple-100",
+                stat.color === "blue" && "bg-blue-100",
+                stat.color === "orange" && "bg-orange-100",
+                stat.color === "green" && "bg-green-100"
+              )}>
+                <stat.icon className={cn(
+                  "h-5 w-5",
+                  stat.color === "purple" && "text-purple-600",
+                  stat.color === "blue" && "text-blue-600",
+                  stat.color === "orange" && "text-orange-500",
+                  stat.color === "green" && "text-green-600"
+                )} />
+              </div>
+              <div className="space-y-0.5">
+                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardDescription className="text-xs line-clamp-2">{stat.description}</CardDescription>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
       
-      {/* Main Tabs */}
-      <Tabs 
-        defaultValue="breathing" 
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="mt-6"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <TabsList className="w-full sm:w-auto grid grid-cols-4 h-auto p-1">
+      <div className="relative">
+        <div className="absolute -z-10 top-1/3 left-1/4 w-40 h-40 rounded-full bg-purple-100/20 blur-3xl"></div>
+        <div className="absolute -z-10 bottom-0 right-1/4 w-40 h-40 rounded-full bg-blue-100/20 blur-3xl"></div>
+        
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="grid grid-cols-4 mb-6 bg-background/50 backdrop-blur-md border border-border/50 rounded-full p-1">
             <TabsTrigger 
-              value="breathing"
-              className="py-2 px-3 text-xs sm:text-sm data-[state=active]:text-mindscape-primary"
+              value="breathing" 
+              className="rounded-full data-[state=active]:bg-mindscape-light data-[state=active]:text-mindscape-tertiary"
             >
               Breathing
             </TabsTrigger>
             <TabsTrigger 
               value="mindfulness" 
-              className="py-2 px-3 text-xs sm:text-sm data-[state=active]:text-mindscape-primary"
+              className="rounded-full data-[state=active]:bg-mindscape-light data-[state=active]:text-mindscape-tertiary"
             >
               Mindfulness
             </TabsTrigger>
             <TabsTrigger 
               value="quiz" 
-              className="py-2 px-3 text-xs sm:text-sm data-[state=active]:text-mindscape-primary"
+              className="rounded-full data-[state=active]:bg-mindscape-light data-[state=active]:text-mindscape-tertiary"
             >
               Quiz
             </TabsTrigger>
             <TabsTrigger 
               value="progress" 
-              className="py-2 px-3 text-xs sm:text-sm data-[state=active]:text-mindscape-primary"
+              className="rounded-full data-[state=active]:bg-mindscape-light data-[state=active]:text-mindscape-tertiary"
             >
               Progress
             </TabsTrigger>
           </TabsList>
-        </div>
-        
-        <TabsContent value="breathing" className="mt-0">
-          <BreathingExercises />
-        </TabsContent>
-        
-        <TabsContent value="mindfulness" className="mt-0">
-          <MindfulnessExercises />
-        </TabsContent>
-        
-        <TabsContent value="quiz" className="mt-0">
-          <MentalHealthQuiz />
-        </TabsContent>
-        
-        <TabsContent value="progress" className="mt-0">
-          <ProgressTracker />
-        </TabsContent>
-      </Tabs>
+          
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <TabsContent value="breathing" className="mt-0">
+                <BreathingExercises />
+              </TabsContent>
+              
+              <TabsContent value="mindfulness" className="mt-0">
+                <MindfulnessExercises />
+              </TabsContent>
+              
+              <TabsContent value="quiz" className="mt-0">
+                <MentalHealthQuiz />
+              </TabsContent>
+              
+              <TabsContent value="progress" className="mt-0">
+                <ProgressTracker />
+              </TabsContent>
+            </motion.div>
+          </AnimatePresence>
+        </Tabs>
+      </div>
       
-      {/* Floating Action Button */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button 
-            size="icon" 
-            className="h-12 w-12 rounded-full fixed bottom-20 right-4 shadow-lg bg-mindscape-primary hover:bg-mindscape-primary/90 z-10"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-xl">
-          <SheetHeader>
-            <SheetTitle>Quick Mindfulness</SheetTitle>
-            <SheetDescription>
-              Choose a quick exercise to boost your mental wellbeing
-            </SheetDescription>
-          </SheetHeader>
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Button 
-              onClick={() => {
-                setActiveTab("breathing");
-                document.querySelector('[data-state="open"]')?.dispatchEvent(
-                  new KeyboardEvent('keydown', { key: 'Escape' })
-                );
-              }}
-              variant="outline" 
-              className="h-auto py-4 flex flex-col items-center justify-center gap-2 border-blue-200"
-            >
-              <div className="p-3 bg-blue-100 rounded-full">
-                <CloudSun className="h-6 w-6 text-blue-600" />
-              </div>
-              <span className="font-medium">Quick Breathing</span>
-              <span className="text-xs text-muted-foreground">2-5 minutes</span>
-            </Button>
-            
-            <Button 
-              onClick={() => {
-                setActiveTab("mindfulness");
-                document.querySelector('[data-state="open"]')?.dispatchEvent(
-                  new KeyboardEvent('keydown', { key: 'Escape' })
-                );
-              }}
-              variant="outline" 
-              className="h-auto py-4 flex flex-col items-center justify-center gap-2 border-purple-200"
-            >
-              <div className="p-3 bg-purple-100 rounded-full">
-                <Brain className="h-6 w-6 text-purple-600" />
-              </div>
-              <span className="font-medium">Body Scan</span>
-              <span className="text-xs text-muted-foreground">3-5 minutes</span>
-            </Button>
-            
-            <Button 
-              onClick={() => {
-                setActiveTab("mindfulness");
-                document.querySelector('[data-state="open"]')?.dispatchEvent(
-                  new KeyboardEvent('keydown', { key: 'Escape' })
-                );
-              }}
-              variant="outline" 
-              className="h-auto py-4 flex flex-col items-center justify-center gap-2 border-green-200"
-            >
-              <div className="p-3 bg-green-100 rounded-full">
-                <Heart className="h-6 w-6 text-green-600" />
-              </div>
-              <span className="font-medium">Stress Relief</span>
-              <span className="text-xs text-muted-foreground">5 minutes</span>
-            </Button>
-            
-            <Button
-              onClick={() => {
-                setActiveTab("quiz");
-                document.querySelector('[data-state="open"]')?.dispatchEvent(
-                  new KeyboardEvent('keydown', { key: 'Escape' })
-                );
-              }}
-              variant="outline"
-              className="h-auto py-4 flex flex-col items-center justify-center gap-2 border-orange-200"
-            >
-              <div className="p-3 bg-orange-100 rounded-full">
-                <Shield className="h-6 w-6 text-orange-600" />
-              </div>
-              <span className="font-medium">Take Quiz</span>
-              <span className="text-xs text-muted-foreground">Get personalized recommendations</span>
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <div className={cn(
+        "fixed bottom-20 right-6 z-30 p-4 rounded-full bg-mindscape-light shadow-md",
+        "animate-bounce-soft transition-all"
+      )}>
+        <Flower className="text-mindscape-primary w-6 h-6" />
+      </div>
     </div>
   );
 }
