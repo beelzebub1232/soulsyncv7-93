@@ -13,7 +13,7 @@ export function MoodButton({ mood, isSelected, onClick }: MoodButtonProps) {
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center justify-center p-1 sm:p-2 rounded-lg transition-all hover:scale-105",
+        "flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg transition-all hover:scale-105",
         isSelected ? 
           `${mood.bgColor} border-2 scale-105` : 
           "border border-transparent"
@@ -23,7 +23,7 @@ export function MoodButton({ mood, isSelected, onClick }: MoodButtonProps) {
       <div className={cn("transition-colors", mood.color, isSelected ? "animate-bounce-soft" : "")}>
         {mood.icon}
       </div>
-      <span className="text-xs mt-1 font-medium truncate max-w-full">{mood.label}</span>
+      <span className="text-xs mt-2 font-medium truncate max-w-full">{mood.label}</span>
     </button>
   );
 }

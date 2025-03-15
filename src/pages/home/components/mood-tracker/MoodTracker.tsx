@@ -34,13 +34,13 @@ export function MoodTracker() {
   
   return (
     <>
-      <div className="card-highlight p-4 md:p-5">
-        <div className="mb-3">
+      <div className="card-highlight p-5 md:p-6">
+        <div className="mb-4">
           <h2 className="text-lg font-semibold">How are you feeling?</h2>
           <p className="text-sm text-muted-foreground">Track your mood daily</p>
         </div>
         
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1 sm:gap-2 mt-3 overflow-y-auto max-h-[300px] pb-1">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
           {moods.map((mood) => (
             <MoodButton
               key={mood.value}
