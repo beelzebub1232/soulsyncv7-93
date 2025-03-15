@@ -2,15 +2,15 @@
 import { 
   SunMedium, 
   HeartHandshake, 
-  CircleEqual, 
+  CircleOff,
   Cloud,
   CloudRain,
   Flame,
   Wind,
   Zap,
-  Dumbbell,
+  AlertCircle,
   Battery,
-  Loader,
+  Clock,
   Leaf
 } from "lucide-react";
 import { Mood } from "./types";
@@ -54,7 +54,7 @@ export const moods: Mood[] = [
   { 
     value: "okay", 
     label: "Okay", 
-    icon: <CircleEqual className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <CircleOff className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-blue-600",
     bgColor: "bg-blue-50 border-blue-200" 
   },
@@ -68,14 +68,14 @@ export const moods: Mood[] = [
   { 
     value: "stressed", 
     label: "Stressed", 
-    icon: <Loader className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <Clock className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-orange-500",
     bgColor: "bg-orange-50 border-orange-100" 
   },
   { 
     value: "anxious", 
     label: "Anxious", 
-    icon: <Dumbbell className="h-8 w-8 stroke-[1.25]" />, 
+    icon: <AlertCircle className="h-8 w-8 stroke-[1.25]" />, 
     color: "text-indigo-500",
     bgColor: "bg-indigo-50 border-indigo-200" 
   },
