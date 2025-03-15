@@ -40,11 +40,16 @@ export function WeeklySummary() {
   // Calculate total mindful minutes this week
   const mindfulMinutes = thisWeekSessions.reduce((total, session) => total + session.duration, 0);
   
+  // Ensure data has default values if properties don't exist
+  const moodScore = data?.moodScore || 0.6;
+  const journalCount = data?.journalCount || 0;
+  const habitCompletionRate = data?.habitCompletionRate || 0.7;
+  
   const weeklyData = {
-    moodScore: data?.moodScore || 0.6,
-    journalCount: data?.journalCount || 0,
-    habitCompletionRate: data?.habitCompletionRate || 0.7,
-    mindfulMinutes: mindfulMinutes,
+    moodScore,
+    journalCount,
+    habitCompletionRate,
+    mindfulMinutes,
     mindfulSessions: thisWeekSessions,
     startDate: startOfWeek,
     endDate: endOfWeek,
@@ -66,7 +71,7 @@ export function WeeklySummary() {
           <div className="flex flex-col items-center justify-center text-center p-3 bg-mindscape-quaternary/10 rounded-md">
             <HeartPulse className="h-6 w-6 mb-1 text-red-500" />
             <span className="text-xs text-muted-foreground">Mood Score</span>
-            <span className="text-xl font-bold">{Math.round((data?.moodScore || 0.6) * 100)}%</span>
+            <span className="text-xl font-bold">{Math.round(moodScore * 100)}%</span>
           </div>
           
           <div className="flex flex-col items-center justify-center text-center p-3 bg-mindscape-quaternary/10 rounded-md">
@@ -78,13 +83,13 @@ export function WeeklySummary() {
           <div className="flex flex-col items-center justify-center text-center p-3 bg-mindscape-quaternary/10 rounded-md">
             <Calendar className="h-6 w-6 mb-1 text-blue-500" />
             <span className="text-xs text-muted-foreground">Journal Entries</span>
-            <span className="text-xl font-bold">{data?.journalCount || 0}</span>
+            <span className="text-xl font-bold">{journalCount}</span>
           </div>
           
           <div className="flex flex-col items-center justify-center text-center p-3 bg-mindscape-quaternary/10 rounded-md">
             <Flame className="h-6 w-6 mb-1 text-orange-500" />
             <span className="text-xs text-muted-foreground">Habit Completion</span>
-            <span className="text-xl font-bold">{Math.round((data?.habitCompletionRate || 0.7) * 100)}%</span>
+            <span className="text-xl font-bold">{Math.round(habitCompletionRate * 100)}%</span>
           </div>
         </div>
         

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronRight, Calendar, Brain, Wind, Clock } from "lucide-react";
+import { ChevronRight, Calendar, Brain, Wind, Clock, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ProgressLogItem } from "@/pages/mindful/types";
 import { ScrollArea } from "@/components/ui/scroll-area";

@@ -37,6 +37,9 @@ export interface InsightsData {
   habitProgress: HabitProgress[];
   journalCount: number;
   mindfulnessData: MindfulnessSession[];
+  // Adding missing properties
+  moodScore: number;
+  habitCompletionRate: number;
 }
 
 export const MOOD_SCORES: Record<string, number> = {

@@ -24,7 +24,7 @@ export default function Mindful() {
   
   return (
     <div className="container px-4 py-6 max-w-4xl mx-auto">
-      <MindfulHeader />
+      <MindfulHeader username="User" />
       
       {/* Summary Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 mt-4">
@@ -162,7 +162,7 @@ export default function Mindful() {
                   new KeyboardEvent('keydown', { key: 'Escape' })
                 );
               }}
-              variant="outline" 
+              variant="outline"
               className="h-auto py-4 flex flex-col items-center justify-center gap-2 border-orange-200"
             >
               <div className="p-3 bg-orange-100 rounded-full">

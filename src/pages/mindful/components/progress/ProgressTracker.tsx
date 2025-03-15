@@ -18,7 +18,7 @@ export default function ProgressTracker() {
 
   useEffect(() => {
     // Load exercise completions from storage
-    const storedCompletions = mindfulStorage.getExerciseCompletions();
+    const storedCompletions = mindfulStorage.getProgressLog();
     setCompletions(storedCompletions);
   }, []);
 
@@ -119,7 +119,6 @@ export default function ProgressTracker() {
               <Progress 
                 value={totalMinutes > 0 ? (totalBreathingMinutes / totalMinutes) * 100 : 0} 
                 className="h-2" 
-                indicatorClassName="bg-blue-500" 
               />
             </div>
             
@@ -134,7 +133,6 @@ export default function ProgressTracker() {
               <Progress 
                 value={totalMinutes > 0 ? (totalMindfulnessMinutes / totalMinutes) * 100 : 0} 
                 className="h-2" 
-                indicatorClassName="bg-purple-500" 
               />
             </div>
           </div>

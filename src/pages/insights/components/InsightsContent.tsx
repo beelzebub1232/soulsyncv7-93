@@ -35,12 +35,7 @@ export function InsightsContent({ data, insightsRef }: InsightsContentProps) {
         <HabitProgress habitProgress={data.habitProgress} />
       </div>
       
-      <WeeklySummary 
-        moodAverage={data.weeklySummary.moodAverage}
-        journalEntries={data.weeklySummary.journalEntries}
-        completedHabits={data.weeklySummary.completedHabits}
-        mindfulnessMinutes={data.weeklySummary.mindfulnessMinutes}
-      />
+      <WeeklySummary />
     </div>
   );
 }

@@ -51,6 +51,9 @@ export function getProgressLog(): ProgressLogItem[] {
   return getItem(PROGRESS_LOG_KEY, []);
 }
 
+// Alias for backwards compatibility with WeeklySummary component
+export const getExerciseCompletions = getProgressLog;
+
 export function getWeeklyGoal(): number {
   return getItem(WEEKLY_GOAL_KEY, 3);
 }
