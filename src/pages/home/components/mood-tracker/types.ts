@@ -1,6 +1,6 @@
 
 // Define mood types
-export type MoodValue = "amazing" | "good" | "okay" | "sad" | "awful";
+export type MoodValue = "amazing" | "good" | "okay" | "sad" | "awful" | "angry" | "anxious" | "calm" | "tired" | "energetic" | "stressed" | "peaceful";
 
 export interface Mood {
   value: MoodValue;

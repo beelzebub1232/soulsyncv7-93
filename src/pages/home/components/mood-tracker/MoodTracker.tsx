@@ -40,7 +40,7 @@ export function MoodTracker() {
           <p className="text-sm text-muted-foreground">Track your mood daily</p>
         </div>
         
-        <div className="flex justify-between items-center mt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 mt-4">
           {moods.map((mood) => (
             <MoodButton
               key={mood.value}

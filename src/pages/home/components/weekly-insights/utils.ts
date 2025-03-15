@@ -20,9 +20,16 @@ export const calculateMoodTrend = (recentAvg: number, prevAvg: number): number =
 export const getMoodScores = (): Record<string, number> => {
   return {
     "amazing": 5, 
-    "good": 4, 
-    "okay": 3, 
-    "sad": 2, 
+    "good": 4,
+    "energetic": 4,
+    "calm": 4,
+    "peaceful": 4,
+    "okay": 3,
+    "tired": 3,
+    "stressed": 2,
+    "anxious": 2, 
+    "sad": 2,
+    "angry": 1, 
     "awful": 1
   };
 };
