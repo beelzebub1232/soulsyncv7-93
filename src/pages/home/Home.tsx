@@ -50,7 +50,7 @@ export default function Home() {
         <DailyMotivation />
       </div>
       
-      {/* New Mood Suggestions component */}
+      {/* Mood Suggestions component */}
       <MoodSuggestions />
       
       <div className="space-y-4 bg-gradient-to-br from-blue-50/50 to-transparent p-5 rounded-xl shadow-sm">
