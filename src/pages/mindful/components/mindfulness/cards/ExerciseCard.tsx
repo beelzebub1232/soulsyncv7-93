@@ -1,9 +1,12 @@
 
-import React from "react";
-import { Clock, Heart, Play, ScanFace } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { MindfulnessExerciseType } from "../../../types";
+import { Clock, Heart, Star, Timer } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface ExerciseCardProps {
   exercise: MindfulnessExerciseType;
@@ -12,71 +15,96 @@ interface ExerciseCardProps {
   onStartSession: (id: string) => void;
 }
 
-export default function ExerciseCard({ 
-  exercise, 
-  isFavorite, 
+export default function ExerciseCard({
+  exercise,
+  isFavorite,
   onToggleFavorite,
-  onStartSession 
+  onStartSession
 }: ExerciseCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  
   return (
-    <Card 
-      key={exercise.id}
+    <Card
       className={cn(
-        "overflow-hidden transition-all hover:shadow-md",
-        exercise.color === "blue" && "bg-gradient-to-br from-blue-50 to-transparent border-blue-200/50",
-        exercise.color === "purple" && "bg-gradient-to-br from-purple-50 to-transparent border-purple-200/50",
-        exercise.color === "green" && "bg-gradient-to-br from-green-50 to-transparent border-green-200/50",
-        exercise.color === "orange" && "bg-gradient-to-br from-orange-50 to-transparent border-orange-200/50"
+        "overflow-hidden border relative transition-all",
+        isHovered && "shadow-md",
+        exercise.color === "blue" && "bg-gradient-to-br from-blue-50/30 to-transparent",
+        exercise.color === "purple" && "bg-gradient-to-br from-purple-50/30 to-transparent",
+        exercise.color === "green" && "bg-gradient-to-br from-green-50/30 to-transparent",
+        exercise.color === "orange" && "bg-gradient-to-br from-orange-50/30 to-transparent"
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <CardHeader className="px-4 py-3 pb-0">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-base font-semibold">{exercise.name}</CardTitle>
-          <button 
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h3 className="font-medium mb-1">{exercise.name}</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                <Clock className="h-3 w-3" />
+                {exercise.duration} min
+              </Badge>
+              <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                {exercise.focus}
+              </Badge>
+            </div>
+          </div>
+          
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
               onToggleFavorite(exercise.id);
             }}
-            className="text-muted-foreground hover:text-red-400 transition-colors"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            className="bg-transparent border-none p-1 flex items-center justify-center"
           >
-            <Heart className={cn(
-              "h-5 w-5",
-              isFavorite ? "fill-red-400 text-red-400" : "fill-transparent"
-            )} />
-          </button>
+            <Heart
+              className={cn(
+                "h-5 w-5 transition-colors",
+                isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground"
+              )}
+            />
+          </motion.button>
         </div>
-        <CardDescription className="text-xs mt-1 line-clamp-2">{exercise.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="px-4 py-2">
-        <div className="flex gap-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            <span>{exercise.duration} min</span>
+        
+        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+          {exercise.description}
+        </p>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Timer className="h-3 w-3" />
+            <span>{exercise.steps.length} steps</span>
           </div>
-          <div className="flex items-center gap-1">
-            <ScanFace className="h-3.5 w-3.5" />
-            <span>{exercise.focus}</span>
-          </div>
+          
+          <Button
+            onClick={() => onStartSession(exercise.id)}
+            className={cn(
+              "transition-all",
+              exercise.color === "blue" && "bg-blue-500 hover:bg-blue-600",
+              exercise.color === "purple" && "bg-purple-500 hover:bg-purple-600",
+              exercise.color === "green" && "bg-green-500 hover:bg-green-600",
+              exercise.color === "orange" && "bg-orange-500 hover:bg-orange-600"
+            )}
+            size="sm"
+          >
+            Start
+          </Button>
         </div>
       </CardContent>
-      <CardFooter className="px-4 py-3 pt-1">
-        <button 
-          className={cn(
-            "w-full flex items-center justify-center gap-2 text-sm py-1.5 rounded-md",
-            "text-white transition-colors",
-            exercise.color === "blue" && "bg-blue-500 hover:bg-blue-600",
-            exercise.color === "purple" && "bg-purple-500 hover:bg-purple-600",
-            exercise.color === "green" && "bg-green-500 hover:bg-green-600",
-            exercise.color === "orange" && "bg-orange-500 hover:bg-orange-600"
-          )}
-          onClick={() => onStartSession(exercise.id)}
-        >
-          <Play className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Start Exercise</span>
-          <span className="sm:hidden">Start</span>
-        </button>
-      </CardFooter>
+      
+      {/* Card decoration */}
+      <div
+        className={cn(
+          "absolute -z-10 top-0 right-0 w-24 h-24 rounded-full opacity-20 blur-2xl transition-opacity",
+          isHovered && "opacity-40",
+          exercise.color === "blue" && "bg-blue-300",
+          exercise.color === "purple" && "bg-purple-300",
+          exercise.color === "green" && "bg-green-300",
+          exercise.color === "orange" && "bg-orange-300"
+        )}
+      />
     </Card>
   );
 }
