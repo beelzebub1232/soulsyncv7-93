@@ -4,25 +4,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Wind, Clock, Filter, XCircle } from "lucide-react";
 import BreathingSession from "./BreathingSession";
 import { breathingExercises } from "../../data/breathingExercises";
-import FilterSection from "../mindfulness/filters/FilterSection";
-import SearchBar from "../mindfulness/filters/SearchBar";
+import FilterSection from "./filters/FilterSection";
+import SearchBar from "./filters/SearchBar";
 import ExerciseCard from "./cards/ExerciseCard";
 import EmptyState from "./EmptyState";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
-import { Separator } from "@/components/ui/separator";
 
-interface BreathingExercisesProps {
-  onSessionComplete?: (exerciseId: string, duration: number) => void;
-}
-
-export default function BreathingExercises({ onSessionComplete }: BreathingExercisesProps) {
+export default function BreathingExercises() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("breathing-favorites", []);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState(breathingExercises);
-  const [showFilters, setShowFilters] = useState(false);
   
   const toggleFavorite = (id: string) => {
     if (favoriteExercises.includes(id)) {
@@ -89,15 +83,6 @@ export default function BreathingExercises({ onSessionComplete }: BreathingExerc
     setSearchQuery("");
   };
 
-  const handleSessionComplete = (exerciseId: string) => {
-    // Find the exercise to get its duration
-    const exercise = breathingExercises.find(ex => ex.id === exerciseId);
-    if (exercise && onSessionComplete) {
-      onSessionComplete(exerciseId, exercise.duration);
-    }
-    setActiveSession(null);
-  };
-
   if (activeSession) {
     const exercise = breathingExercises.find(ex => ex.id === activeSession);
     if (!exercise) return null;
@@ -106,75 +91,62 @@ export default function BreathingExercises({ onSessionComplete }: BreathingExerc
       <BreathingSession 
         exercise={exercise} 
         onClose={() => setActiveSession(null)} 
-        onComplete={() => handleSessionComplete(exercise.id)}
       />
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-mindscape-tertiary flex items-center gap-2">
           <Wind className="h-5 w-5 text-mindscape-primary" />
-          Breathing
+          Breathing Exercises
         </h2>
-        <button 
-          className="text-xs text-muted-foreground flex items-center gap-1 p-1.5 rounded-full hover:bg-background/80"
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <Filter className="h-3.5 w-3.5" />
-          Filters
-        </button>
+        <span className="text-sm text-muted-foreground">Choose an exercise to begin</span>
       </div>
       
       {/* Search Bar */}
       <SearchBar 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        placeholder="Search breathing exercises..."
       />
       
-      {/* Collapsible Filters */}
-      {showFilters && (
-        <div className="space-y-3 p-3 bg-background/50 rounded-xl border border-border/30 animate-fade-in">
-          {/* Level Filters */}
-          <FilterSection
-            title="Level"
-            icon={<Filter className="h-4 w-4 text-muted-foreground" />}
-            options={filters}
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-          />
-          
-          <Separator className="bg-border/30" />
-          
-          {/* Duration Filters */}
-          <FilterSection
-            title="Duration"
-            icon={<Clock className="h-4 w-4 text-muted-foreground" />}
-            options={durationFilters}
-            activeFilter={activeDurationFilter}
-            onFilterChange={setActiveDurationFilter}
-          />
-        </div>
-      )}
+      <div className="space-y-3">
+        {/* Level Filters */}
+        <FilterSection
+          title="Level"
+          icon={<Filter className="h-4 w-4 text-muted-foreground" />}
+          options={filters}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+        />
+        
+        {/* Duration Filters */}
+        <FilterSection
+          title="Duration"
+          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          options={durationFilters}
+          activeFilter={activeDurationFilter}
+          onFilterChange={setActiveDurationFilter}
+        />
+      </div>
       
       {/* Clear Filters Button */}
       {(activeFilter || activeDurationFilter || searchQuery) && (
         <button 
-          className="text-mindscape-primary text-xs font-medium flex items-center gap-1 mx-auto px-3 py-1.5 rounded-full bg-mindscape-light/20"
+          className="text-mindscape-primary text-sm font-medium flex items-center gap-1"
           onClick={clearFilters}
         >
-          <XCircle className="h-3.5 w-3.5" />
+          <XCircle className="h-4 w-4" />
           Clear all filters
         </button>
       )}
       
-      <ScrollArea className="h-[calc(100vh-400px)]">
+      <ScrollArea className="h-[calc(100vh-420px)]">
         {filteredExercises.length === 0 ? (
           <EmptyState onClearFilters={clearFilters} />
         ) : (
-          <div className="grid grid-cols-1 gap-3 pt-1 pb-20">
+          <div className="grid grid-cols-1 gap-4">
             {filteredExercises.map((exercise) => (
               <ExerciseCard
                 key={exercise.id}
