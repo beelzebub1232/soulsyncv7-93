@@ -1,391 +1,257 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart2, Calendar, Trophy, Target, Clock, Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Calendar, BarChart3, Wind, Flower, History, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { format, isToday, startOfWeek, endOfWeek, differenceInDays, isSameDay, isWithinInterval } from "date-fns";
-import { ProgressLogItem, MindfulStat } from "../../types";
-import { mindfulSummaryStats } from "../../data/summaryData";
-import * as mindfulStorage from "../../services/mindfulStorage";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ProgressLogItem } from "../../types";
+import { cn } from "@/lib/utils";
+import * as mindfulStorage from "../../services/mindfulStorage";
+import { breathingExercises } from "../../data/breathingExercises";
+import { mindfulnessExercises } from "../../data/mindfulnessExercises";
+import { formatDistanceToNow } from "date-fns";
 
 export default function ProgressTracker() {
-  const [progressLog, setProgressLog] = useState<ProgressLogItem[]>([]);
-  const [weeklyGoal, setWeeklyGoal] = useState<number>(3);
-  const [currentStreak, setCurrentStreak] = useState<number>(0);
-  const [bestStreak, setBestStreak] = useState<number>(0);
-  const [totalSessions, setTotalSessions] = useState<number>(0);
-  const [totalMinutes, setTotalMinutes] = useState<number>(0);
-  const [activeTab, setActiveTab] = useState<string>("overview");
-  const isMobile = useIsMobile();
-  
+  const [completions, setCompletions] = useState<ProgressLogItem[]>([]);
+  const [activeTab, setActiveTab] = useState("history");
+
   useEffect(() => {
-    // Load data from localStorage
-    setProgressLog(mindfulStorage.getProgressLog());
-    setWeeklyGoal(mindfulStorage.getWeeklyGoal());
-    setCurrentStreak(mindfulStorage.getCurrentStreak());
-    setBestStreak(mindfulStorage.getBestStreak());
-    setTotalSessions(mindfulStorage.getTotalSessions());
-    setTotalMinutes(mindfulStorage.getTotalMinutes());
-    
-    // Listen for storage changes
-    const handleStorageChange = () => {
-      setProgressLog(mindfulStorage.getProgressLog());
-      setWeeklyGoal(mindfulStorage.getWeeklyGoal());
-      setCurrentStreak(mindfulStorage.getCurrentStreak());
-      setBestStreak(mindfulStorage.getBestStreak());
-      setTotalSessions(mindfulStorage.getTotalSessions());
-      setTotalMinutes(mindfulStorage.getTotalMinutes());
-    };
-    
-    // Listen for custom event from mindful exercises
-    window.addEventListener('mindful_exercise_completed', handleStorageChange);
-    
-    // Listen for storage changes from other tabs
-    window.addEventListener('storage', (e) => {
-      if (e.key && e.key.startsWith('mindful-')) {
-        handleStorageChange();
-      }
-    });
-    
-    return () => {
-      window.removeEventListener('mindful_exercise_completed', handleStorageChange);
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    // Load exercise completions from storage
+    const storedCompletions = mindfulStorage.getExerciseCompletions();
+    setCompletions(storedCompletions);
   }, []);
+
+  // Calculate total minutes for each type
+  const totalBreathingMinutes = completions
+    .filter(c => c.exerciseType === "breathing")
+    .reduce((sum, c) => sum + c.duration, 0);
+
+  const totalMindfulnessMinutes = completions
+    .filter(c => c.exerciseType === "mindfulness")
+    .reduce((sum, c) => sum + c.duration, 0);
+    
+  const totalMinutes = totalBreathingMinutes + totalMindfulnessMinutes;
   
-  const calculateWeeklyProgress = () => {
-    const now = new Date();
-    const weekStart = startOfWeek(now);
-    const weekEnd = endOfWeek(now);
-    
-    const sessionsThisWeek = progressLog.filter(log => {
-      const logDate = new Date(log.date);
-      return isWithinInterval(logDate, { start: weekStart, end: weekEnd });
-    }).length;
-    
-    return Math.min((sessionsThisWeek / weeklyGoal) * 100, 100);
+  // Get exercise names by ID
+  const getExerciseName = (id: string, type: "breathing" | "mindfulness"): string => {
+    if (type === "breathing") {
+      const exercise = breathingExercises.find(e => e.id === id);
+      return exercise?.name || "Unknown Exercise";
+    } else {
+      const exercise = mindfulnessExercises.find(e => e.id === id);
+      return exercise?.name || "Unknown Exercise";
+    }
   };
   
-  const weeklyProgress = calculateWeeklyProgress();
-  
-  const getWeeklySessionCount = () => {
-    const now = new Date();
-    const weekStart = startOfWeek(now);
-    const weekEnd = endOfWeek(now);
-    
-    return progressLog.filter(log => {
-      const logDate = new Date(log.date);
-      return isWithinInterval(logDate, { start: weekStart, end: weekEnd });
-    }).length;
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      return "Invalid date";
+    }
   };
   
-  const getWeeklyMinutes = () => {
-    const now = new Date();
-    const weekStart = startOfWeek(now);
-    const weekEnd = endOfWeek(now);
-    
-    return progressLog
-      .filter(log => {
-        const logDate = new Date(log.date);
-        return isWithinInterval(logDate, { start: weekStart, end: weekEnd });
-      })
-      .reduce((total, log) => total + log.duration, 0);
-  };
-  
-  const weeklySessionCount = getWeeklySessionCount();
-  const weeklyMinutes = getWeeklyMinutes();
-  
-  const getExerciseTypeCounts = () => {
-    const breathingCount = progressLog.filter(log => log.exerciseType === "breathing").length;
-    const mindfulnessCount = progressLog.filter(log => log.exerciseType === "mindfulness").length;
-    return { breathingCount, mindfulnessCount };
-  };
-  
-  const { breathingCount, mindfulnessCount } = getExerciseTypeCounts();
-  
-  const ActivityCalendar = () => {
-    const now = new Date();
-    const weekDays = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(now);
-      d.setDate(now.getDate() - now.getDay() + i);
-      return d;
-    });
-    
-    return (
-      <div className="grid grid-cols-7 gap-1 mt-4">
-        {weekDays.map((day, i) => {
-          const dayActivities = progressLog.filter(log => {
-            const logDate = new Date(log.date);
-            return isSameDay(logDate, day);
-          });
-          
-          return (
-            <div key={i} className="flex flex-col items-center">
-              <span className="text-xs text-muted-foreground mb-1">{format(day, 'EEE')}</span>
-              <div 
-                className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center text-xs",
-                  isToday(day) && "ring-2 ring-mindscape-primary/50",
-                  dayActivities.length === 0 && "bg-muted",
-                  dayActivities.length === 1 && "bg-mindscape-light/50 text-mindscape-tertiary",
-                  dayActivities.length >= 2 && "bg-mindscape-primary text-white"
-                )}
-              >
-                {format(day, 'd')}
-              </div>
-              {dayActivities.length > 0 && (
-                <span className="text-xs mt-1">{dayActivities.length}</span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-  
-  const SessionHistoryItem = ({ item }: { item: ProgressLogItem }) => {
-    const date = new Date(item.date);
-    
-    return (
-      <div className="flex items-center justify-between p-3 border-b border-border/50 last:border-b-0">
-        <div className="flex items-start gap-3">
-          <div className={cn(
-            "p-2 rounded-full",
-            item.exerciseType === "breathing" ? "bg-blue-100" : "bg-purple-100"
-          )}>
-            {item.exerciseType === "breathing" ? (
-              <Calendar className="h-4 w-4 text-blue-600" />
-            ) : (
-              <CalendarIcon className="h-4 w-4 text-purple-600" />
-            )}
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">{item.exerciseType === "breathing" ? "Breathing" : "Mindfulness"} Session</p>
-            <p className="text-xs text-muted-foreground">{format(date, 'PPp')}</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium">{item.duration} min</p>
-        </div>
-      </div>
-    );
-  };
-  
-  const DetailedHistory = () => {
-    const sortedLog = [...progressLog].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-    
-    return (
-      <Card className="border border-border/50">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-mindscape-primary" />
-            Exercise History
-          </CardTitle>
-          <CardDescription>Your mindfulness practice over time</CardDescription>
-        </CardHeader>
-        <CardContent className="p-0">
-          {sortedLog.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">
-              No activities recorded yet. Start your mindfulness journey by completing an exercise.
-            </div>
-          ) : (
-            <ScrollArea className="h-[300px]">
-              <div className="divide-y divide-border/50">
-                {sortedLog.map((item) => (
-                  <SessionHistoryItem key={item.id} item={item} />
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-  
+  // Sort completions by date (newest first)
+  const sortedCompletions = [...completions].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-mindscape-tertiary flex items-center gap-2">
-          <BarChart2 className="h-5 w-5 text-mindscape-primary" />
-          Your Progress
+          <History className="h-5 w-5 text-mindscape-primary" />
+          Your Mindfulness Journey
         </h2>
-        <span className="text-sm text-muted-foreground">{format(new Date(), "MMMM yyyy")}</span>
       </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 w-full mb-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center">
+              <Clock className="h-8 w-8 mb-2 text-mindscape-primary" />
+              <h3 className="text-sm font-medium mb-1">Total Practice Time</h3>
+              <p className="text-2xl font-bold">{totalMinutes} min</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center">
+              <Wind className="h-8 w-8 mb-2 text-blue-500" />
+              <h3 className="text-sm font-medium mb-1">Breathing Exercises</h3>
+              <p className="text-2xl font-bold">{completions.filter(c => c.exerciseType === "breathing").length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center">
+              <Flower className="h-8 w-8 mb-2 text-purple-500" />
+              <h3 className="text-sm font-medium mb-1">Mindfulness Sessions</h3>
+              <p className="text-2xl font-bold">{completions.filter(c => c.exerciseType === "mindfulness").length}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Practice Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Practice Breakdown</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="flex items-center gap-1">
+                  <Wind className="h-4 w-4 text-blue-500" />
+                  <span>Breathing</span>
+                </span>
+                <span>{totalBreathingMinutes} min ({totalMinutes > 0 ? Math.round((totalBreathingMinutes / totalMinutes) * 100) : 0}%)</span>
+              </div>
+              <Progress 
+                value={totalMinutes > 0 ? (totalBreathingMinutes / totalMinutes) * 100 : 0} 
+                className="h-2" 
+                indicatorClassName="bg-blue-500" 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="flex items-center gap-1">
+                  <Flower className="h-4 w-4 text-purple-500" />
+                  <span>Mindfulness</span>
+                </span>
+                <span>{totalMindfulnessMinutes} min ({totalMinutes > 0 ? Math.round((totalMindfulnessMinutes / totalMinutes) * 100) : 0}%)</span>
+              </div>
+              <Progress 
+                value={totalMinutes > 0 ? (totalMindfulnessMinutes / totalMinutes) * 100 : 0} 
+                className="h-2" 
+                indicatorClassName="bg-purple-500" 
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Detailed Tabs */}
+      <Tabs defaultValue="history" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="w-full grid grid-cols-2">
+          <TabsTrigger value="history">
+            <History className="h-4 w-4 mr-2" />
+            Session History
+          </TabsTrigger>
+          <TabsTrigger value="stats">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Stats
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-6">
-          <Card className="bg-gradient-to-br from-mindscape-light/30 to-transparent border-mindscape-primary/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Weekly Goal</CardTitle>
-              <CardDescription>
-                {weeklyProgress >= 100 
-                  ? "Congratulations! You've met your weekly goal."
-                  : `${weeklyGoal - weeklySessionCount} more sessions to reach your goal`
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Progress 
-                value={weeklyProgress} 
-                className="h-3"
-                indicatorClassName="bg-mindscape-primary"
-              />
-              <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                <span>{weeklySessionCount}/{weeklyGoal}</span>
-                <span>{Math.floor(weeklyGoal/2)}/{weeklyGoal}</span>
-                <span>{weeklyGoal}/{weeklyGoal}</span>
-              </div>
-              
-              <ActivityCalendar />
-            </CardContent>
-          </Card>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="border border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-yellow-500" />
-                  Current Streak
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-mindscape-tertiary">{currentStreak}</span>
-                  <span className="text-sm text-muted-foreground">days</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Target className="h-4 w-4 text-mindscape-primary" />
-                  Best Streak
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-mindscape-tertiary">{bestStreak}</span>
-                  <span className="text-sm text-muted-foreground">days</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="border border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-green-500" />
-                  Total Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-mindscape-tertiary">{totalSessions}</span>
-                  <span className="text-sm text-muted-foreground">completed</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-500" />
-                  Total Time
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-mindscape-tertiary">{totalMinutes}</span>
-                  <span className="text-sm text-muted-foreground">minutes</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card className="border border-border/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Sessions by Type</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                      <span className="text-sm">Breathing</span>
+        <TabsContent value="history" className="mt-4">
+          {sortedCompletions.length === 0 ? (
+            <div className="text-center py-10">
+              <Calendar className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-3" />
+              <h3 className="text-lg font-medium">No sessions yet</h3>
+              <p className="text-sm text-muted-foreground">
+                Complete a breathing or mindfulness exercise to start tracking your progress
+              </p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-3">
+                {sortedCompletions.map((item, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "p-2 rounded-full",
+                          item.exerciseType === "breathing" ? "bg-blue-100" : "bg-purple-100"
+                        )}>
+                          {item.exerciseType === "breathing" ? (
+                            <Wind className="h-4 w-4 text-blue-600" />
+                          ) : (
+                            <Flower className="h-4 w-4 text-purple-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium">{getExerciseName(item.exerciseId, item.exerciseType)}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(item.date)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{item.duration} min</span>
+                      </div>
                     </div>
-                    <span className="text-sm font-medium">{breathingCount}</span>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="stats" className="mt-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-base font-medium mb-1">Weekly Practice Goal</h3>
+                  <div className="w-32 h-32 mx-auto relative flex items-center justify-center">
+                    <svg className="w-full h-full" viewBox="0 0 100 100">
+                      <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="45" 
+                        fill="none" 
+                        stroke="#e5e7eb" 
+                        strokeWidth="10" 
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="hsl(var(--mindscape-primary))"
+                        strokeWidth="10"
+                        strokeDasharray={2 * Math.PI * 45}
+                        strokeDashoffset={2 * Math.PI * 45 * (1 - Math.min(1, totalMinutes / 60))}
+                        strokeLinecap="round"
+                        transform="rotate(-90 50 50)"
+                      />
+                    </svg>
+                    <div className="absolute">
+                      <p className="text-3xl font-bold">{Math.round((totalMinutes / 60) * 100)}%</p>
+                      <p className="text-xs text-muted-foreground">of 60 min goal</p>
+                    </div>
                   </div>
-                  <Progress value={(breathingCount / (breathingCount + mindfulnessCount || 1)) * 100} className="h-2" indicatorClassName="bg-blue-500" />
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
-                      <span className="text-sm">Mindfulness</span>
-                    </div>
-                    <span className="text-sm font-medium">{mindfulnessCount}</span>
+                  <h3 className="text-sm font-medium">Most Practiced Exercise Types</h3>
+                  
+                  <div className="space-y-4">
+                    {completions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-2">No data yet</p>
+                    ) : (
+                      <>
+                        {/* Exercise frequency analysis would go here */}
+                        <p className="text-sm text-center py-2">
+                          Continue practicing to see more detailed statistics
+                        </p>
+                      </>
+                    )}
                   </div>
-                  <Progress value={(mindfulnessCount / (breathingCount + mindfulnessCount || 1)) * 100} className="h-2" indicatorClassName="bg-purple-500" />
                 </div>
               </div>
             </CardContent>
           </Card>
-          
-          <h3 className="text-lg font-semibold mt-6">Mindfulness Benefits</h3>
-          <div className="grid grid-cols-1 gap-4">
-            {mindfulSummaryStats.map((stat: MindfulStat) => (
-              <Card 
-                key={stat.id}
-                className={cn(
-                  "border border-border/50 overflow-hidden hover:shadow-sm transition-shadow",
-                  stat.color === "blue" && "bg-gradient-to-r from-blue-50/50 to-transparent",
-                  stat.color === "purple" && "bg-gradient-to-r from-purple-50/50 to-transparent",
-                  stat.color === "green" && "bg-gradient-to-r from-green-50/50 to-transparent",
-                  stat.color === "orange" && "bg-gradient-to-r from-orange-50/50 to-transparent"
-                )}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-base">{stat.title}</CardTitle>
-                    <div 
-                      className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center",
-                        stat.color === "blue" && "bg-blue-100/50 text-blue-500",
-                        stat.color === "purple" && "bg-purple-100/50 text-purple-500",
-                        stat.color === "green" && "bg-green-100/50 text-green-500",
-                        stat.color === "orange" && "bg-orange-100/50 text-orange-500"
-                      )}
-                    >
-                      <stat.icon className="h-4 w-4" />
-                    </div>
-                  </div>
-                  <CardDescription>{stat.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="history">
-          <DetailedHistory />
         </TabsContent>
       </Tabs>
     </div>

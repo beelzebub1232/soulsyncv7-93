@@ -30,7 +30,7 @@ export default function FilterSection({
         <span className="text-sm font-medium">{title}</span>
       </div>
       <ScrollArea className="w-full">
-        <div className="flex gap-2 pb-2 pr-4">
+        <div className="flex flex-wrap gap-2 pb-2 pr-4">
           {options.map((filter) => (
             <Badge
               key={filter.label}
