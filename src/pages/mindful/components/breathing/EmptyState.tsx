@@ -12,6 +12,7 @@ export default function EmptyState({ onClearFilters }: EmptyStateProps) {
       onClearFilters={onClearFilters} 
       icon={<Wind className="h-5 w-5" />}
       color="blue"
+      message="No breathing exercises match your filters"
     />
   );
 }

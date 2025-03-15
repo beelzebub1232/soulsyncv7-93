@@ -10,6 +10,7 @@ import ExerciseCard from "./cards/ExerciseCard";
 import EmptyState from "./EmptyState";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 export default function MindfulnessExercises() {
   const [activeSession, setActiveSession] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export default function MindfulnessExercises() {
   const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState(mindfulnessExercises);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   const toggleFavorite = (id: string) => {
     if (favoriteExercises.includes(id)) {
@@ -97,9 +99,13 @@ export default function MindfulnessExercises() {
     );
   }
 
+  const toggleFilters = () => {
+    setIsFilterOpen(!isFilterOpen);
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold text-mindscape-tertiary flex items-center gap-2">
           <Flower className="h-5 w-5 text-mindscape-primary" />
           Mindfulness Exercises
@@ -113,56 +119,90 @@ export default function MindfulnessExercises() {
         onSearchChange={setSearchQuery}
       />
       
-      {/* Filters accordion for mobile */}
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="filters" className="border-b-0">
-          <AccordionTrigger className="py-2 text-sm">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              <span>Filters</span>
-              {(activeFocusFilter || activeDurationFilter) && (
-                <span className="bg-mindscape-primary/20 text-mindscape-primary text-xs px-2 py-0.5 rounded-full">
-                  Active
-                </span>
-              )}
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3 py-2">
-              {/* Focus Filters */}
-              <FilterSection
-                title="Focus Area"
-                icon={<ScanFace className="h-4 w-4 text-muted-foreground" />}
-                options={focusFilters}
-                activeFilter={activeFocusFilter}
-                onFilterChange={setActiveFocusFilter}
-              />
-              
-              {/* Duration Filters */}
-              <FilterSection
-                title="Duration"
-                icon={<Clock className="h-4 w-4 text-muted-foreground" />}
-                options={durationFilters}
-                activeFilter={activeDurationFilter}
-                onFilterChange={setActiveDurationFilter}
-              />
-              
-              {/* Clear Filters Button */}
-              {(activeFocusFilter || activeDurationFilter || searchQuery) && (
-                <button 
-                  className="text-mindscape-primary text-sm font-medium flex items-center gap-1 mt-2"
-                  onClick={clearFilters}
-                >
-                  <XCircle className="h-4 w-4" />
-                  Clear all filters
-                </button>
-              )}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      {/* Mobile Filters */}
+      <div className="md:hidden">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="filters" className="border-b-0">
+            <AccordionTrigger className="py-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span>Filters</span>
+                {(activeFocusFilter || activeDurationFilter) && (
+                  <span className="bg-mindscape-primary/20 text-mindscape-primary text-xs px-2 py-0.5 rounded-full">
+                    Active
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-3 py-2">
+                {/* Focus Filters */}
+                <FilterSection
+                  title="Focus Area"
+                  icon={<ScanFace className="h-4 w-4 text-muted-foreground" />}
+                  options={focusFilters}
+                  activeFilter={activeFocusFilter}
+                  onFilterChange={setActiveFocusFilter}
+                />
+                
+                {/* Duration Filters */}
+                <FilterSection
+                  title="Duration"
+                  icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+                  options={durationFilters}
+                  activeFilter={activeDurationFilter}
+                  onFilterChange={setActiveDurationFilter}
+                />
+                
+                {/* Clear Filters Button */}
+                {(activeFocusFilter || activeDurationFilter || searchQuery) && (
+                  <button 
+                    className="text-mindscape-primary text-sm font-medium flex items-center gap-1 mt-2"
+                    onClick={clearFilters}
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
       
-      <ScrollArea className="h-[calc(100vh-370px)]">
+      {/* Desktop Filters (hidden on mobile) */}
+      <div className="hidden md:block space-y-3">
+        {/* Focus Filters */}
+        <FilterSection
+          title="Focus Area"
+          icon={<ScanFace className="h-4 w-4 text-muted-foreground" />}
+          options={focusFilters}
+          activeFilter={activeFocusFilter}
+          onFilterChange={setActiveFocusFilter}
+        />
+        
+        {/* Duration Filters */}
+        <FilterSection
+          title="Duration"
+          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          options={durationFilters}
+          activeFilter={activeDurationFilter}
+          onFilterChange={setActiveDurationFilter}
+        />
+        
+        {/* Clear Filters Button */}
+        {(activeFocusFilter || activeDurationFilter || searchQuery) && (
+          <button 
+            className="text-mindscape-primary text-sm font-medium flex items-center gap-1 mt-2"
+            onClick={clearFilters}
+          >
+            <XCircle className="h-4 w-4" />
+            Clear all filters
+          </button>
+        )}
+      </div>
+      
+      <ScrollArea className="h-[calc(100vh-370px)] md:h-[calc(100vh-320px)]">
         {filteredExercises.length === 0 ? (
           <EmptyState onClearFilters={clearFilters} />
         ) : (

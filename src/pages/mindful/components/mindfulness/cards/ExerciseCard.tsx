@@ -2,7 +2,6 @@
 import React from "react";
 import { Clock, Heart, Play, ScanFace } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MindfulnessExerciseType } from "../../../types";
 
@@ -39,6 +38,7 @@ export default function ExerciseCard({
               onToggleFavorite(exercise.id);
             }}
             className="text-muted-foreground hover:text-red-400 transition-colors"
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart className={cn(
               "h-5 w-5",
@@ -60,7 +60,7 @@ export default function ExerciseCard({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="px-4 py-3 pt-0">
+      <CardFooter className="px-4 py-3 pt-1">
         <button 
           className={cn(
             "w-full flex items-center justify-center gap-2 text-sm py-1.5 rounded-md",
@@ -73,7 +73,8 @@ export default function ExerciseCard({
           onClick={() => onStartSession(exercise.id)}
         >
           <Play className="h-3.5 w-3.5" />
-          Start Exercise
+          <span className="hidden sm:inline">Start Exercise</span>
+          <span className="sm:hidden">Start</span>
         </button>
       </CardFooter>
     </Card>

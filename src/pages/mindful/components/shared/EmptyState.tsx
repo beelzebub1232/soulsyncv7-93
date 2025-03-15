@@ -31,6 +31,7 @@ export default function EmptyState({
       <button 
         className="text-mindscape-primary underline mt-2 flex items-center gap-1.5 text-xs"
         onClick={onClearFilters}
+        aria-label="Clear all filters"
       >
         <XCircle className="h-3.5 w-3.5" />
         Clear all filters

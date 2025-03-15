@@ -29,14 +29,14 @@ export default function FilterSection({
         {icon}
         <span className="text-sm font-medium">{title}</span>
       </div>
-      <ScrollArea className="pb-1">
-        <div className="flex gap-2 pb-1">
+      <ScrollArea className="pb-1 max-w-full">
+        <div className="flex flex-wrap gap-2 pb-1">
           {options.map((filter) => (
             <Badge
               key={filter.label}
               variant={activeFilter === filter.value ? "default" : "outline"}
               className={cn(
-                "cursor-pointer rounded-full whitespace-nowrap",
+                "cursor-pointer rounded-full whitespace-nowrap text-xs py-0.5 px-2",
                 activeFilter === filter.value &&
                   "bg-mindscape-primary hover:bg-mindscape-primary/90"
               )}
