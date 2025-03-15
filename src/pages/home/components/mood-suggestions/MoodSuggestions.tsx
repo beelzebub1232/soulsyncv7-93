@@ -18,7 +18,6 @@ type ActivitySuggestion = {
   title: string;
   description: string;
   icon: React.ReactNode;
-  path: string;
 };
 
 export function MoodSuggestions() {
@@ -36,13 +35,11 @@ export function MoodSuggestions() {
             title: "Calming Breath",
             description: "Reduce anxiety with slow, deep breathing",
             icon: <Wind className="h-5 w-5 text-blue-500" />,
-            path: "/mindful/breathing/calming-breath"
           },
           {
             title: "Box Breathing",
             description: "A simple technique to reduce stress",
             icon: <Brain className="h-5 w-5 text-purple-500" />,
-            path: "/mindful/breathing/box-breathing"
           }
         ];
         
@@ -52,13 +49,11 @@ export function MoodSuggestions() {
             title: "4-7-8 Breathing",
             description: "Calm your nervous system and release tension",
             icon: <Flame className="h-5 w-5 text-orange-500" />,
-            path: "/mindful/breathing/4-7-8-breathing"
           },
           {
             title: "Mindfulness Quiz",
             description: "Explore your mental health needs",
             icon: <BookOpen className="h-5 w-5 text-indigo-500" />,
-            path: "/mindful/quiz"
           }
         ];
         
@@ -69,13 +64,11 @@ export function MoodSuggestions() {
             title: "Deep Breathing",
             description: "Restore emotional balance with deep breaths",
             icon: <HeartPulse className="h-5 w-5 text-red-500" />,
-            path: "/mindful/breathing/deep-breathing"
           },
           {
             title: "Mindfulness Quiz",
             description: "Get personalized mental wellness recommendations",
             icon: <Brain className="h-5 w-5 text-purple-500" />,
-            path: "/mindful/quiz"
           }
         ];
         
@@ -85,7 +78,6 @@ export function MoodSuggestions() {
             title: "Energizing Breath",
             description: "Channel your energy positively",
             icon: <Sparkles className="h-5 w-5 text-yellow-500" />,
-            path: "/mindful/breathing/energizing-breath"
           }
         ];
         
@@ -95,13 +87,11 @@ export function MoodSuggestions() {
             title: "Energizing Breath",
             description: "Boost energy and combat fatigue",
             icon: <Sparkles className="h-5 w-5 text-amber-500" />,
-            path: "/mindful/breathing/energizing-breath"
           },
           {
             title: "Box Breathing",
             description: "Increase alertness and focus",
             icon: <Brain className="h-5 w-5 text-blue-500" />,
-            path: "/mindful/breathing/box-breathing"
           }
         ];
         
@@ -112,7 +102,6 @@ export function MoodSuggestions() {
             title: "Alternate Nostril",
             description: "Maintain and deepen your sense of calm",
             icon: <Leaf className="h-5 w-5 text-green-500" />,
-            path: "/mindful/breathing/alternate-nostril"
           }
         ];
         
@@ -125,13 +114,11 @@ export function MoodSuggestions() {
             title: "Box Breathing",
             description: "Maintain emotional balance with simple breathing",
             icon: <Wind className="h-5 w-5 text-blue-500" />,
-            path: "/mindful/breathing/box-breathing"
           },
           {
             title: "Mindfulness Quiz",
             description: "Discover exercises tailored to your needs",
             icon: <BookOpen className="h-5 w-5 text-purple-500" />,
-            path: "/mindful/quiz"
           }
         ];
     }
@@ -156,7 +143,7 @@ export function MoodSuggestions() {
             className="h-auto flex items-center justify-start gap-2.5 p-2.5 border border-mindscape-light hover:bg-mindscape-light/20 w-full"
             asChild
           >
-            <Link to={suggestion.path} className="w-full">
+            <Link to="/mindful" className="w-full">
               <div className="rounded-full p-2 bg-white/50 min-w-[36px] flex items-center justify-center shrink-0">
                 {suggestion.icon}
               </div>
