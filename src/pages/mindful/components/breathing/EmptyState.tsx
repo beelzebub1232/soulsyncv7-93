@@ -10,7 +10,8 @@ export default function EmptyState({ onClearFilters }: EmptyStateProps) {
   return (
     <SharedEmptyState 
       onClearFilters={onClearFilters} 
-      icon={<Wind className="h-10 w-10" />}
+      icon={<Wind className="h-5 w-5" />}
+      color="blue"
     />
   );
 }
