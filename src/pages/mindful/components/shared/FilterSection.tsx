@@ -29,7 +29,7 @@ export default function FilterSection({
         {icon}
         <span className="text-sm font-medium">{title}</span>
       </div>
-      <ScrollArea className="w-full" orientation="horizontal">
+      <ScrollArea className="w-full">
         <div className="flex gap-2 pb-2 pr-4">
           {options.map((filter) => (
             <Badge

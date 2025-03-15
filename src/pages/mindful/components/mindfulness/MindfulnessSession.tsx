@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause, Play, RotateCcw } from "lucide-react";
@@ -12,9 +11,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface MindfulnessSessionProps {
   exercise: MindfulnessExerciseType;
   onClose: () => void;
+  onComplete?: (exerciseId: string, durationMinutes: number) => void;
 }
 
-export default function MindfulnessSession({ exercise, onClose }: MindfulnessSessionProps) {
+export default function MindfulnessSession({ exercise, onClose, onComplete }: MindfulnessSessionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(exercise.duration * 60);
@@ -38,6 +38,9 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
               title: "Exercise Complete",
               description: `Great job! You've completed ${exercise.name}.`,
             });
+            if (onComplete) {
+              onComplete(exercise.id, exercise.duration);
+            }
             return 0;
           }
           return prev - 1;
@@ -48,7 +51,7 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlaying, exercise.name]);
+  }, [isPlaying, exercise.name, exercise.id, exercise.duration, onComplete]);
   
   useEffect(() => {
     if (!isPlaying || timeRemaining <= 0) {
