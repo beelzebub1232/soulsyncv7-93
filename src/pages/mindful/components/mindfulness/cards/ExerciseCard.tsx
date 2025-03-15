@@ -75,7 +75,7 @@ export default function ExerciseCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Timer className="h-3 w-3" />
-            <span>{exercise.steps.length} steps</span>
+            <span>{exercise.steps ? exercise.steps.length : "4"} phases</span>
           </div>
           
           <Button
