@@ -10,7 +10,9 @@ export default function EmptyState({ onClearFilters }: EmptyStateProps) {
   return (
     <SharedEmptyState 
       onClearFilters={onClearFilters} 
-      icon={<Flower className="h-10 w-10" />}
+      icon={<Flower className="h-5 w-5" />}
+      color="purple"
+      message="No mindfulness exercises match your filters"
     />
   );
 }
