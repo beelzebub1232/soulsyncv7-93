@@ -24,8 +24,8 @@ export default function BreathingProgress({
   return (
     <div className="w-full max-w-md">
       <div className="flex justify-between text-sm text-muted-foreground mb-2">
-        <span>Time Remaining: {formatTime(timeRemaining)}</span>
-        <span>Breath Cycles: {breathCount}</span>
+        <span>Time: {formatTime(timeRemaining)}</span>
+        <span>Breaths: {breathCount}</span>
       </div>
       
       <Progress 

@@ -3,10 +3,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MindfulnessExerciseType } from "../../../types";
-import { Clock, Heart, Star, Timer } from "lucide-react";
+import { Clock, Heart, Timer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ExerciseCardProps {
   exercise: MindfulnessExerciseType;
@@ -22,6 +23,7 @@ export default function ExerciseCard({
   onStartSession
 }: ExerciseCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useIsMobile();
   
   return (
     <Card
@@ -36,11 +38,11 @@ export default function ExerciseCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <CardContent className="p-4">
+      <CardContent className={cn("p-4", isMobile && "p-3")}>
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h3 className="font-medium mb-1">{exercise.name}</h3>
-            <div className="flex items-center gap-2 mb-2">
+            <h3 className={cn("font-medium mb-1", isMobile && "text-sm")}>{exercise.name}</h3>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <Badge variant="outline" className="flex items-center gap-1 text-xs">
                 <Clock className="h-3 w-3" />
                 {exercise.duration} min
@@ -68,7 +70,7 @@ export default function ExerciseCard({
           </motion.button>
         </div>
         
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+        <p className={cn("text-sm text-muted-foreground mb-4 line-clamp-2", isMobile && "text-xs mb-3 line-clamp-1")}>
           {exercise.description}
         </p>
         
@@ -85,9 +87,10 @@ export default function ExerciseCard({
               exercise.color === "blue" && "bg-blue-500 hover:bg-blue-600",
               exercise.color === "purple" && "bg-purple-500 hover:bg-purple-600",
               exercise.color === "green" && "bg-green-500 hover:bg-green-600",
-              exercise.color === "orange" && "bg-orange-500 hover:bg-orange-600"
+              exercise.color === "orange" && "bg-orange-500 hover:bg-orange-600",
+              isMobile && "text-xs h-8 px-3"
             )}
-            size="sm"
+            size={isMobile ? "sm" : "sm"}
           >
             Start
           </Button>
@@ -102,7 +105,8 @@ export default function ExerciseCard({
           exercise.color === "blue" && "bg-blue-300",
           exercise.color === "purple" && "bg-purple-300",
           exercise.color === "green" && "bg-green-300",
-          exercise.color === "orange" && "bg-orange-300"
+          exercise.color === "orange" && "bg-orange-300",
+          isMobile && "w-16 h-16"
         )}
       />
     </Card>

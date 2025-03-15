@@ -1,7 +1,8 @@
 
 import { motion } from "framer-motion";
-import { ArrowUp, ArrowDown, Clock, LucideIcon } from "lucide-react";
+import { ArrowUp, ArrowDown, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BreathingFeedbackProps {
   currentStep: string;
@@ -14,6 +15,8 @@ export default function BreathingFeedback({
   remainingTime,
   color 
 }: BreathingFeedbackProps) {
+  const isMobile = useIsMobile();
+  
   // Format time for display
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -38,8 +41,8 @@ export default function BreathingFeedback({
       case "inhale":
         return (
           <motion.div
-            initial={{ y: 10 }}
-            animate={{ y: -10 }}
+            initial={{ y: 0 }}
+            animate={{ y: [-5, 5] }}
             transition={{ repeat: Infinity, repeatType: "reverse", duration: 2 }}
             className={cn(
               "p-2 rounded-full",
@@ -48,14 +51,14 @@ export default function BreathingFeedback({
               color === "green" && "text-green-600"
             )}
           >
-            <ArrowUp className="h-6 w-6" />
+            <ArrowUp className="h-5 w-5" />
           </motion.div>
         );
       case "exhale":
         return (
           <motion.div
-            initial={{ y: -10 }}
-            animate={{ y: 10 }}
+            initial={{ y: 0 }}
+            animate={{ y: [5, -5] }}
             transition={{ repeat: Infinity, repeatType: "reverse", duration: 2 }}
             className={cn(
               "p-2 rounded-full",
@@ -64,7 +67,7 @@ export default function BreathingFeedback({
               color === "green" && "text-green-600"
             )}
           >
-            <ArrowDown className="h-6 w-6" />
+            <ArrowDown className="h-5 w-5" />
           </motion.div>
         );
       case "hold-in":
@@ -80,7 +83,7 @@ export default function BreathingFeedback({
               color === "green" && "text-green-600"
             )}
           >
-            <Clock className="h-6 w-6" />
+            <Clock className="h-5 w-5" />
           </motion.div>
         );
       default:
@@ -89,13 +92,16 @@ export default function BreathingFeedback({
   };
 
   return (
-    <div className="absolute top-1/2 right-0 transform -translate-y-1/2 flex flex-col items-center gap-2">
+    <div className={cn(
+      "fixed flex flex-col items-center gap-2 z-10",
+      isMobile ? "top-2 right-2" : "top-8 right-8"
+    )}>
       {renderIcon()}
       
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
         className={cn(
           "bg-white/90 shadow-sm p-2 rounded text-sm max-w-[200px] text-center",
           color === "blue" && "text-blue-700",
@@ -106,7 +112,7 @@ export default function BreathingFeedback({
         {getInstructionText()}
       </motion.div>
       
-      <div className="text-muted-foreground text-xs mt-2">
+      <div className="text-muted-foreground text-xs">
         {formatTime(remainingTime)}
       </div>
     </div>
