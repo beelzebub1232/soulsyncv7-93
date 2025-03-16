@@ -92,7 +92,7 @@ export default function BreathingFeedback({
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-2 mt-4 mb-4">
+    <div className="w-full flex flex-col items-center gap-2 mt-2 mb-2">
       {renderIcon()}
       
       <motion.div

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause, Play, RotateCcw, Bell, Heart, Info, Settings, Volume2, Volume1, VolumeX } from "lucide-react";
@@ -295,46 +294,19 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                     circleSize={circleSize}
                     exercise={exercise}
                   />
-                  
-                  {/* Feedback overlay - now properly positioned */}
-                  {showGuide && (
-                    <BreathingFeedback 
-                      currentStep={currentStep} 
-                      remainingTime={timeRemaining}
-                      color={exercise.color}
-                    />
-                  )}
-                  
-                  {/* Completion animation */}
-                  <AnimatePresence>
-                    {showCompletionAnimation && (
-                      <motion.div
-                        className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full z-20"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: [0.8, 1.2, 1], opacity: 1 }}
-                          exit={{ scale: 1.5, opacity: 0 }}
-                          transition={{ duration: 2 }}
-                        >
-                          <Heart 
-                            className={cn(
-                              "h-16 w-16",
-                              exercise.color === "blue" ? "text-blue-500" : 
-                              exercise.color === "purple" ? "text-purple-500" : "text-green-500"
-                            )} 
-                          />
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </div>
                 
-                {/* Progress and controls in a fixed container */}
-                <div className="text-center w-full max-w-md px-4 mt-2">
+                {/* Feedback overlay - properly positioned below the circle */}
+                {showGuide && (
+                  <BreathingFeedback 
+                    currentStep={currentStep} 
+                    remainingTime={timeRemaining}
+                    color={exercise.color}
+                  />
+                )}
+                
+                {/* Progress and controls in a fixed container with bottom padding to avoid navbar overlap */}
+                <div className="text-center w-full max-w-md px-4 mt-1 pb-20">
                   <BreathingProgress
                     timeRemaining={timeRemaining}
                     totalDuration={exercise.duration * 60}
@@ -342,7 +314,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                     color={exercise.color}
                   />
                   
-                  <div className="flex justify-center gap-3 mt-6">
+                  <div className="flex justify-center gap-3 mt-4">
                     <Button
                       variant="outline"
                       size="icon"
@@ -436,10 +408,37 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                     </div>
                   )}
                 </div>
+                
+                {/* Completion animation */}
+                <AnimatePresence>
+                  {showCompletionAnimation && (
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full z-20"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: [0.8, 1.2, 1], opacity: 1 }}
+                        exit={{ scale: 1.5, opacity: 0 }}
+                        transition={{ duration: 2 }}
+                      >
+                        <Heart 
+                          className={cn(
+                            "h-16 w-16",
+                            exercise.color === "blue" ? "text-blue-500" : 
+                            exercise.color === "purple" ? "text-purple-500" : "text-green-500"
+                          )} 
+                        />
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </TabsContent>
             
-            <TabsContent value="statistics" className="mt-0 px-4">
+            <TabsContent value="statistics" className="mt-0 px-4 pb-20">
               <div className="grid grid-cols-2 gap-4">
                 <Card>
                   <CardContent className="pt-6">
@@ -531,7 +530,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
               </Card>
             </TabsContent>
             
-            <TabsContent value="info" className="mt-0 px-4">
+            <TabsContent value="info" className="mt-0 px-4 pb-20">
               <Card>
                 <CardContent className="pt-6">
                   <CardTitle className="text-xl mb-2">{exercise.name}</CardTitle>
