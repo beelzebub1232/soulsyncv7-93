@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause, Play, RotateCcw, Bell, Heart, Info, Settings, Volume2, Volume1, VolumeX } from "lucide-react";
@@ -258,7 +257,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   };
   
   return (
-    <div className="flex flex-col items-center h-full max-h-[calc(100vh-160px)] overflow-auto">
+    <div className="flex flex-col items-center h-full max-h-[calc(100vh-160px)] overflow-auto pb-20">
       {/* Header with fixed position */}
       <div className="w-full sticky top-0 bg-background z-10 flex items-center justify-between mb-4 p-2">
         <div className="flex items-center gap-2">
@@ -289,21 +288,12 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
             <TabsContent value="practice" className="mt-0 h-full relative">
               <div className="flex flex-col items-center">
                 {/* Breathing circle with contained dimensions */}
-                <div className="w-full relative mb-4">
+                <div className="w-full relative">
                   <BreathingCircle 
                     currentStep={currentStep}
                     circleSize={circleSize}
                     exercise={exercise}
                   />
-                  
-                  {/* Feedback overlay */}
-                  {showGuide && (
-                    <BreathingFeedback 
-                      currentStep={currentStep} 
-                      remainingTime={timeRemaining}
-                      color={exercise.color}
-                    />
-                  )}
                   
                   {/* Completion animation */}
                   <AnimatePresence>
@@ -333,8 +323,17 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                   </AnimatePresence>
                 </div>
                 
+                {/* Centralized feedback information */}
+                {showGuide && (
+                  <BreathingFeedback 
+                    currentStep={currentStep} 
+                    remainingTime={timeRemaining}
+                    color={exercise.color}
+                  />
+                )}
+                
                 {/* Progress and controls in a fixed container */}
-                <div className="text-center w-full max-w-md px-4">
+                <div className="text-center w-full max-w-md px-4 mb-4">
                   <BreathingProgress
                     timeRemaining={timeRemaining}
                     totalDuration={exercise.duration * 60}
@@ -439,7 +438,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
               </div>
             </TabsContent>
             
-            <TabsContent value="statistics" className="mt-0 px-4">
+            <TabsContent value="statistics" className="mt-0 px-4 pb-20">
               <div className="grid grid-cols-2 gap-4">
                 <Card>
                   <CardContent className="pt-6">
@@ -531,7 +530,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
               </Card>
             </TabsContent>
             
-            <TabsContent value="info" className="mt-0 px-4">
+            <TabsContent value="info" className="mt-0 px-4 pb-20">
               <Card>
                 <CardContent className="pt-6">
                   <CardTitle className="text-xl mb-2">{exercise.name}</CardTitle>

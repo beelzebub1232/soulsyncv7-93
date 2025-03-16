@@ -59,9 +59,9 @@ export default function BreathingCircle({
 
   return (
     <div 
-      className="relative flex items-center justify-center mb-8" 
+      className="relative flex items-center justify-center" 
       style={{
-        height: isMobile ? '280px' : '320px',
+        height: isMobile ? '250px' : '280px', // Reduced height to make more room for feedback below
         overflow: 'hidden' // Prevent content from spilling out
       }}
     >

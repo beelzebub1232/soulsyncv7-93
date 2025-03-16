@@ -92,22 +92,24 @@ export default function BreathingFeedback({
   };
 
   return (
-    <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10 max-w-[160px]">
-      {renderIcon()}
-      
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className={cn(
-          "bg-white/90 shadow-sm p-2 rounded text-sm text-center",
-          color === "blue" && "text-blue-700",
-          color === "purple" && "text-purple-700",
-          color === "green" && "text-green-700"
-        )}
-      >
-        {getInstructionText()}
-      </motion.div>
+    <div className="flex flex-col items-center gap-2 mt-2 mb-4 z-10">
+      <div className="flex items-center gap-2">
+        {renderIcon()}
+        
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className={cn(
+            "bg-white/90 shadow-sm px-4 py-2 rounded text-center",
+            color === "blue" && "text-blue-700",
+            color === "purple" && "text-purple-700",
+            color === "green" && "text-green-700"
+          )}
+        >
+          {getInstructionText()}
+        </motion.div>
+      </div>
       
       <div className="text-muted-foreground text-xs">
         {formatTime(remainingTime)}
