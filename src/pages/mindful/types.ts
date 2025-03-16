@@ -1,4 +1,3 @@
-
 import { LucideIcon } from "lucide-react";
 
 // Breathing Exercise Types
@@ -33,7 +32,12 @@ export interface MindfulnessExerciseType {
   duration: number;
   focus: string;
   color: string;
-  steps: MindfulnessStep[];
+  level: string;
+  steps: {
+    title: string;
+    instruction: string;
+    duration: number;
+  }[];
 }
 
 // Quiz Types

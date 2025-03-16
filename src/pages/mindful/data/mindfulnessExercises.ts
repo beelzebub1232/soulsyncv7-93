@@ -4,385 +4,448 @@ import { MindfulnessExerciseType } from "../types";
 export const mindfulnessExercises: MindfulnessExerciseType[] = [
   {
     id: "body-scan",
-    name: "Body Scan Meditation",
-    description: "A progressive practice of bringing attention to each part of the body to release tension and cultivate body awareness.",
+    name: "Progressive Body Scan",
+    description: "A guided meditation that helps you develop awareness of your body, reducing tension and increasing relaxation.",
+    level: "Beginner",
     duration: 10,
-    focus: "Body awareness",
+    focus: "Body Awareness",
     color: "blue",
     steps: [
       {
         title: "Preparation",
-        instruction: "Find a comfortable position lying down or sitting. Close your eyes and take a few deep breaths to settle in. Feel the weight of your body against the surface beneath you.",
-        duration: 60
-      },
-      {
-        title: "Feet & Legs",
-        instruction: "Bring your attention to your feet. Notice any sensations - warmth, coolness, tingling, or pressure. There's no need to change anything, just observe. Then gradually move your attention up through your legs, noticing sensations in your calves, knees, and thighs.",
-        duration: 120
-      },
-      {
-        title: "Torso",
-        instruction: "Shift your awareness to your abdomen, noticing the gentle rise and fall with each breath. Continue up to your chest, back, and shoulders. Are there areas of tension or relaxation? Simply observe without judgment.",
-        duration: 120
-      },
-      {
-        title: "Arms & Hands",
-        instruction: "Move your attention down your arms to your hands. Notice any sensations in your shoulders, upper arms, elbows, forearms, wrists, and finally your hands and fingers. Observe any tingling, warmth, or other sensations that arise.",
-        duration: 90
-      },
-      {
-        title: "Neck & Head",
-        instruction: "Bring awareness to your neck, throat, and head. Notice your jaw, mouth, nose, eyes, ears, and scalp. If you find tension anywhere, acknowledge it with kindness and allow it to soften with your breath.",
-        duration: 90
-      },
-      {
-        title: "Whole Body",
-        instruction: "Now expand your awareness to sense your entire body as a whole. Feel the boundary between your body and the space around it. Notice the sense of your body as a complete, integrated whole, breathing and alive.",
-        duration: 60
-      },
-      {
-        title: "Closing",
-        instruction: "Slowly deepen your breath and gently wiggle your fingers and toes. When you feel ready, slowly open your eyes, carrying this sense of body awareness with you into the rest of your day.",
-        duration: 60
-      }
-    ]
-  },
-  {
-    id: "progressive-muscle-relaxation",
-    name: "Progressive Muscle Relaxation",
-    description: "Systematically tense and release muscle groups to reduce physical tension and stress, improving overall relaxation response.",
-    duration: 12,
-    focus: "Tension release",
-    color: "green",
-    steps: [
-      {
-        title: "Preparation",
-        instruction: "Find a comfortable position sitting or lying down. Take a few deep breaths to begin. Allow your body to settle into the surface beneath you. Loosen any tight clothing and remove glasses if you're wearing them.",
-        duration: 60
-      },
-      {
-        title: "Hands & Arms",
-        instruction: "Make a tight fist with both hands, squeezing as hard as you can. Notice the tension in your hands and forearms. Hold for 5 seconds... and release completely. Feel the difference between tension and relaxation. Notice the sensation of warmth and heaviness as the muscles relax.",
-        duration: 90
-      },
-      {
-        title: "Upper Arms & Shoulders",
-        instruction: "Bend your elbows and tense your biceps as if you're showing off your muscles. Hold for 5 seconds... and release, letting your arms rest comfortably. Notice the pleasant feeling of relaxation spreading through your arms.",
-        duration: 90
-      },
-      {
-        title: "Shoulders & Neck",
-        instruction: "Raise your shoulders toward your ears, creating tension. Hold for 5 seconds... and release, letting your shoulders drop and relax completely. Feel the tension draining away from your neck and shoulders.",
-        duration: 90
-      },
-      {
-        title: "Face",
-        instruction: "Scrunch your facial muscles, squeezing your eyes shut, wrinkling your nose, and clenching your jaw. Hold for 5 seconds... and release, feeling your face become smooth and relaxed. Notice the sensation of the muscles in your face softening.",
-        duration: 90
-      },
-      {
-        title: "Chest & Abdomen",
-        instruction: "Take a deep breath, filling your lungs completely, and tense your chest and abdomen. Hold for 5 seconds... and slowly exhale, releasing all tension. Feel your torso softening with each breath.",
-        duration: 90
-      },
-      {
-        title: "Back",
-        instruction: "Gently arch your back, creating tension along your spine. Hold for 5 seconds... and release, allowing your back to rest comfortably against the surface beneath you. Notice the relaxation spreading across your back.",
-        duration: 90
-      },
-      {
-        title: "Legs & Feet",
-        instruction: "Extend your legs, point your toes, and tense all the muscles in your legs. Hold for 5 seconds... and release, letting your legs fall gently back into place. Feel the heaviness and warmth as your legs relax completely.",
-        duration: 90
-      },
-      {
-        title: "Full Body Awareness",
-        instruction: "Now focus on your entire body, scanning from head to toe. Notice the pleasant sensations of relaxation throughout. If you find any remaining areas of tension, breathe into them and allow them to soften.",
-        duration: 90
-      },
-      {
-        title: "Closing",
-        instruction: "Lie or sit quietly, enjoying this state of deep relaxation. Take a moment to appreciate how different your body feels now compared to when you started. When you're ready, slowly reawaken your body by wiggling fingers and toes, stretching gently, and opening your eyes.",
-        duration: 60
-      }
-    ]
-  },
-  {
-    id: "mindful-breathing",
-    name: "Mindful Breathing",
-    description: "A foundational practice of bringing full attention to the physical sensations of breathing, helping to anchor you in the present moment.",
-    duration: 5,
-    focus: "Breath",
-    color: "purple",
-    steps: [
-      {
-        title: "Getting Settled",
-        instruction: "Find a comfortable seated position with your back straight but not rigid. Rest your hands on your legs and gently close your eyes or lower your gaze. Take a moment to notice how your body feels right now.",
-        duration: 45
-      },
-      {
-        title: "Noticing Your Breath",
-        instruction: "Bring your attention to your breathing. Don't try to change it - simply notice the natural rhythm. You might feel the air moving through your nostrils, the rise and fall of your chest, or the expansion of your abdomen. Choose one place to focus on.",
-        duration: 60
-      },
-      {
-        title: "Following the Breath",
-        instruction: "Follow the complete cycle of each breath. The beginning of the inhale... the middle... and the end. Then the beginning of the exhale... the middle... and the end. Just riding the waves of your breath with full awareness.",
-        duration: 90
-      },
-      {
-        title: "Counting Breaths",
-        instruction: "If it helps, try counting your breaths. Count 'one' on the inhale, 'two' on the exhale, and so on up to ten. Then start again at one. This helps keep your mind focused on the breath.",
-        duration: 60
-      },
-      {
-        title: "Returning to the Breath",
-        instruction: "When your mind wanders, gently recognize that it has wandered, and kindly bring your attention back to your breathing. This is the essence of the practice - noticing when your attention has drifted and returning to the breath without judgment.",
-        duration: 90
-      },
-      {
-        title: "Expanding Awareness",
-        instruction: "While maintaining awareness of your breath, expand your attention to include sensations in your whole body. Notice how your entire body subtly moves with each breath, like waves on the ocean.",
-        duration: 60
-      },
-      {
-        title: "Closing the Practice",
-        instruction: "Gradually broaden your awareness to include the sounds around you. Take a deeper breath, inviting energy and alertness. When you're ready, gently open your eyes, carrying this mindful awareness with you.",
-        duration: 45
-      }
-    ]
-  },
-  {
-    id: "mindful-awareness",
-    name: "Mindful Awareness Practice",
-    description: "Develop present-moment awareness through the methodical observation of sensory experiences, thoughts, and emotions.",
-    duration: 8,
-    focus: "Sensory awareness",
-    color: "blue",
-    steps: [
-      {
-        title: "Grounding",
-        instruction: "Sit comfortably and take a few deep breaths. Feel the weight of your body against the chair or floor. Notice the points of contact where your body touches the surface beneath you. Let yourself be fully supported.",
-        duration: 45
-      },
-      {
-        title: "Sound Awareness",
-        instruction: "Open your awareness to sounds. Notice nearby sounds, distant sounds, and the quality of silence between sounds. There's no need to identify or name them, just experience them directly as patterns of sensation arising in your awareness.",
-        duration: 75
-      },
-      {
-        title: "Body Sensations",
-        instruction: "Shift your attention to physical sensations. Notice temperature, tingling, pulsing, pressure, or any other sensations present in your body right now. Observe how these sensations naturally change and shift, moment by moment.",
-        duration: 75
-      },
-      {
-        title: "Breath Awareness",
-        instruction: "Bring attention to your breathing. Feel the sensations of air moving in and out. Notice the rise and fall of your abdomen or chest, the feeling of air at your nostrils. Use the breath as an anchor for your awareness.",
-        duration: 60
-      },
-      {
-        title: "Thought Observation",
-        instruction: "Now notice your thoughts. Watch them arise, exist for a moment, and pass away, like clouds moving across the sky. Try not to get caught up in any particular thought - just observe them coming and going, without judgment.",
-        duration: 90
-      },
-      {
-        title: "Emotional Awareness",
-        instruction: "Become aware of any emotions present. What does this emotion feel like in your body? Is there tension, warmth, heaviness, or lightness? Notice without judgment, allowing all emotions to be as they are, neither pushing them away nor holding onto them.",
-        duration: 90
-      },
-      {
-        title: "Open Awareness",
-        instruction: "Now expand to open awareness. Allow whatever is most prominent in your experience - sounds, sensations, thoughts, or emotions - to naturally enter and leave your awareness. Rest in this spacious awareness that holds all experience.",
-        duration: 90
-      },
-      {
-        title: "Closing",
-        instruction: "Slowly bring your attention back to your breathing. Take a few deep breaths and, when you're ready, gently open your eyes. See if you can maintain this quality of mindful awareness as you transition back to your day.",
-        duration: 45
-      }
-    ]
-  },
-  {
-    id: "present-moment",
-    name: "Present Moment Grounding",
-    description: "A short, accessible practice to quickly anchor yourself in the present moment anytime, anywhere, especially during stressful situations.",
-    duration: 3,
-    focus: "Present moment",
-    color: "orange",
-    steps: [
-      {
-        title: "Pause",
-        instruction: "Wherever you are, whatever you're doing, just pause. Take a conscious break from autopilot. Set an intention to be fully present for the next few minutes.",
-        duration: 15
-      },
-      {
-        title: "Three Conscious Breaths",
-        instruction: "Take three slow, deep breaths. Feel the full sensation of each inhale and exhale. Let each breath help you arrive more fully in the present moment.",
+        instruction: "Find a comfortable position lying down on your back. Close your eyes and take a few deep breaths, feeling your body sink into the surface beneath you.",
         duration: 30
       },
       {
-        title: "Five Senses Check-in",
-        instruction: "Notice 5 things you can see around you, observing details and colors. Then acknowledge 4 things you can feel (like the texture of your clothing or the surface beneath you). Next, notice 3 things you can hear. Then 2 things you can smell (or simply notice your breath). Finally, note 1 thing you can taste, or the sensation in your mouth.",
-        duration: 90
-      },
-      {
-        title: "Body Scan",
-        instruction: "Quickly scan through your body from head to toe. Notice any areas of tension and allow them to soften with your awareness. Feel your feet on the ground, grounding you to the present moment.",
+        title: "Focus on Breath",
+        instruction: "Bring attention to your breath. Notice the natural rhythm of your inhales and exhales without trying to change them.",
         duration: 45
       },
       {
-        title: "Integration",
-        instruction: "Take one more deep breath and set an intention to carry this present-moment awareness into your next activity. Remind yourself that you can return to this practice anytime you need to center yourself.",
+        title: "Feet & Ankles",
+        instruction: "Bring awareness to your feet. Notice any sensations - warmth, coolness, pressure, tingling. Gently flex and relax your feet, then let go of any tension.",
+        duration: 60
+      },
+      {
+        title: "Legs",
+        instruction: "Move your attention up to your calves, knees, and thighs. Notice any sensations without judgment. If you find tension, imagine it melting away as you exhale.",
+        duration: 60
+      },
+      {
+        title: "Hips & Lower Back",
+        instruction: "Focus on your hips, pelvis, and lower back. These areas often hold stress. Notice any tightness and allow it to soften with each breath.",
+        duration: 60
+      },
+      {
+        title: "Abdomen & Chest",
+        instruction: "Bring awareness to your stomach and chest. Feel your breath moving in this area. Notice how your abdomen rises and falls with each breath.",
+        duration: 60
+      },
+      {
+        title: "Upper Back & Shoulders",
+        instruction: "Focus on your upper back, shoulders, and neck. These areas commonly accumulate tension. Allow any tightness to release as you exhale.",
+        duration: 60
+      },
+      {
+        title: "Arms & Hands",
+        instruction: "Move your attention down your arms to your hands and fingers. Notice any sensations. Imagine tension flowing out through your fingertips.",
+        duration: 60
+      },
+      {
+        title: "Face & Head",
+        instruction: "Bring awareness to your face and head. Relax your jaw, soften the space between your eyebrows, and release tension in your forehead and scalp.",
+        duration: 60
+      },
+      {
+        title: "Whole Body",
+        instruction: "Now expand your awareness to your entire body as a whole. Feel the connection between all parts and the sense of completeness.",
+        duration: 45
+      },
+      {
+        title: "Completion",
+        instruction: "Take a few deep breaths. As you're ready, gently wiggle your fingers and toes, stretch if you like, and slowly open your eyes, carrying this sense of relaxation with you.",
         duration: 30
       }
     ]
   },
   {
     id: "loving-kindness",
-    name: "Loving Kindness Meditation",
-    description: "Cultivate positive emotions and compassion toward yourself and others through this heart-centered practice of well-wishing.",
-    duration: 10,
+    name: "Loving-Kindness Meditation",
+    description: "A practice to develop compassion for yourself and others, fostering feelings of goodwill and kindness.",
+    level: "Intermediate",
+    duration: 15,
     focus: "Compassion",
     color: "purple",
     steps: [
       {
         title: "Preparation",
-        instruction: "Find a comfortable position and take a few deep breaths to settle in. Place your hands over your heart if that feels comfortable. Bring a gentle smile to your face, even if it feels a bit artificial at first.",
-        duration: 45
+        instruction: "Find a comfortable seated position with a straight back. Close your eyes and take several deep breaths to center yourself.",
+        duration: 30
       },
       {
         title: "Self-Kindness",
-        instruction: "Bring to mind an image of yourself. Silently repeat these phrases, directing them to yourself with sincerity: 'May I be safe and protected. May I be healthy and strong. May I be happy and peaceful. May I live with ease.' Feel the intention behind the words, allowing warmth to develop in your heart.",
+        instruction: "Place your hands over your heart. Silently repeat these phrases to yourself: 'May I be happy. May I be healthy. May I be safe. May I live with ease.' Feel the warmth of these wishes.",
         duration: 120
       },
       {
-        title: "Benefactor",
-        instruction: "Now bring to mind someone who has been kind to you - someone who makes you smile just thinking about them. Direct the same wishes to them: 'May you be safe and protected. May you be healthy and strong. May you be happy and peaceful. May you live with ease.' Feel the natural gratitude and goodwill flowing toward this person.",
+        title: "Loved One",
+        instruction: "Bring to mind someone you care about deeply. Picture them clearly and extend the same wishes: 'May you be happy. May you be healthy. May you be safe. May you live with ease.'",
         duration: 120
-      },
-      {
-        title: "Beloved Friend",
-        instruction: "Bring to mind a close friend or family member whom you care deeply about. Send them the same loving wishes, feeling the warmth in your heart expand as you do so. Notice how it feels to wish well for someone you love.",
-        duration: 90
       },
       {
         title: "Neutral Person",
-        instruction: "Bring to mind someone you neither like nor dislike - perhaps someone you see regularly but don't know well, like a store clerk or neighbor. Send them the same wishes for well-being, recognizing that like you, they wish to be happy and free from suffering.",
-        duration: 90
+        instruction: "Think of someone you neither like nor dislike - perhaps a neighbor or colleague you don't know well. Extend the same wishes to them, recognizing their humanity.",
+        duration: 120
       },
       {
         title: "Difficult Person",
-        instruction: "Now, if you feel ready, bring to mind someone challenging in your life. Remember they also wish to be happy and free from suffering, even if their actions are unskillful. Send them the same wishes, even if it feels difficult. If this feels too challenging, return to sending loving-kindness to yourself or a benefactor.",
-        duration: 90
+        instruction: "If you feel ready, bring to mind someone with whom you have difficulty. With an open heart, offer them the same wishes, acknowledging that they too wish to be happy.",
+        duration: 120
       },
       {
         title: "All Beings",
-        instruction: "Finally, expand your awareness to include all beings everywhere. 'May all beings be safe and protected. May all beings be healthy and strong. May all beings be happy and peaceful. May all beings live with ease.' Feel your heart opening to embrace all life with care and kindness.",
+        instruction: "Expand your awareness to include all beings everywhere. 'May all beings be happy. May all beings be healthy. May all beings be safe. May all be at ease.'",
+        duration: 120
+      },
+      {
+        title: "Return to Self",
+        instruction: "Finally, return to yourself. Notice how your heart feels after offering these wishes. Rest in the feeling of kindness you've generated.",
+        duration: 60
+      },
+      {
+        title: "Completion",
+        instruction: "Gradually widen your awareness to the room around you. When you're ready, gently open your eyes, carrying this sense of kindness with you.",
+        duration: 30
+      }
+    ]
+  },
+  {
+    id: "mindful-listening",
+    name: "Mindful Listening Practice",
+    description: "A meditation focused on developing deep attention to sounds, helping to improve focus and present-moment awareness.",
+    level: "Beginner",
+    duration: 8,
+    focus: "Sensory Awareness",
+    color: "green",
+    steps: [
+      {
+        title: "Preparation",
+        instruction: "Find a comfortable position sitting up straight but relaxed. Close your eyes or lower your gaze to reduce visual distractions.",
+        duration: 30
+      },
+      {
+        title: "Initial Awareness",
+        instruction: "Take a few deep breaths and begin to notice the ambient sounds around you. Don't try to identify every sound, just become aware of the soundscape.",
+        duration: 60
+      },
+      {
+        title: "Distant Sounds",
+        instruction: "Focus your attention on the most distant sounds you can hear. Notice their qualities - are they continuous or intermittent? Loud or soft? Pleasant or unpleasant?",
         duration: 90
       },
       {
-        title: "Closing",
-        instruction: "Return your awareness to your body and breath. Notice how you feel now compared to when you started. Carry this sense of connection and goodwill with you as you return to your day. When you're ready, slowly open your eyes.",
+        title: "Middle-Distance Sounds",
+        instruction: "Shift your attention to sounds in the middle distance - perhaps from another room or just outside. Listen with curiosity, as if hearing these common sounds for the first time.",
+        duration: 90
+      },
+      {
+        title: "Close Sounds",
+        instruction: "Now bring your attention to the closest sounds - perhaps the sound of your own breathing, subtle movements of your body, or electronics in the room.",
+        duration: 90
+      },
+      {
+        title: "Whole Soundscape",
+        instruction: "Expand your awareness to take in the entire soundscape - near, middle, and far sounds all at once. Notice how sounds arise and fade, creating an ever-changing symphony.",
+        duration: 90
+      },
+      {
+        title: "Sound and Silence",
+        instruction: "Begin to notice the spaces between sounds - the moments of relative quiet. Pay attention to both sound and silence with equal interest.",
+        duration: 60
+      },
+      {
+        title: "Completion",
+        instruction: "Gradually bring your awareness back to your body and breath. When you're ready, slowly open your eyes and carry this quality of attentive listening with you.",
+        duration: 30
+      }
+    ]
+  },
+  {
+    id: "mindful-walking",
+    name: "Mindful Walking Meditation",
+    description: "A practice that combines gentle walking with focused awareness, helping to ground you in the present moment through movement.",
+    level: "Beginner",
+    duration: 12,
+    focus: "Movement",
+    color: "blue",
+    steps: [
+      {
+        title: "Preparation",
+        instruction: "Find a quiet space where you can walk slowly for about 10-20 steps in one direction. Stand still at one end, with your feet hip-width apart.",
+        duration: 30
+      },
+      {
+        title: "Posture Awareness",
+        instruction: "Feel your feet firmly connecting with the ground. Notice your posture - align your spine, relax your shoulders, and let your arms hang naturally at your sides.",
         duration: 45
+      },
+      {
+        title: "Begin Walking",
+        instruction: "Start walking very slowly, more slowly than your normal pace. Pay attention to the sensation of lifting your foot, moving it forward, and placing it back down.",
+        duration: 90
+      },
+      {
+        title: "Heel-to-Toe Awareness",
+        instruction: "Feel each part of your foot as it contacts the ground - heel, ball, toes. Notice weight shifting from the back to the front of your foot with each step.",
+        duration: 120
+      },
+      {
+        title: "Full Movement",
+        instruction: "Expand your awareness to include your entire legs, hips, and the subtle movements of your body as you walk. Notice how your arms naturally swing slightly.",
+        duration: 120
+      },
+      {
+        title: "Turning Point",
+        instruction: "When you reach the end of your walking path, pause. Take a moment to be fully aware as you slowly turn around to walk in the opposite direction.",
+        duration: 30
+      },
+      {
+        title: "Continue Practice",
+        instruction: "Continue walking back and forth, maintaining full awareness of each step. If your mind wanders, gently bring your attention back to the physical sensations of walking.",
+        duration: 120
+      },
+      {
+        title: "Environmental Awareness",
+        instruction: "While maintaining awareness of your movement, also notice your surroundings - the space around you, any sounds, or the feeling of air on your skin.",
+        duration: 60
+      },
+      {
+        title: "Completion",
+        instruction: "Gradually come to a stop. Stand still for a moment and notice how your body feels after this walking meditation. Carry this mindful awareness with you as you resume normal activities.",
+        duration: 45
+      }
+    ]
+  },
+  {
+    id: "breath-counting",
+    name: "Breath Counting Meditation",
+    description: "A simple but powerful concentration practice that uses counting to develop focus and present-moment awareness.",
+    level: "Beginner",
+    duration: 5,
+    focus: "Concentration",
+    color: "green",
+    steps: [
+      {
+        title: "Preparation",
+        instruction: "Find a comfortable seated position with your back straight but not rigid. Rest your hands in your lap or on your knees and close your eyes.",
+        duration: 30
+      },
+      {
+        title: "Initial Breath Awareness",
+        instruction: "Take a few deep breaths to settle in. Then allow your breathing to return to its natural rhythm - not forced or controlled, just natural.",
+        duration: 45
+      },
+      {
+        title: "Begin Counting",
+        instruction: "As you exhale, silently count 'one'. On the next exhale, count 'two', and so on up to 'five'. Then start over again at 'one'. Focus on the sensation of the breath and the counting.",
+        duration: 60
+      },
+      {
+        title: "Mind Wandering",
+        instruction: "If you notice your mind has wandered and you've lost count, simply return to 'one' with your next exhale. Do this without judgment or frustration - mind wandering is normal.",
+        duration: 60
+      },
+      {
+        title: "Continue Practice",
+        instruction: "Continue counting your exhalations from one to five, then starting over. Allow your breath to be natural and relaxed as you maintain the count.",
+        duration: 60
+      },
+      {
+        title: "Deepen Awareness",
+        instruction: "As you continue, try to notice the subtle sensations of each breath - the feeling of air moving through your nostrils, the rise and fall of your abdomen or chest.",
+        duration: 60
+      },
+      {
+        title: "Completion",
+        instruction: "Let go of the counting and simply rest in awareness of your breath for a few moments. When you're ready, slowly open your eyes and return your attention to your surroundings.",
+        duration: 30
       }
     ]
   },
   {
     id: "gratitude-practice",
-    name: "Gratitude Meditation",
-    description: "Develop appreciation for the positive aspects of life through conscious reflection on what you're thankful for.",
-    duration: 7,
-    focus: "Appreciation",
-    color: "green",
+    name: "Mindful Gratitude Practice",
+    description: "A meditation focused on developing appreciation and thankfulness, helping to shift perspective toward the positive aspects of life.",
+    level: "Beginner",
+    duration: 10,
+    focus: "Positive Emotion",
+    color: "purple",
     steps: [
       {
-        title: "Settling In",
-        instruction: "Find a comfortable position and take several deep breaths. Allow your body to relax and your mind to become calm. Set an intention to open yourself to feelings of gratitude and appreciation.",
+        title: "Preparation",
+        instruction: "Find a comfortable position either sitting or lying down. Close your eyes and take several deep breaths to center yourself.",
+        duration: 30
+      },
+      {
+        title: "Heart Focus",
+        instruction: "Bring your attention to the area around your heart. Place a hand on your heart if that helps. Take a few breaths into this area, feeling a sense of warmth developing.",
         duration: 45
       },
       {
-        title: "Simple Pleasures",
-        instruction: "Bring to mind something simple that you often take for granted - clean water, electricity, the comfort of your bed, or the beauty of nature. Reflect on how this enriches your life and feel a sense of gratitude for its presence.",
+        title: "Simple Gratitude",
+        instruction: "Think of something simple in your life that you're grateful for - perhaps clean water, a comfortable bed, or the beauty of nature. Feel the appreciation in your heart.",
         duration: 60
       },
       {
-        title: "Body Gratitude",
-        instruction: "Shift your awareness to your body. Consider the incredible functions it performs without conscious effort - your heart beating, lungs breathing, immune system protecting you. Send gratitude to your body for its continuous service.",
-        duration: 60
-      },
-      {
-        title: "Relationships",
-        instruction: "Think of people who support, love, or inspire you. Bring them to mind one by one, acknowledging the gift of their presence in your life. Feel the warmth of appreciation spread through your chest as you consider these connections.",
+        title: "People Gratitude",
+        instruction: "Bring to mind someone who has helped you or shown you kindness. It could be a family member, friend, teacher, or even a stranger. Feel gratitude for their presence in your life.",
         duration: 90
       },
       {
-        title: "Personal Strengths",
-        instruction: "Reflect on your own positive qualities and strengths - perhaps your kindness, creativity, determination, or sense of humor. Appreciate these aspects of yourself without pride or judgment, simply acknowledging them with gratitude.",
+        title: "Self Gratitude",
+        instruction: "Consider something about yourself that you're grateful for - a personal quality, an accomplishment, or simply your own resilience. Extend appreciation toward yourself.",
+        duration: 90
+      },
+      {
+        title: "Challenges Gratitude",
+        instruction: "If you feel ready, consider a challenge or difficulty that ultimately led to growth or learning. Can you find gratitude even within challenging experiences?",
+        duration: 90
+      },
+      {
+        title: "Open Gratitude",
+        instruction: "Expand your awareness to a general sense of gratitude for life itself, for the opportunity to experience this moment. Rest in this open feeling of appreciation.",
         duration: 60
       },
       {
-        title: "Challenges as Growth",
-        instruction: "Consider challenges or difficulties you've faced that ultimately led to growth or learning. Can you find a sense of gratitude for these experiences and how they've shaped you? This isn't about denying pain, but finding value even in difficulty.",
-        duration: 60
-      },
-      {
-        title: "Expanding Gratitude",
-        instruction: "Widen your perspective to include all the conditions that support your life - the farmers who grow your food, the people who built your home, the countless individuals whose efforts contribute to your wellbeing. Feel gratitude for this vast web of support.",
-        duration: 60
-      },
-      {
-        title: "Closing Reflection",
-        instruction: "Notice how you feel now. Has your mood shifted? Is there a sense of lightness or warmth? Set an intention to notice moments of gratitude throughout your day. When you're ready, gently open your eyes and carry this appreciative awareness with you.",
+        title: "Carry Forward",
+        instruction: "Consider how you might carry this feeling of gratitude into your day. Perhaps there's someone you could thank or a moment you could pause to appreciate.",
         duration: 45
+      },
+      {
+        title: "Completion",
+        instruction: "Take a few deep breaths, feeling the sense of gratitude in your body. When you're ready, slowly open your eyes, carrying this appreciation with you.",
+        duration: 30
       }
     ]
   },
   {
-    id: "self-compassion",
-    name: "Self-Compassion Practice",
-    description: "Learn to treat yourself with the same kindness and understanding that you would offer to a good friend facing difficulties.",
-    duration: 9,
-    focus: "Self-kindness",
+    id: "mindful-eating",
+    name: "Mindful Eating Practice",
+    description: "A guided exercise to develop full awareness while eating, helping to improve your relationship with food and enhance enjoyment of meals.",
+    level: "Intermediate",
+    duration: 10,
+    focus: "Sensory Awareness",
+    color: "orange",
+    steps: [
+      {
+        title: "Preparation",
+        instruction: "Choose a small piece of food - perhaps a raisin, a piece of chocolate, or a slice of fruit. Sit comfortably at a table with your food item in front of you.",
+        duration: 30
+      },
+      {
+        title: "Visual Observation",
+        instruction: "Look at the food as if you've never seen it before. Notice its colors, shapes, textures, and how light reflects off its surface. Observe with curiosity and interest.",
+        duration: 45
+      },
+      {
+        title: "Touch Exploration",
+        instruction: "Pick up the food and explore it with your fingers. Notice its weight, temperature, and texture. Is it smooth, rough, soft, or firm? Be aware of all tactile sensations.",
+        duration: 45
+      },
+      {
+        title: "Smell Awareness",
+        instruction: "Bring the food toward your nose and smell it carefully. Notice the aroma - is it strong or subtle? Pleasant or unpleasant? Does the smell trigger any memories or emotions?",
+        duration: 45
+      },
+      {
+        title: "First Taste",
+        instruction: "Place the food on your tongue but don't chew yet. Notice how your body responds - salivation, mouth movements, anticipation. Be aware of the initial taste and texture.",
+        duration: 45
+      },
+      {
+        title: "Mindful Chewing",
+        instruction: "Begin to chew slowly and deliberately. Notice how the taste changes and spreads throughout your mouth. Feel the texture transforming as you chew.",
+        duration: 60
+      },
+      {
+        title: "Swallowing Awareness",
+        instruction: "When ready to swallow, do so consciously, following the sensation as the food moves down your throat. Notice how your body feels after swallowing.",
+        duration: 45
+      },
+      {
+        title: "After-Effects",
+        instruction: "Sit quietly for a moment and notice any lingering tastes or sensations. Be aware of how your body feels after eating this small amount of food.",
+        duration: 45
+      },
+      {
+        title: "Reflection",
+        instruction: "Reflect on this experience. How was it different from your usual way of eating? Did you notice anything new about this familiar food?",
+        duration: 45
+      },
+      {
+        title: "Completion",
+        instruction: "Consider how you might bring elements of this practice into your daily meals, even if just for the first few bites. When ready, conclude the practice.",
+        duration: 30
+      }
+    ]
+  },
+  {
+    id: "mountain-meditation",
+    name: "Mountain Meditation",
+    description: "A visualization practice that cultivates inner stability and strength by connecting with the qualities of a mountain.",
+    level: "Intermediate",
+    duration: 15,
+    focus: "Stability",
     color: "blue",
     steps: [
       {
         title: "Preparation",
-        instruction: "Find a comfortable position and take a few deep breaths. Place a hand over your heart as a gesture of self-care and connection. Acknowledge that this is a time to be kind to yourself.",
+        instruction: "Find a comfortable seated position with your back straight. Rest your hands in your lap or on your knees and close your eyes. Take several deep breaths to center yourself.",
         duration: 45
       },
       {
-        title: "Acknowledging Difficulty",
-        instruction: "Bring to mind a situation in your life that's causing you stress, pain, or difficulty. Don't analyze the situation - simply acknowledge that this is hard, and it's okay to feel whatever you're feeling about it.",
+        title: "Body Awareness",
+        instruction: "Feel your body sitting - the weight of your body on the chair or cushion, your feet on the floor. Notice the natural dignity of your upright posture.",
         duration: 60
       },
       {
-        title: "Common Humanity",
-        instruction: "Remind yourself that difficulty and suffering are part of the shared human experience. Everyone struggles at times - you're not alone in your pain. This isn't meant to minimize your experience, but to help you feel connected rather than isolated.",
-        duration: 60
-      },
-      {
-        title: "Self-Kindness",
-        instruction: "Ask yourself: 'What do I need right now?' or 'What would I say to a dear friend facing this situation?' Offer yourself those same words of comfort and understanding. Speaking silently to yourself, use phrases like 'May I be kind to myself in this moment' or 'I'm here for myself through this difficulty.'",
+        title: "Mountain Visualization",
+        instruction: "Bring to mind an image of a majestic mountain - any mountain that feels right for you, whether real or imagined. See its solid base, rising slopes, and noble peak.",
         duration: 90
       },
       {
-        title: "Soothing Touch",
-        instruction: "If it feels supportive, continue with a hand on your heart, or try other soothing touches like gently holding your own hand, cradling your face, or giving yourself a gentle hug. Notice how physical touch can communicate care and comfort.",
-        duration: 60
-      },
-      {
-        title: "Compassionate Letter",
-        instruction: "Imagine writing a letter to yourself from the perspective of an unconditionally loving friend or mentor who knows your struggles and still sees your inherent worth. What would they say? How would they encourage you?",
+        title: "Mountain Qualities",
+        instruction: "Consider the qualities of this mountain - its solidity, stability, grandeur, and unmoving nature. It remains steadfast regardless of what happens around it.",
         duration: 90
       },
       {
-        title: "Compassionate Breathing",
-        instruction: "Breathe compassion in for yourself and all who suffer. On the inhale, imagine drawing in compassion, kindness and strength. On the exhale, allow tension, judgment, and self-criticism to dissolve. Continue this rhythmic breathing for several cycles.",
+        title: "Changing Conditions",
+        instruction: "Imagine the mountain throughout the changing seasons - snow in winter, flowers in spring, summer heat, autumn colors. Through all these changes, the mountain remains a mountain.",
+        duration: 120
+      },
+      {
+        title: "Weather Systems",
+        instruction: "Visualize different weather systems moving over the mountain - sunshine, clouds, storms, fog, rain, snow. The mountain experiences all of these but remains unmoved at its core.",
+        duration: 120
+      },
+      {
+        title: "Becoming the Mountain",
+        instruction: "Now begin to merge your awareness with the mountain. Feel yourself becoming the mountain - solid at your base, rising upward with dignity, your head like the mountain peak.",
+        duration: 120
+      },
+      {
+        title: "Inner Weather",
+        instruction: "Notice how, like the mountain, you experience your own changing weather - thoughts, emotions, sensations, all passing through your awareness while your essential nature remains.",
         duration: 90
       },
       {
-        title: "Closing Integration",
-        instruction: "Reflect on how it feels to offer yourself compassion. Notice any resistance that arose, as well as any moments of relief or tenderness. Set an intention to remember this practice when you're struggling. When you're ready, slowly open your eyes, maintaining this attitude of kindness toward yourself.",
+        title: "Mountain Strength",
+        instruction: "Draw on the mountain's strength and stability. Know that you can weather any storm of thought or emotion while maintaining your fundamental steadiness.",
+        duration: 90
+      },
+      {
+        title: "Completion",
+        instruction: "As you prepare to end the meditation, remember that you can connect with these mountain qualities anytime. Gradually return your awareness to the room and open your eyes when ready.",
         duration: 45
       }
     ]
