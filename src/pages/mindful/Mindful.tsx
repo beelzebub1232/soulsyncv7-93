@@ -28,9 +28,16 @@ export default function Mindful() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("breathing");
   const [showHelp, setShowHelp] = useState(false);
+  const [activeExercise, setActiveExercise] = useState(false);
   
+  // We'll use this function to show the help dialog
   const handleFloatingButtonClick = () => {
     setShowHelp(true);
+  };
+  
+  // Function to be passed to exercise components to track when they're active
+  const handleExerciseStateChange = (isActive: boolean) => {
+    setActiveExercise(isActive);
   };
   
   return (
@@ -167,15 +174,15 @@ export default function Mindful() {
               className="pt-4"
             >
               <TabsContent value="breathing" className="mt-0">
-                <BreathingExercises />
+                <BreathingExercises onExerciseStateChange={handleExerciseStateChange} />
               </TabsContent>
               
               <TabsContent value="mindfulness" className="mt-0">
-                <MindfulnessExercises />
+                <MindfulnessExercises onExerciseStateChange={handleExerciseStateChange} />
               </TabsContent>
               
               <TabsContent value="quiz" className="mt-0">
-                <MentalHealthQuiz />
+                <MentalHealthQuiz onQuizStateChange={handleExerciseStateChange} />
               </TabsContent>
               
               <TabsContent value="progress" className="mt-0">
@@ -223,15 +230,18 @@ export default function Mindful() {
         </DialogContent>
       </Dialog>
       
-      <button 
-        onClick={handleFloatingButtonClick}
-        className={cn(
-          "fixed bottom-20 right-6 z-30 p-4 rounded-full bg-mindscape-light shadow-md",
-          "animate-bounce-soft transition-all"
-        )}
-      >
-        <Info className="text-mindscape-primary w-5 h-5" />
-      </button>
+      {/* Only show the floating button when no exercise is active */}
+      {!activeExercise && (
+        <button 
+          onClick={handleFloatingButtonClick}
+          className={cn(
+            "fixed bottom-20 right-6 z-30 p-4 rounded-full bg-mindscape-light shadow-md",
+            "animate-bounce-soft transition-all"
+          )}
+        >
+          <Info className="text-mindscape-primary w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }
