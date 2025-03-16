@@ -107,7 +107,7 @@ export default function BreathingExercises({ onExerciseStateChange }: BreathingE
     return (
       <div>
         <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} searchQuery={searchQuery} />
           <FilterSection 
             difficultyFilter={difficultyFilter}
             durationFilter={durationFilter}
@@ -148,7 +148,7 @@ export default function BreathingExercises({ onExerciseStateChange }: BreathingE
             key="list"
           >
             <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-              <SearchBar onSearch={handleSearch} />
+              <SearchBar onSearch={handleSearch} searchQuery={searchQuery} />
               <FilterSection 
                 difficultyFilter={difficultyFilter}
                 durationFilter={durationFilter}
@@ -163,7 +163,7 @@ export default function BreathingExercises({ onExerciseStateChange }: BreathingE
                   key={exercise.id}
                   exercise={exercise}
                   onSelect={() => handleSelectExercise(exercise)}
-                  onToggleFavorite={() => handleToggleFavorite(exercise.id)}
+                  onToggleFavorite={handleToggleFavorite}
                   isFavorite={favorites.includes(exercise.id)}
                   isCompleted={completedExercises.includes(exercise.id)}
                 />

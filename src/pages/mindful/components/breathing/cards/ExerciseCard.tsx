@@ -9,16 +9,28 @@ import { BreathingExerciseType } from "../../../types";
 interface ExerciseCardProps {
   exercise: BreathingExerciseType;
   isFavorite: boolean;
+  isCompleted?: boolean;
   onToggleFavorite: (id: string) => void;
-  onStartSession: (id: string) => void;
+  onStartSession?: (id: string) => void;
+  onSelect?: () => void;
 }
 
 export default function ExerciseCard({ 
   exercise, 
-  isFavorite, 
+  isFavorite,
+  isCompleted,
   onToggleFavorite,
-  onStartSession 
+  onStartSession,
+  onSelect
 }: ExerciseCardProps) {
+  const handleCardClick = () => {
+    if (onSelect) {
+      onSelect();
+    } else if (onStartSession) {
+      onStartSession(exercise.id);
+    }
+  };
+
   return (
     <Card 
       key={exercise.id}
@@ -28,6 +40,7 @@ export default function ExerciseCard({
         exercise.color === "purple" && "bg-gradient-to-br from-purple-50 to-transparent border-purple-200/50",
         exercise.color === "green" && "bg-gradient-to-br from-green-50 to-transparent border-green-200/50"
       )}
+      onClick={handleCardClick}
     >
       <CardHeader className="px-4 py-3 pb-0">
         <div className="flex justify-between items-start">
@@ -57,6 +70,11 @@ export default function ExerciseCard({
             <Wind className="h-3.5 w-3.5" />
             <span>{exercise.level}</span>
           </div>
+          {isCompleted && (
+            <div className="flex items-center gap-1 text-green-500">
+              <span>Completed</span>
+            </div>
+          )}
         </div>
       </CardContent>
       <CardFooter className="px-4 py-3 pt-0">
@@ -68,7 +86,6 @@ export default function ExerciseCard({
             exercise.color === "purple" && "bg-purple-500 hover:bg-purple-600",
             exercise.color === "green" && "bg-green-500 hover:bg-green-600"
           )}
-          onClick={() => onStartSession(exercise.id)}
         >
           <Play className="h-3.5 w-3.5" />
           Start Exercise

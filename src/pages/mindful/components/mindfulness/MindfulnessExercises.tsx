@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { mindfulnessExercises } from "../../data/mindfulnessExercises";
 import ExerciseCard from "./cards/ExerciseCard";
-import EmptyState from "../shared/EmptyState";
+import EmptyState from "./EmptyState";
 import FilterSection from "./filters/FilterSection";
 import SearchBar from "./filters/SearchBar";
 import MindfulnessSession from "./MindfulnessSession";
@@ -94,7 +94,7 @@ export default function MindfulnessExercises({ onExerciseStateChange }: Mindfuln
     const matchesSearch = exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          exercise.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesDifficulty = difficultyFilter.length === 0 || difficultyFilter.includes(exercise.level);
+    const matchesDifficulty = difficultyFilter.length === 0 || difficultyFilter.includes(exercise.level || '');
     const matchesDuration = durationFilter.length === 0 || durationFilter.includes(exercise.duration.toString());
     
     return matchesSearch && matchesDifficulty && matchesDuration;
@@ -105,7 +105,7 @@ export default function MindfulnessExercises({ onExerciseStateChange }: Mindfuln
     return (
       <div>
         <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} searchQuery={searchQuery} />
           <FilterSection 
             difficultyFilter={difficultyFilter}
             durationFilter={durationFilter}
@@ -146,7 +146,7 @@ export default function MindfulnessExercises({ onExerciseStateChange }: Mindfuln
             key="list"
           >
             <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-              <SearchBar onSearch={handleSearch} />
+              <SearchBar onSearch={handleSearch} searchQuery={searchQuery} />
               <FilterSection 
                 difficultyFilter={difficultyFilter}
                 durationFilter={durationFilter}
@@ -161,7 +161,7 @@ export default function MindfulnessExercises({ onExerciseStateChange }: Mindfuln
                   key={exercise.id}
                   exercise={exercise}
                   onSelect={() => handleSelectExercise(exercise)}
-                  onToggleFavorite={() => handleToggleFavorite(exercise.id)}
+                  onToggleFavorite={handleToggleFavorite}
                   isFavorite={favorites.includes(exercise.id)}
                   isCompleted={completedExercises.includes(exercise.id)}
                 />

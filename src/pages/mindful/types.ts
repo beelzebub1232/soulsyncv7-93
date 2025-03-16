@@ -32,6 +32,7 @@ export interface MindfulnessExerciseType {
   description: string;
   duration: number;
   focus: string;
+  level: string; // Adding this missing property
   color: string;
   steps: MindfulnessStep[];
 }
@@ -39,9 +40,13 @@ export interface MindfulnessExerciseType {
 // Quiz Types
 export interface QuizQuestion {
   id: string;
-  text: string;
-  description: string;
-  category: string;
+  question: string;  // Changed from text to match the component
+  options: Array<{
+    value: string;
+    label: string;
+  }>;
+  category?: string;
+  description?: string;
 }
 
 export interface QuizAnswer {
@@ -66,6 +71,12 @@ export interface QuizResult {
   categoryScores: QuizCategoryScore[];
   recommendations: QuizRecommendation[];
   date: string;
+}
+
+export interface QuizResultsProps {
+  answers: Record<string, string>;
+  onRestart: () => void;
+  onExit: () => void;
 }
 
 // Progress Types

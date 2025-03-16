@@ -1,210 +1,115 @@
 
 import { QuizQuestion } from "../types";
 
-// Stress & Anxiety Assessment
-export const stressAnxietyQuiz: QuizQuestion[] = [
+export const quizQuestions: QuizQuestion[] = [
   {
-    id: "stress-1",
-    text: "How often have you felt that you were unable to control the important things in your life?",
-    description: "Think about the past week",
+    id: "q1",
+    question: "How often do you feel overwhelmed or stressed?",
+    options: [
+      { value: "1", label: "Rarely or never" },
+      { value: "2", label: "Occasionally" },
+      { value: "3", label: "Often" },
+      { value: "4", label: "Most of the time" }
+    ],
     category: "stress"
   },
   {
-    id: "stress-2",
-    text: "How often have you felt nervous and stressed?",
-    description: "Think about the past week",
-    category: "stress"
-  },
-  {
-    id: "stress-3",
-    text: "How often have you found that you could not cope with all the things that you had to do?",
-    description: "Think about the past week",
-    category: "stress"
-  },
-  {
-    id: "anxiety-1",
-    text: "How often have you been bothered by feeling nervous, anxious, or on edge?",
-    description: "Think about the past week",
-    category: "anxiety"
-  },
-  {
-    id: "anxiety-2",
-    text: "How often have you been bothered by not being able to stop or control worrying?",
-    description: "Think about the past week",
-    category: "anxiety"
-  },
-  {
-    id: "anxiety-3",
-    text: "How often have you had trouble relaxing?",
-    description: "Think about the past week",
-    category: "anxiety"
-  },
-  {
-    id: "anxiety-4",
-    text: "How often have you felt so restless that it's hard to sit still?",
-    description: "Think about the past week",
-    category: "anxiety"
-  },
-  {
-    id: "stress-4",
-    text: "How often have you been angered because of things outside of your control?",
-    description: "Think about the past week",
-    category: "stress"
-  }
-];
-
-// Focus & Mood Assessment
-export const focusMoodQuiz: QuizQuestion[] = [
-  {
-    id: "focus-1",
-    text: "How often have you found it difficult to concentrate on what you're doing?",
-    description: "Think about the past week",
+    id: "q2",
+    question: "How would you rate your ability to focus on tasks?",
+    options: [
+      { value: "1", label: "Excellent - I rarely get distracted" },
+      { value: "2", label: "Good - I can focus most of the time" },
+      { value: "3", label: "Fair - I get distracted sometimes" },
+      { value: "4", label: "Poor - I struggle to maintain focus" }
+    ],
     category: "focus"
   },
   {
-    id: "focus-2",
-    text: "How often have you been easily distracted from tasks?",
-    description: "Think about the past week",
-    category: "focus"
-  },
-  {
-    id: "focus-3",
-    text: "How often have you had difficulty organizing your thoughts or activities?",
-    description: "Think about the past week",
-    category: "focus"
-  },
-  {
-    id: "mood-1",
-    text: "How often have you had little interest or pleasure in doing things?",
-    description: "Think about the past week",
-    category: "mood"
-  },
-  {
-    id: "mood-2",
-    text: "How often have you been bothered by feeling down, depressed, or hopeless?",
-    description: "Think about the past week",
-    category: "mood"
-  },
-  {
-    id: "mood-3",
-    text: "How often have you experienced feelings of optimism about the future?",
-    description: "Think about the past week",
-    category: "mood"
-  },
-  {
-    id: "focus-4",
-    text: "How often have you been able to focus on a task until completion?",
-    description: "Think about the past week",
-    category: "focus"
-  },
-  {
-    id: "mood-4",
-    text: "How often have you been feeling good about yourself?",
-    description: "Think about the past week",
-    category: "mood"
-  }
-];
-
-// Sleep & Energy Assessment
-export const sleepEnergyQuiz: QuizQuestion[] = [
-  {
-    id: "sleep-1",
-    text: "How often have you had trouble falling asleep or staying asleep?",
-    description: "Think about the past week",
+    id: "q3",
+    question: "How often do you experience difficulty falling or staying asleep?",
+    options: [
+      { value: "1", label: "Rarely or never" },
+      { value: "2", label: "Once or twice a week" },
+      { value: "3", label: "Several times a week" },
+      { value: "4", label: "Almost every night" }
+    ],
     category: "sleep"
   },
   {
-    id: "sleep-2",
-    text: "How often have you woken up feeling refreshed and well-rested?",
-    description: "Think about the past week",
-    category: "sleep"
-  },
-  {
-    id: "energy-1",
-    text: "How often have you felt tired or had little energy during the day?",
-    description: "Think about the past week",
+    id: "q4",
+    question: "How would you describe your energy levels throughout the day?",
+    options: [
+      { value: "1", label: "Consistently high" },
+      { value: "2", label: "Generally good with occasional dips" },
+      { value: "3", label: "Variable - high at times but often low" },
+      { value: "4", label: "Frequently low or depleted" }
+    ],
     category: "energy"
   },
   {
-    id: "energy-2",
-    text: "How often have you had enough energy to complete your daily activities?",
-    description: "Think about the past week",
-    category: "energy"
+    id: "q5",
+    question: "How often do you engage in activities purely for relaxation or enjoyment?",
+    options: [
+      { value: "1", label: "Daily" },
+      { value: "2", label: "Several times a week" },
+      { value: "3", label: "Once a week or less" },
+      { value: "4", label: "Rarely or never" }
+    ],
+    category: "balance"
   },
   {
-    id: "sleep-3",
-    text: "How often have you used screens (phone, TV, computer) right before bedtime?",
-    description: "Think about the past week",
-    category: "sleep"
+    id: "q6",
+    question: "How would you rate your ability to stay calm in challenging situations?",
+    options: [
+      { value: "1", label: "Excellent - I rarely lose my composure" },
+      { value: "2", label: "Good - I usually stay calm" },
+      { value: "3", label: "Fair - I sometimes become anxious or upset" },
+      { value: "4", label: "Poor - I often become overwhelmed" }
+    ],
+    category: "resilience"
   },
   {
-    id: "energy-3",
-    text: "How often have you felt physically exhausted by the end of the day?",
-    description: "Think about the past week",
-    category: "energy"
+    id: "q7",
+    question: "How often do you feel disconnected from your body or physical sensations?",
+    options: [
+      { value: "1", label: "Rarely or never" },
+      { value: "2", label: "Occasionally" },
+      { value: "3", label: "Often" },
+      { value: "4", label: "Most of the time" }
+    ],
+    category: "bodyawareness"
   },
   {
-    id: "sleep-4",
-    text: "How often have you kept a consistent sleep schedule (going to bed and waking up at similar times)?",
-    description: "Think about the past week",
-    category: "sleep"
+    id: "q8",
+    question: "How would you describe your thought patterns?",
+    options: [
+      { value: "1", label: "Mostly positive and constructive" },
+      { value: "2", label: "Generally balanced" },
+      { value: "3", label: "Often ruminative or worrying" },
+      { value: "4", label: "Frequently negative or self-critical" }
+    ],
+    category: "thought"
   },
   {
-    id: "energy-4",
-    text: "How often have you felt mentally exhausted or burned out?",
-    description: "Think about the past week",
-    category: "energy"
-  }
-];
-
-// Life Balance Assessment
-export const balanceQuiz: QuizQuestion[] = [
-  {
-    id: "work-life-1",
-    text: "How often have you been able to maintain a healthy balance between work/study and personal life?",
-    description: "Think about the past month",
-    category: "work-life"
+    id: "q9",
+    question: "How often do you feel a sense of peace or contentment?",
+    options: [
+      { value: "1", label: "Frequently throughout each day" },
+      { value: "2", label: "Several times a week" },
+      { value: "3", label: "Occasionally" },
+      { value: "4", label: "Rarely or never" }
+    ],
+    category: "peace"
   },
   {
-    id: "work-life-2",
-    text: "How often have you worked or studied outside of your normal hours?",
-    description: "Think about the past month",
-    category: "work-life"
-  },
-  {
-    id: "social-1",
-    text: "How often have you spent quality time with friends or family?",
-    description: "Think about the past month",
-    category: "social"
-  },
-  {
-    id: "social-2",
-    text: "How often have you felt a sense of connection and belonging with others?",
-    description: "Think about the past month",
-    category: "social"
-  },
-  {
-    id: "work-life-3",
-    text: "How often have you engaged in activities purely for enjoyment or relaxation?",
-    description: "Think about the past month",
-    category: "work-life"
-  },
-  {
-    id: "social-3",
-    text: "How often have you felt lonely or isolated from others?",
-    description: "Think about the past month",
-    category: "social"
-  },
-  {
-    id: "work-life-4",
-    text: "How often have you felt overwhelmed by your responsibilities?",
-    description: "Think about the past month",
-    category: "work-life"
-  },
-  {
-    id: "social-4",
-    text: "How often have you been able to openly share your thoughts and feelings with someone you trust?",
-    description: "Think about the past month",
-    category: "social"
+    id: "q10",
+    question: "How would you rate your self-awareness of emotions?",
+    options: [
+      { value: "1", label: "Excellent - I'm very aware of what I'm feeling" },
+      { value: "2", label: "Good - I usually understand my emotions" },
+      { value: "3", label: "Fair - I sometimes struggle to identify feelings" },
+      { value: "4", label: "Poor - I often don't know what I'm feeling" }
+    ],
+    category: "emotional"
   }
 ];
