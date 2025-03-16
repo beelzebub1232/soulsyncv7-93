@@ -1,3 +1,4 @@
+
 import { LucideIcon } from "lucide-react";
 
 // Breathing Exercise Types
@@ -43,9 +44,12 @@ export interface MindfulnessExerciseType {
 // Quiz Types
 export interface QuizQuestion {
   id: string;
-  text: string;
-  description: string;
-  category: string;
+  question: string;
+  description?: string;
+  options: {
+    value: string;
+    label: string;
+  }[];
 }
 
 export interface QuizAnswer {
@@ -89,4 +93,36 @@ export interface MindfulStat {
   color: string;
   benefits: string[];
   research: string;
+}
+
+// Component Props Types
+export interface SearchBarProps {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+}
+
+export interface FilterSectionProps {
+  title: string;
+  icon: React.ReactNode;
+  options: Array<{ label: string; value: string | null }>;
+  activeFilter: string | null;
+  onFilterChange: (value: string | null) => void;
+}
+
+export interface ExerciseCardProps {
+  exercise: BreathingExerciseType | MindfulnessExerciseType;
+  isFavorite: boolean;
+  isCompleted?: boolean;
+  onToggleFavorite: (id: string) => void;
+  onStartSession: (id: string) => void;
+}
+
+export interface EmptyStateProps {
+  onClearFilters: () => void;
+}
+
+export interface QuizResultsProps {
+  answers: Record<string, string>;
+  onRestart: () => void;
+  onExit: () => void;
 }

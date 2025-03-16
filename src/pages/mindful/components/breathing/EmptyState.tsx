@@ -1,18 +1,24 @@
 
 import { Wind } from "lucide-react";
 import SharedEmptyState from "../shared/EmptyState";
+import { EmptyStateProps } from "../../types";
 
-interface EmptyStateProps {
-  onClearFilters: () => void;
+interface ExtendedEmptyStateProps extends EmptyStateProps {
+  title?: string;
+  description?: string;
 }
 
-export default function EmptyState({ onClearFilters }: EmptyStateProps) {
+export default function EmptyState({ 
+  onClearFilters, 
+  title,
+  description 
+}: ExtendedEmptyStateProps) {
   return (
     <SharedEmptyState 
       onClearFilters={onClearFilters} 
       icon={<Wind className="h-5 w-5" />}
       color="blue"
-      message="No breathing exercises match your filters"
+      message={title || "No breathing exercises match your filters"}
     />
   );
 }

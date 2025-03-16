@@ -1,11 +1,7 @@
 
 import { Search, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
-interface SearchBarProps {
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-}
+import { SearchBarProps } from "../../../types";
 
 export default function SearchBar({ searchQuery, onSearchChange }: SearchBarProps) {
   return (

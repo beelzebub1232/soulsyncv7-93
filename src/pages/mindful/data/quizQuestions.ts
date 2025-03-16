@@ -1,8 +1,11 @@
 
-export const questions = [
+import { QuizQuestion } from "../types";
+
+export const questions: QuizQuestion[] = [
   {
     id: "q1",
     question: "How often do you feel anxious or stressed?",
+    description: "",
     options: [
       { value: "rarely", label: "Rarely (once a month or less)" },
       { value: "sometimes", label: "Sometimes (a few times per month)" },
@@ -13,6 +16,7 @@ export const questions = [
   {
     id: "q2",
     question: "How would you rate your overall sleep quality?",
+    description: "",
     options: [
       { value: "excellent", label: "Excellent - I fall asleep easily and feel refreshed" },
       { value: "good", label: "Good - I generally sleep well with occasional issues" },
@@ -23,6 +27,7 @@ export const questions = [
   {
     id: "q3",
     question: "How would you describe your ability to focus or concentrate?",
+    description: "",
     options: [
       { value: "excellent", label: "Excellent - I can focus for long periods without distraction" },
       { value: "good", label: "Good - I occasionally get distracted but can usually focus well" },
@@ -33,6 +38,7 @@ export const questions = [
   {
     id: "q4",
     question: "How often do you feel overwhelmed by negative thoughts?",
+    description: "",
     options: [
       { value: "rarely", label: "Rarely - I mostly think positively" },
       { value: "sometimes", label: "Sometimes - I have occasional negative thought patterns" },
@@ -43,6 +49,7 @@ export const questions = [
   {
     id: "q5",
     question: "How much time do you currently spend on mindfulness or relaxation practices?",
+    description: "",
     options: [
       { value: "none", label: "None at all" },
       { value: "little", label: "A little (less than 10 minutes a few times a week)" },
@@ -53,6 +60,7 @@ export const questions = [
   {
     id: "q6",
     question: "What area of wellbeing would you most like to improve?",
+    description: "",
     options: [
       { value: "stress", label: "Stress reduction" },
       { value: "sleep", label: "Better sleep" },
@@ -63,6 +71,7 @@ export const questions = [
   {
     id: "q7",
     question: "How do you typically respond to stressful situations?",
+    description: "",
     options: [
       { value: "calm", label: "I stay calm and handle them well" },
       { value: "moderate", label: "I feel some anxiety but manage adequately" },

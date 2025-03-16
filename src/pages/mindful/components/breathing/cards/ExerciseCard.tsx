@@ -4,21 +4,30 @@ import { Clock, Heart, Play, Wind } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { BreathingExerciseType } from "../../../types";
+import { BreathingExerciseType, ExerciseCardProps } from "../../../types";
 
-interface ExerciseCardProps {
+interface ExtendedExerciseCardProps extends Omit<ExerciseCardProps, 'exercise' | 'onStartSession'> {
   exercise: BreathingExerciseType;
-  isFavorite: boolean;
-  onToggleFavorite: (id: string) => void;
-  onStartSession: (id: string) => void;
+  onSelect?: () => void;
+  isCompleted?: boolean;
 }
 
 export default function ExerciseCard({ 
   exercise, 
   isFavorite, 
+  isCompleted,
   onToggleFavorite,
-  onStartSession 
-}: ExerciseCardProps) {
+  onStartSession,
+  onSelect
+}: ExtendedExerciseCardProps) {
+  const handleSelect = () => {
+    if (onSelect) {
+      onSelect();
+    } else if (onStartSession) {
+      onStartSession(exercise.id);
+    }
+  };
+
   return (
     <Card 
       key={exercise.id}
@@ -68,7 +77,7 @@ export default function ExerciseCard({
             exercise.color === "purple" && "bg-purple-500 hover:bg-purple-600",
             exercise.color === "green" && "bg-green-500 hover:bg-green-600"
           )}
-          onClick={() => onStartSession(exercise.id)}
+          onClick={handleSelect}
         >
           <Play className="h-3.5 w-3.5" />
           Start Exercise
