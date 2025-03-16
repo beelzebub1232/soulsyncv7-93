@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/c
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Import our components
 import BreathingCircle from "./components/BreathingCircle";
@@ -24,6 +25,7 @@ interface BreathingSessionProps {
 }
 
 export default function BreathingSession({ exercise, onClose }: BreathingSessionProps) {
+  const isMobile = useIsMobile();
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentStep, setCurrentStep] = useState("inhale");
   const [timeRemaining, setTimeRemaining] = useState(exercise.duration * 60);
@@ -256,13 +258,14 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   };
   
   return (
-    <div className="flex flex-col items-center justify-center h-[60vh] relative">
-      <div className="w-full flex items-center justify-between mb-4">
+    <div className="flex flex-col items-center h-full max-h-[calc(100vh-160px)] overflow-auto">
+      {/* Header with fixed position */}
+      <div className="w-full sticky top-0 bg-background z-10 flex items-center justify-between mb-4 p-2">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="flex items-center gap-1">
             {exercise.level}
           </Badge>
-          <h2 className="text-xl font-semibold">{exercise.name}</h2>
+          <h2 className="text-lg md:text-xl font-semibold">{exercise.name}</h2>
         </div>
         <Button 
           variant="ghost" 
@@ -273,279 +276,288 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
         </Button>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 w-full">
-          <TabsTrigger value="practice">Practice</TabsTrigger>
-          <TabsTrigger value="statistics">Stats</TabsTrigger>
-          <TabsTrigger value="info">Info</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="practice" className="min-h-[300px]">
-          <div className="flex flex-col items-center">
-            <div className="relative">
-              <BreathingCircle 
-                currentStep={currentStep}
-                circleSize={circleSize}
-                exercise={exercise}
-              />
-              
-              {showGuide && (
-                <BreathingFeedback 
-                  currentStep={currentStep} 
-                  remainingTime={timeRemaining}
-                  color={exercise.color}
-                />
-              )}
-              
-              {/* Completion animation */}
-              <AnimatePresence>
-                {showCompletionAnimation && (
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: [0.8, 1.2, 1], opacity: 1 }}
-                      exit={{ scale: 1.5, opacity: 0 }}
-                      transition={{ duration: 2 }}
-                    >
-                      <Heart 
-                        className={`h-16 w-16 ${
-                          exercise.color === "blue" ? "text-blue-500" : 
-                          exercise.color === "purple" ? "text-purple-500" : "text-green-500"
-                        }`} 
-                      />
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            
-            <div className="text-center space-y-4 w-full max-w-md mt-4">
-              <BreathingProgress
-                timeRemaining={timeRemaining}
-                totalDuration={exercise.duration * 60}
-                breathCount={breathCount}
-                color={exercise.color}
-              />
-              
-              <div className="flex justify-center gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={togglePlayPause}
-                  className={cn(
-                    "rounded-full",
-                    !isPlaying && exercise.color === "blue" && "border-blue-500 text-blue-500",
-                    !isPlaying && exercise.color === "purple" && "border-purple-500 text-purple-500",
-                    !isPlaying && exercise.color === "green" && "border-green-500 text-green-500"
-                  )}
-                >
-                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={resetSession}
-                  className="rounded-full"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={playBellSound}
-                  className="rounded-full"
-                >
-                  <Bell className="h-4 w-4" />
-                </Button>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={toggleSound}
-                        className="rounded-full"
-                      >
-                        {soundEnabled ? 
-                          (volume > 50 ? <Volume2 className="h-4 w-4" /> : <Volume1 className="h-4 w-4" />) : 
-                          <VolumeX className="h-4 w-4" />}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{soundEnabled ? "Mute sounds" : "Enable sounds"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setShowGuide(!showGuide)}
-                        className={cn(
-                          "rounded-full",
-                          showGuide && "bg-background-foreground/5"
-                        )}
-                      >
-                        <Info className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{showGuide ? "Hide guidance" : "Show guidance"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              
-              {/* Sound volume control */}
-              {soundEnabled && (
-                <div className="flex items-center gap-4 mt-4 px-4">
-                  <Volume1 className="h-4 w-4 text-muted-foreground" />
-                  <Slider
-                    value={[volume]}
-                    max={100}
-                    step={1}
-                    onValueChange={(vals) => setVolume(vals[0])}
-                    className={cn(
-                      exercise.color === "blue" && "text-blue-500",
-                      exercise.color === "purple" && "text-purple-500",
-                      exercise.color === "green" && "text-green-500"
-                    )}
-                  />
-                  <Volume2 className="h-4 w-4 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="statistics" className="min-h-[300px] space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <CardTitle className="text-lg mb-1">Breath Count</CardTitle>
-                <CardDescription>Total breaths in this session</CardDescription>
-                <div className={cn(
-                  "text-3xl font-bold mt-2",
-                  exercise.color === "blue" && "text-blue-600",
-                  exercise.color === "purple" && "text-purple-600",
-                  exercise.color === "green" && "text-green-600"
-                )}>
-                  {breathCount}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <CardTitle className="text-lg mb-1">Time Elapsed</CardTitle>
-                <CardDescription>Session duration</CardDescription>
-                <div className={cn(
-                  "text-3xl font-bold mt-2",
-                  exercise.color === "blue" && "text-blue-600",
-                  exercise.color === "purple" && "text-purple-600",
-                  exercise.color === "green" && "text-green-600"
-                )}>
-                  {Math.floor((exercise.duration * 60 - timeRemaining) / 60)}:{((exercise.duration * 60 - timeRemaining) % 60).toString().padStart(2, '0')}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <CardTitle className="text-lg mb-1">Avg Breath Cycle</CardTitle>
-                <CardDescription>Average seconds per breath</CardDescription>
-                <div className={cn(
-                  "text-3xl font-bold mt-2",
-                  exercise.color === "blue" && "text-blue-600",
-                  exercise.color === "purple" && "text-purple-600",
-                  exercise.color === "green" && "text-green-600"
-                )}>
-                  {avgBreathDuration.toFixed(1)}s
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <CardTitle className="text-lg mb-1">Calories</CardTitle>
-                <CardDescription>Estimated calories burned</CardDescription>
-                <div className={cn(
-                  "text-3xl font-bold mt-2",
-                  exercise.color === "blue" && "text-blue-600",
-                  exercise.color === "purple" && "text-purple-600",
-                  exercise.color === "green" && "text-green-600"
-                )}>
-                  {Math.round(caloriesBurned)}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      {/* Main content with tabs */}
+      <div className="w-full flex-1 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 w-full mb-2">
+            <TabsTrigger value="practice">Practice</TabsTrigger>
+            <TabsTrigger value="statistics">Stats</TabsTrigger>
+            <TabsTrigger value="info">Info</TabsTrigger>
+          </TabsList>
           
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg mb-1">Efficiency</CardTitle>
-                  <CardDescription>How well you're following the pattern</CardDescription>
+          <div className="overflow-auto h-full">
+            <TabsContent value="practice" className="mt-0 h-full relative">
+              <div className="flex flex-col items-center">
+                {/* Breathing circle with contained dimensions */}
+                <div className="w-full relative mb-4">
+                  <BreathingCircle 
+                    currentStep={currentStep}
+                    circleSize={circleSize}
+                    exercise={exercise}
+                  />
+                  
+                  {/* Feedback overlay */}
+                  {showGuide && (
+                    <BreathingFeedback 
+                      currentStep={currentStep} 
+                      remainingTime={timeRemaining}
+                      color={exercise.color}
+                    />
+                  )}
+                  
+                  {/* Completion animation */}
+                  <AnimatePresence>
+                    {showCompletionAnimation && (
+                      <motion.div
+                        className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full z-20"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: [0.8, 1.2, 1], opacity: 1 }}
+                          exit={{ scale: 1.5, opacity: 0 }}
+                          transition={{ duration: 2 }}
+                        >
+                          <Heart 
+                            className={cn(
+                              "h-16 w-16",
+                              exercise.color === "blue" ? "text-blue-500" : 
+                              exercise.color === "purple" ? "text-purple-500" : "text-green-500"
+                            )} 
+                          />
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <div className={cn(
-                  "text-sm font-medium px-2 py-1 rounded",
-                  breathCount >= 10 ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700" 
-                )}>
-                  {breathCount >= 10 ? "Excellent" : breathCount >= 5 ? "Good" : "Learning"}
+                
+                {/* Progress and controls in a fixed container */}
+                <div className="text-center w-full max-w-md px-4">
+                  <BreathingProgress
+                    timeRemaining={timeRemaining}
+                    totalDuration={exercise.duration * 60}
+                    breathCount={breathCount}
+                    color={exercise.color}
+                  />
+                  
+                  <div className="flex justify-center gap-3 mt-6">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={togglePlayPause}
+                      className={cn(
+                        "rounded-full",
+                        !isPlaying && exercise.color === "blue" && "border-blue-500 text-blue-500",
+                        !isPlaying && exercise.color === "purple" && "border-purple-500 text-purple-500",
+                        !isPlaying && exercise.color === "green" && "border-green-500 text-green-500"
+                      )}
+                    >
+                      {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={resetSession}
+                      className="rounded-full"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={playBellSound}
+                      className="rounded-full"
+                    >
+                      <Bell className="h-4 w-4" />
+                    </Button>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={toggleSound}
+                            className="rounded-full"
+                          >
+                            {soundEnabled ? 
+                              (volume > 50 ? <Volume2 className="h-4 w-4" /> : <Volume1 className="h-4 w-4" />) : 
+                              <VolumeX className="h-4 w-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{soundEnabled ? "Mute sounds" : "Enable sounds"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setShowGuide(!showGuide)}
+                            className={cn(
+                              "rounded-full",
+                              showGuide && "bg-background-foreground/5"
+                            )}
+                          >
+                            <Info className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{showGuide ? "Hide guidance" : "Show guidance"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  {/* Sound volume control */}
+                  {soundEnabled && (
+                    <div className="flex items-center gap-4 mt-4 px-4">
+                      <Volume1 className="h-4 w-4 text-muted-foreground" />
+                      <Slider
+                        value={[volume]}
+                        max={100}
+                        step={1}
+                        onValueChange={(vals) => setVolume(vals[0])}
+                        className={cn(
+                          exercise.color === "blue" && "text-blue-500",
+                          exercise.color === "purple" && "text-purple-500",
+                          exercise.color === "green" && "text-green-500"
+                        )}
+                      />
+                      <Volume2 className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="statistics" className="mt-0 px-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <CardTitle className="text-lg mb-1">Breath Count</CardTitle>
+                    <CardDescription>Total breaths in this session</CardDescription>
+                    <div className={cn(
+                      "text-3xl font-bold mt-2",
+                      exercise.color === "blue" && "text-blue-600",
+                      exercise.color === "purple" && "text-purple-600",
+                      exercise.color === "green" && "text-green-600"
+                    )}>
+                      {breathCount}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    <CardTitle className="text-lg mb-1">Time Elapsed</CardTitle>
+                    <CardDescription>Session duration</CardDescription>
+                    <div className={cn(
+                      "text-3xl font-bold mt-2",
+                      exercise.color === "blue" && "text-blue-600",
+                      exercise.color === "purple" && "text-purple-600",
+                      exercise.color === "green" && "text-green-600"
+                    )}>
+                      {Math.floor((exercise.duration * 60 - timeRemaining) / 60)}:{((exercise.duration * 60 - timeRemaining) % 60).toString().padStart(2, '0')}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    <CardTitle className="text-lg mb-1">Avg Breath Cycle</CardTitle>
+                    <CardDescription>Average seconds per breath</CardDescription>
+                    <div className={cn(
+                      "text-3xl font-bold mt-2",
+                      exercise.color === "blue" && "text-blue-600",
+                      exercise.color === "purple" && "text-purple-600",
+                      exercise.color === "green" && "text-green-600"
+                    )}>
+                      {avgBreathDuration.toFixed(1)}s
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="pt-6">
+                    <CardTitle className="text-lg mb-1">Calories</CardTitle>
+                    <CardDescription>Estimated calories burned</CardDescription>
+                    <div className={cn(
+                      "text-3xl font-bold mt-2",
+                      exercise.color === "blue" && "text-blue-600",
+                      exercise.color === "purple" && "text-purple-600",
+                      exercise.color === "green" && "text-green-600"
+                    )}>
+                      {Math.round(caloriesBurned)}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
               
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span>Breathing rhythm</span>
-                  <span className="font-medium">{getPatternDescription()}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span>Consistency</span>
-                  <span className="font-medium">{breathCount > 3 ? Math.min(100, Math.round(100 - (Math.abs(avgBreathDuration - (exercise.pattern.inhale + exercise.pattern.holdIn + exercise.pattern.exhale + exercise.pattern.holdOut)) * 5))) : 0}%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="info" className="min-h-[300px]">
-          <Card>
-            <CardContent className="pt-6">
-              <CardTitle className="text-xl mb-2">{exercise.name}</CardTitle>
-              <CardDescription className="text-base">{exercise.description}</CardDescription>
-              
-              <div className="mt-4">
-                <h3 className="font-medium mb-2">How to practice</h3>
-                <p className="text-sm text-muted-foreground">{getPatternDescription()}</p>
-                
-                <h3 className="font-medium mt-4 mb-2">Benefits</h3>
-                {renderBenefits()}
-                
-                <h3 className="font-medium mt-4 mb-2">Tips</h3>
-                <ul className="space-y-2">
-                  <li className="text-sm text-muted-foreground">Find a comfortable seated position</li>
-                  <li className="text-sm text-muted-foreground">Keep your back straight but not rigid</li>
-                  <li className="text-sm text-muted-foreground">Try to breathe from your diaphragm, not your chest</li>
-                  <li className="text-sm text-muted-foreground">If your mind wanders, gently bring it back to your breath</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <Card className="mt-4">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg mb-1">Efficiency</CardTitle>
+                      <CardDescription>How well you're following the pattern</CardDescription>
+                    </div>
+                    <div className={cn(
+                      "text-sm font-medium px-2 py-1 rounded",
+                      breathCount >= 10 ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700" 
+                    )}>
+                      {breathCount >= 10 ? "Excellent" : breathCount >= 5 ? "Good" : "Learning"}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Breathing rhythm</span>
+                      <span className="font-medium">{getPatternDescription()}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>Consistency</span>
+                      <span className="font-medium">{breathCount > 3 ? Math.min(100, Math.round(100 - (Math.abs(avgBreathDuration - (exercise.pattern.inhale + exercise.pattern.holdIn + exercise.pattern.exhale + exercise.pattern.holdOut)) * 5))) : 0}%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="info" className="mt-0 px-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <CardTitle className="text-xl mb-2">{exercise.name}</CardTitle>
+                  <CardDescription className="text-base">{exercise.description}</CardDescription>
+                  
+                  <div className="mt-4">
+                    <h3 className="font-medium mb-2">How to practice</h3>
+                    <p className="text-sm text-muted-foreground">{getPatternDescription()}</p>
+                    
+                    <h3 className="font-medium mt-4 mb-2">Benefits</h3>
+                    {renderBenefits()}
+                    
+                    <h3 className="font-medium mt-4 mb-2">Tips</h3>
+                    <ul className="space-y-2">
+                      <li className="text-sm text-muted-foreground">Find a comfortable seated position</li>
+                      <li className="text-sm text-muted-foreground">Keep your back straight but not rigid</li>
+                      <li className="text-sm text-muted-foreground">Try to breathe from your diaphragm, not your chest</li>
+                      <li className="text-sm text-muted-foreground">If your mind wanders, gently bring it back to your breath</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }

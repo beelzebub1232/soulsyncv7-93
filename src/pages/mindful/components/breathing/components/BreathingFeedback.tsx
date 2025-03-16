@@ -92,10 +92,7 @@ export default function BreathingFeedback({
   };
 
   return (
-    <div className={cn(
-      "fixed flex flex-col items-center gap-2 z-10",
-      isMobile ? "top-2 right-2" : "top-8 right-8"
-    )}>
+    <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10 max-w-[160px]">
       {renderIcon()}
       
       <motion.div
@@ -103,7 +100,7 @@ export default function BreathingFeedback({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
         className={cn(
-          "bg-white/90 shadow-sm p-2 rounded text-sm max-w-[200px] text-center",
+          "bg-white/90 shadow-sm p-2 rounded text-sm text-center",
           color === "blue" && "text-blue-700",
           color === "purple" && "text-purple-700",
           color === "green" && "text-green-700"
