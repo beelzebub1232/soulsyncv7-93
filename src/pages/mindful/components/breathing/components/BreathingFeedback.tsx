@@ -92,7 +92,7 @@ export default function BreathingFeedback({
   };
 
   return (
-    <div className="absolute top-4 right-4 flex flex-col items-center gap-2 z-10 max-w-[160px]">
+    <div className="w-full flex flex-col items-center gap-2 mt-4 mb-4">
       {renderIcon()}
       
       <motion.div
@@ -100,7 +100,7 @@ export default function BreathingFeedback({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
         className={cn(
-          "bg-white/90 shadow-sm p-2 rounded text-sm text-center",
+          "bg-white/90 shadow-sm p-2 rounded text-sm text-center max-w-[160px]",
           color === "blue" && "text-blue-700",
           color === "purple" && "text-purple-700",
           color === "green" && "text-green-700"
