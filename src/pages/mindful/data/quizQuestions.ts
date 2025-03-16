@@ -1,8 +1,8 @@
+
 import { QuizQuestion } from "../types";
 
-// Combine all quizzes into a single exportable array
-export const quizQuestions: QuizQuestion[] = [
-  // Stress & Anxiety Assessment
+// Stress & Anxiety Assessment
+export const stressAnxietyQuiz: QuizQuestion[] = [
   {
     id: "stress-1",
     text: "How often have you felt that you were unable to control the important things in your life?",
@@ -50,8 +50,11 @@ export const quizQuestions: QuizQuestion[] = [
     text: "How often have you been angered because of things outside of your control?",
     description: "Think about the past week",
     category: "stress"
-  },
-  // Focus & Mood Assessment
+  }
+];
+
+// Focus & Mood Assessment
+export const focusMoodQuiz: QuizQuestion[] = [
   {
     id: "focus-1",
     text: "How often have you found it difficult to concentrate on what you're doing?",
@@ -99,8 +102,11 @@ export const quizQuestions: QuizQuestion[] = [
     text: "How often have you been feeling good about yourself?",
     description: "Think about the past week",
     category: "mood"
-  },
-  // Sleep & Energy Assessment
+  }
+];
+
+// Sleep & Energy Assessment
+export const sleepEnergyQuiz: QuizQuestion[] = [
   {
     id: "sleep-1",
     text: "How often have you had trouble falling asleep or staying asleep?",
@@ -148,8 +154,11 @@ export const quizQuestions: QuizQuestion[] = [
     text: "How often have you felt mentally exhausted or burned out?",
     description: "Think about the past week",
     category: "energy"
-  },
-  // Life Balance Assessment
+  }
+];
+
+// Life Balance Assessment
+export const balanceQuiz: QuizQuestion[] = [
   {
     id: "work-life-1",
     text: "How often have you been able to maintain a healthy balance between work/study and personal life?",
@@ -199,20 +208,3 @@ export const quizQuestions: QuizQuestion[] = [
     category: "social"
   }
 ];
-
-// Keep individual quiz categories for specific assessments
-export const stressAnxietyQuiz: QuizQuestion[] = quizQuestions.filter(q => 
-  q.category === "stress" || q.category === "anxiety"
-);
-
-export const focusMoodQuiz: QuizQuestion[] = quizQuestions.filter(q => 
-  q.category === "focus" || q.category === "mood"
-);
-
-export const sleepEnergyQuiz: QuizQuestion[] = quizQuestions.filter(q => 
-  q.category === "sleep" || q.category === "energy"
-);
-
-export const balanceQuiz: QuizQuestion[] = quizQuestions.filter(q => 
-  q.category === "work-life" || q.category === "social"
-);
