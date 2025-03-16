@@ -289,14 +289,14 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
             <TabsContent value="practice" className="mt-0 h-full relative">
               <div className="flex flex-col items-center">
                 {/* Breathing circle with contained dimensions */}
-                <div className="w-full relative mb-4">
+                <div className="w-full">
                   <BreathingCircle 
                     currentStep={currentStep}
                     circleSize={circleSize}
                     exercise={exercise}
                   />
                   
-                  {/* Feedback overlay */}
+                  {/* Feedback overlay - now properly positioned */}
                   {showGuide && (
                     <BreathingFeedback 
                       currentStep={currentStep} 
@@ -334,7 +334,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                 </div>
                 
                 {/* Progress and controls in a fixed container */}
-                <div className="text-center w-full max-w-md px-4">
+                <div className="text-center w-full max-w-md px-4 mt-2">
                   <BreathingProgress
                     timeRemaining={timeRemaining}
                     totalDuration={exercise.duration * 60}
