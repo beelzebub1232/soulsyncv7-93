@@ -11,6 +11,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { v4 as uuidv4 } from 'uuid';
 
 interface MindfulnessSessionProps {
   exercise: MindfulnessExerciseType;
@@ -24,8 +26,11 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
   const [activeTab, setActiveTab] = useState("practice");
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showStepCompleteAnimation, setShowStepCompleteAnimation] = useState(false);
+  const [totalSeconds, setTotalSeconds] = useState(0);
   const stepTimerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  const [progressLog, setProgressLog] = useLocalStorage<any[]>("mindful-progress-log", []);
   
   useEffect(() => {
     // Setup audio element for bell sound
@@ -61,6 +66,8 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
         setTimeRemaining(prev => {
           if (prev <= 1) {
             clearInterval(interval!);
+            // Log completed exercise
+            logCompletedExercise();
             toast({
               title: "Exercise Complete",
               description: `Great job! You've completed ${exercise.name}.`,
@@ -69,6 +76,7 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
           }
           return prev - 1;
         });
+        setTotalSeconds(prev => prev + 1);
       }, 1000);
     }
     
@@ -106,6 +114,7 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
           setCompletedSteps(prev => [...prev, currentStepIndex]);
           playBellSound();
           setIsPlaying(false);
+          logCompletedExercise();
           toast({
             title: "Exercise Complete",
             description: "You've completed all steps. Take a moment to reflect on how you feel now.",
@@ -121,12 +130,32 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
     };
   }, [currentStepIndex, isPlaying, exercise.steps, timeRemaining, completedSteps]);
   
+  // Log completed exercise to progress tracker
+  const logCompletedExercise = () => {
+    if (timeRemaining === 0 || totalSeconds > 30) { // Only log if significant progress was made
+      const newLogEntry = {
+        id: uuidv4(),
+        date: new Date().toISOString(),
+        exerciseId: exercise.id,
+        exerciseType: "mindfulness",
+        duration: exercise.duration
+      };
+      
+      setProgressLog([...progressLog, newLogEntry]);
+      toast({
+        title: "Progress Saved",
+        description: "Your exercise completion has been recorded.",
+      });
+    }
+  };
+  
   const resetSession = () => {
     setTimeRemaining(exercise.duration * 60);
     setCurrentStepIndex(0);
     setCompletedSteps([]);
     setIsPlaying(true);
     setActiveTab("practice");
+    setTotalSeconds(0);
   };
   
   const navigateToStep = (index: number) => {
@@ -138,6 +167,15 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
       );
       setCompletedSteps(newCompletedSteps);
     }
+  };
+  
+  // Handle early completion or leaving the exercise
+  const handleClose = () => {
+    if (totalSeconds > 30 && timeRemaining > 0) {
+      // If significant time was spent but not completed, log it anyway
+      logCompletedExercise();
+    }
+    onClose();
   };
   
   const currentStep = exercise.steps[currentStepIndex];
