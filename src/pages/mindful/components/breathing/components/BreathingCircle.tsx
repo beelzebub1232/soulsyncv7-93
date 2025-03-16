@@ -61,7 +61,7 @@ export default function BreathingCircle({
     <div 
       className="relative flex items-center justify-center"
       style={{
-        height: isMobile ? '220px' : '260px', // Reduced height to allow more room for controls
+        height: isMobile ? '260px' : '300px',
         width: '100%',
         overflow: 'hidden' // Prevent content from spilling out
       }}
@@ -128,6 +128,63 @@ export default function BreathingCircle({
             </AnimatePresence>
           </motion.div>
         </motion.div>
+        
+        {/* Add pulsing rings for visual effect but make sure they don't affect layout */}
+        {currentStep === "inhale" && (
+          <motion.div 
+            className={cn(
+              "absolute rounded-full border-2 z-0 pointer-events-none", 
+              exercise.color === "blue" && "border-blue-300/40", 
+              exercise.color === "purple" && "border-purple-300/40", 
+              exercise.color === "green" && "border-green-300/40"
+            )} 
+            initial={{
+              width: adjustedSize * 0.9,
+              height: adjustedSize * 0.9,
+              opacity: 0
+            }} 
+            animate={{
+              width: [adjustedSize * 0.9, adjustedSize * 1.1, adjustedSize * 1.3],
+              height: [adjustedSize * 0.9, adjustedSize * 1.1, adjustedSize * 1.3],
+              opacity: [0, 0.5, 0]
+            }} 
+            transition={{
+              duration: 3,
+              repeat: Infinity
+            }} 
+            style={{
+              position: 'absolute'
+            }} 
+          />
+        )}
+        
+        {currentStep === "exhale" && (
+          <motion.div 
+            className={cn(
+              "absolute rounded-full border-2 z-0 pointer-events-none", 
+              exercise.color === "blue" && "border-blue-300/40", 
+              exercise.color === "purple" && "border-purple-300/40", 
+              exercise.color === "green" && "border-green-300/40"
+            )} 
+            initial={{
+              width: adjustedSize * 1.3,
+              height: adjustedSize * 1.3,
+              opacity: 0
+            }} 
+            animate={{
+              width: [adjustedSize * 1.3, adjustedSize * 1.1, adjustedSize * 0.9],
+              height: [adjustedSize * 1.3, adjustedSize * 1.1, adjustedSize * 0.9],
+              opacity: [0, 0.5, 0]
+            }} 
+            transition={{
+              duration: 3,
+              repeat: Infinity
+            }} 
+            style={{
+              position: 'absolute'
+            }} 
+          />
+        )}
       </div>
     </div>
   );

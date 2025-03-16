@@ -36,11 +36,9 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   const [volume, setVolume] = useState(50);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showGuide, setShowGuide] = useState(true);
-  const [sessionCompleted, setSessionCompleted] = useState(false);
   
   const breathingTimerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const toastShownRef = useRef(false);
   
   // Statistics
   const [avgBreathDuration, setAvgBreathDuration] = useState(0);
@@ -78,40 +76,33 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   useEffect(() => {
     let interval: number | null = null;
     
-    if (isPlaying && !sessionCompleted) {
+    if (isPlaying) {
       interval = window.setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
             clearInterval(interval!);
             setShowCompletionAnimation(true);
-            setSessionCompleted(true);
-            setIsPlaying(false); // Stop playing when session is completed
             playBellSound();
             
-            // Save session stats to local storage - but only once
-            if (!toastShownRef.current) {
-              const sessionData = {
-                exerciseId: exercise.id,
-                date: new Date().toISOString(),
-                duration: exercise.duration * 60,
-                breathCount,
-                caloriesBurned: Math.round(caloriesBurned)
-              };
-              
-              const existingSessions = JSON.parse(localStorage.getItem('breathing-sessions') || '[]');
-              localStorage.setItem('breathing-sessions', JSON.stringify([...existingSessions, sessionData]));
-              
-              // Set the ref to true to prevent multiple toasts
-              toastShownRef.current = true;
-              
-              setTimeout(() => {
-                setShowCompletionAnimation(false);
-                toast({
-                  title: "Exercise Complete",
-                  description: `Great job! You've completed ${exercise.name} with ${breathCount} breaths.`,
-                });
-              }, 3000);
-            }
+            // Save session stats to local storage
+            const sessionData = {
+              exerciseId: exercise.id,
+              date: new Date().toISOString(),
+              duration: exercise.duration * 60,
+              breathCount,
+              caloriesBurned: Math.round(caloriesBurned)
+            };
+            
+            const existingSessions = JSON.parse(localStorage.getItem('breathing-sessions') || '[]');
+            localStorage.setItem('breathing-sessions', JSON.stringify([...existingSessions, sessionData]));
+            
+            setTimeout(() => {
+              setShowCompletionAnimation(false);
+              toast({
+                title: "Exercise Complete",
+                description: `Great job! You've completed ${exercise.name} with ${breathCount} breaths.`,
+              });
+            }, 3000);
             return 0;
           }
           return prev - 1;
@@ -126,11 +117,11 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlaying, exercise.name, exercise.duration, breathCount, playBellSound, caloriesBurned, sessionCompleted]);
+  }, [isPlaying, exercise.name, exercise.duration, breathCount, playBellSound, caloriesBurned]);
   
   // Breathing cycle animation
   useEffect(() => {
-    if (!isPlaying || sessionCompleted) {
+    if (!isPlaying) {
       if (breathingTimerRef.current) {
         clearTimeout(breathingTimerRef.current);
         breathingTimerRef.current = null;
@@ -192,7 +183,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
         clearTimeout(breathingTimerRef.current);
       }
     };
-  }, [isPlaying, exercise.pattern, breathCount, playBellSound, sessionCompleted]);
+  }, [isPlaying, exercise.pattern, breathCount, playBellSound]);
   
   const resetSession = () => {
     setTimeRemaining(exercise.duration * 60);
@@ -202,8 +193,6 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
     setIsPlaying(true);
     setAvgBreathDuration(0);
     setCaloriesBurned(0);
-    setSessionCompleted(false);
-    toastShownRef.current = false;
     lastBreathTimeRef.current = Date.now();
   };
   
@@ -269,7 +258,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   };
   
   return (
-    <div className="flex flex-col items-center h-[calc(100vh-180px)] overflow-auto pb-20">
+    <div className="flex flex-col items-center h-full max-h-[calc(100vh-160px)] overflow-auto">
       {/* Header with fixed position */}
       <div className="w-full sticky top-0 bg-background z-10 flex items-center justify-between mb-4 p-2">
         <div className="flex items-center gap-2">
@@ -345,7 +334,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                 </div>
                 
                 {/* Progress and controls in a fixed container */}
-                <div className="text-center w-full max-w-md px-4 mt-2 mb-20">
+                <div className="text-center w-full max-w-md px-4 mt-2">
                   <BreathingProgress
                     timeRemaining={timeRemaining}
                     totalDuration={exercise.duration * 60}
@@ -513,7 +502,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                 </Card>
               </div>
               
-              <Card className="mt-4 mb-20">
+              <Card className="mt-4">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -556,7 +545,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                     {renderBenefits()}
                     
                     <h3 className="font-medium mt-4 mb-2">Tips</h3>
-                    <ul className="space-y-2 mb-20">
+                    <ul className="space-y-2">
                       <li className="text-sm text-muted-foreground">Find a comfortable seated position</li>
                       <li className="text-sm text-muted-foreground">Keep your back straight but not rigid</li>
                       <li className="text-sm text-muted-foreground">Try to breathe from your diaphragm, not your chest</li>
