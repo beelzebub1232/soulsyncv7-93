@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -95,7 +94,7 @@ export default function MentalHealthQuiz({ onSessionChange }: MentalHealthQuizPr
     const recommendations = categoryScores
       .filter(cat => cat.score <= 3) // Focus on areas with lower scores
       .map(cat => {
-        const exerciseType = Math.random() > 0.5 ? "breathing" : "mindfulness";
+        const exerciseType = Math.random() > 0.5 ? "breathing" as const : "mindfulness" as const;
         let exerciseIds: string[] = [];
         
         // This is simplified - in a real app, you'd have more targeted recommendations
@@ -164,7 +163,7 @@ export default function MentalHealthQuiz({ onSessionChange }: MentalHealthQuizPr
   };
   
   if (showResults && quizResult) {
-    return <QuizResults results={quizResult} onReset={resetQuiz} />;
+    return <QuizResults result={quizResult} onRetakeQuiz={resetQuiz} quizType="stress-anxiety" />;
   }
   
   if (currentQuestion === 0) {

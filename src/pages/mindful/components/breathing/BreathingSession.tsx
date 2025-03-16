@@ -167,16 +167,15 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
           <AnimatePresence mode="wait">
             <div className="flex flex-col items-center">
               <BreathingCircle
-                phase={currentPhase}
-                pattern={exercise.pattern}
-                color={exercise.color}
-                isPlaying={isPlaying}
+                currentStep={currentPhase}
+                circleSize={200}
+                exercise={exercise}
               />
               
               <div className="mt-4 mb-2">
                 <BreathingFeedback
-                  phase={currentPhase}
-                  isPlaying={isPlaying}
+                  currentStep={currentPhase}
+                  remainingTime={timeRemaining}
                   color={exercise.color}
                 />
               </div>
@@ -225,8 +224,6 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
           isPlaying={isPlaying}
           onPlayPause={() => setIsPlaying(!isPlaying)}
           onReset={resetSession}
-          onBell={playBellSound}
-          color={exercise.color}
         />
       </div>
     </div>
