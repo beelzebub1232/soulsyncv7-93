@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause, Play, RotateCcw, Bell, Heart, Info, Settings, Volume2, Volume1, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { BreathingExerciseType } from "../../types";
+import { BreathingExerciseType, ProgressLogItem } from "../../types";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,8 @@ import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { v4 as uuidv4 } from "uuid";
 
 // Import our components
 import BreathingCircle from "./components/BreathingCircle";
@@ -35,6 +37,9 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
   const [volume, setVolume] = useState(50);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showGuide, setShowGuide] = useState(true);
+  
+  // Get progress log from local storage
+  const [progressLog, setProgressLog] = useLocalStorage<ProgressLogItem[]>("mindful-progress-log", []);
   
   const breathingTimerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -71,6 +76,24 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
     }
   }, [soundEnabled]);
   
+  // Function to log completed session
+  const logCompletedSession = (duration: number) => {
+    const newSession: ProgressLogItem = {
+      id: uuidv4(),
+      date: new Date().toISOString(),
+      exerciseId: exercise.id,
+      exerciseType: "breathing",
+      duration: duration
+    };
+    
+    setProgressLog(prev => [...prev, newSession]);
+    
+    toast({
+      title: "Exercise Logged",
+      description: `${exercise.name} exercise completed and saved to your progress.`,
+    });
+  };
+  
   // Timer for session duration
   useEffect(() => {
     let interval: number | null = null;
@@ -83,17 +106,11 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
             setShowCompletionAnimation(true);
             playBellSound();
             
-            // Save session stats to local storage
-            const sessionData = {
-              exerciseId: exercise.id,
-              date: new Date().toISOString(),
-              duration: exercise.duration * 60,
-              breathCount,
-              caloriesBurned: Math.round(caloriesBurned)
-            };
+            // Calculate total duration spent
+            const durationSpent = Math.round(exercise.duration * 60 - timeRemaining);
             
-            const existingSessions = JSON.parse(localStorage.getItem('breathing-sessions') || '[]');
-            localStorage.setItem('breathing-sessions', JSON.stringify([...existingSessions, sessionData]));
+            // Log the completed session
+            logCompletedSession(Math.round(durationSpent / 60));
             
             setTimeout(() => {
               setShowCompletionAnimation(false);
@@ -116,7 +133,7 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlaying, exercise.name, exercise.duration, breathCount, playBellSound, caloriesBurned]);
+  }, [isPlaying, exercise.name, exercise.duration, breathCount, playBellSound, caloriesBurned, timeRemaining]);
   
   // Breathing cycle animation
   useEffect(() => {
@@ -314,80 +331,13 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
                     color={exercise.color}
                   />
                   
-                  <div className="flex justify-center gap-3 mt-4">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={togglePlayPause}
-                      className={cn(
-                        "rounded-full",
-                        !isPlaying && exercise.color === "blue" && "border-blue-500 text-blue-500",
-                        !isPlaying && exercise.color === "purple" && "border-purple-500 text-purple-500",
-                        !isPlaying && exercise.color === "green" && "border-green-500 text-green-500"
-                      )}
-                    >
-                      {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={resetSession}
-                      className="rounded-full"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={playBellSound}
-                      className="rounded-full"
-                    >
-                      <Bell className="h-4 w-4" />
-                    </Button>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={toggleSound}
-                            className="rounded-full"
-                          >
-                            {soundEnabled ? 
-                              (volume > 50 ? <Volume2 className="h-4 w-4" /> : <Volume1 className="h-4 w-4" />) : 
-                              <VolumeX className="h-4 w-4" />}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{soundEnabled ? "Mute sounds" : "Enable sounds"}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setShowGuide(!showGuide)}
-                            className={cn(
-                              "rounded-full",
-                              showGuide && "bg-background-foreground/5"
-                            )}
-                          >
-                            <Info className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{showGuide ? "Hide guidance" : "Show guidance"}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                  <BreathingControls
+                    isPlaying={isPlaying}
+                    onPlayPause={togglePlayPause}
+                    onReset={resetSession}
+                    onBell={playBellSound}
+                    color={exercise.color}
+                  />
                   
                   {/* Sound volume control */}
                   {soundEnabled && (
@@ -560,3 +510,4 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
     </div>
   );
 }
+

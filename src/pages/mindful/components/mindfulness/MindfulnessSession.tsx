@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause, Play, RotateCcw, Timer, SkipBack, SkipForward, Heart, Bell } from "lucide-react";
@@ -6,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { MindfulnessExerciseType } from "../../types";
+import { MindfulnessExerciseType, ProgressLogItem } from "../../types";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { v4 as uuidv4 } from "uuid";
 
 interface MindfulnessSessionProps {
   exercise: MindfulnessExerciseType;
@@ -27,8 +28,9 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
   const stepTimerRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
+  const [progressLog, setProgressLog] = useLocalStorage<ProgressLogItem[]>("mindful-progress-log", []);
+  
   useEffect(() => {
-    // Setup audio element for bell sound
     audioRef.current = new Audio("/bell-sound.mp3");
     audioRef.current.volume = 0.5;
     
@@ -47,6 +49,23 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
     }
   };
   
+  const logCompletedSession = (duration: number) => {
+    const newSession: ProgressLogItem = {
+      id: uuidv4(),
+      date: new Date().toISOString(),
+      exerciseId: exercise.id,
+      exerciseType: "mindfulness",
+      duration: duration
+    };
+    
+    setProgressLog(prev => [...prev, newSession]);
+    
+    toast({
+      title: "Exercise Logged",
+      description: `${exercise.name} exercise completed and saved to your progress.`,
+    });
+  };
+  
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -61,6 +80,10 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
         setTimeRemaining(prev => {
           if (prev <= 1) {
             clearInterval(interval!);
+            
+            const durationSpent = exercise.duration * 60;
+            logCompletedSession(Math.round(durationSpent / 60));
+            
             toast({
               title: "Exercise Complete",
               description: `Great job! You've completed ${exercise.name}.`,
@@ -75,7 +98,7 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isPlaying, exercise.name]);
+  }, [isPlaying, exercise.name, exercise.duration]);
   
   useEffect(() => {
     if (!isPlaying || timeRemaining <= 0) {
@@ -88,7 +111,6 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
     
     const currentStep = exercise.steps[currentStepIndex];
     
-    // Play bell sound when moving to a new step
     if (currentStepIndex > 0 && !completedSteps.includes(currentStepIndex - 1)) {
       playBellSound();
       setCompletedSteps(prev => [...prev, currentStepIndex - 1]);
@@ -97,15 +119,17 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
     }
     
     stepTimerRef.current = window.setTimeout(() => {
-      // Move to next step
       if (currentStepIndex < exercise.steps.length - 1) {
         setCurrentStepIndex(prev => prev + 1);
       } else {
-        // Last step - mark as completed but don't loop
         if (!completedSteps.includes(currentStepIndex)) {
           setCompletedSteps(prev => [...prev, currentStepIndex]);
           playBellSound();
           setIsPlaying(false);
+          
+          const durationSpent = exercise.duration * 60 - timeRemaining;
+          logCompletedSession(Math.round(durationSpent / 60));
+          
           toast({
             title: "Exercise Complete",
             description: "You've completed all steps. Take a moment to reflect on how you feel now.",
@@ -132,7 +156,6 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
   const navigateToStep = (index: number) => {
     if (index >= 0 && index < exercise.steps.length) {
       setCurrentStepIndex(index);
-      // If they manually navigate, mark all previous steps as completed
       const newCompletedSteps = Array.from(
         new Set([...completedSteps, ...Array.from({ length: index }, (_, i) => i)])
       );
@@ -195,7 +218,6 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
                   <p className="text-muted-foreground text-left">{currentStep.instruction}</p>
                 </ScrollArea>
                 
-                {/* Step completed animation */}
                 <AnimatePresence>
                   {showStepCompleteAnimation && (
                     <motion.div
@@ -226,7 +248,6 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
           </div>
           
           <div className="text-center space-y-4 w-full max-w-md mx-auto">
-            {/* Time and progress */}
             <div className="flex justify-between text-sm text-muted-foreground mb-1">
               <div className="flex items-center gap-1">
                 <Timer className="h-4 w-4" />
@@ -238,7 +259,6 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
               </div>
             </div>
             
-            {/* Progress bars */}
             <div className="space-y-2">
               <Progress 
                 value={(timeRemaining / (exercise.duration * 60)) * 100} 
@@ -263,7 +283,6 @@ export default function MindfulnessSession({ exercise, onClose }: MindfulnessSes
               />
             </div>
             
-            {/* Controls */}
             <div className="flex gap-2 justify-center pt-3">
               <Button
                 variant="outline"
