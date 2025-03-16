@@ -12,7 +12,11 @@ import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
-export default function MindfulnessExercises() {
+interface MindfulnessExercisesProps {
+  onSessionChange?: (inSession: boolean) => void;
+}
+
+export default function MindfulnessExercises({ onSessionChange }: MindfulnessExercisesProps) {
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("mindfulness-favorites", []);
   const [activeFocusFilter, setActiveFocusFilter] = useState<string | null>(null);
@@ -20,6 +24,13 @@ export default function MindfulnessExercises() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState(mindfulnessExercises);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
+  // Notify parent component about session state changes
+  useEffect(() => {
+    if (onSessionChange) {
+      onSessionChange(activeSession !== null);
+    }
+  }, [activeSession, onSessionChange]);
   
   const toggleFavorite = (id: string) => {
     if (favoriteExercises.includes(id)) {

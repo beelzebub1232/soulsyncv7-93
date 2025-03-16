@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -26,13 +25,23 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 
-export default function MentalHealthQuiz() {
+interface MentalHealthQuizProps {
+  onSessionChange?: (inSession: boolean) => void;
+}
+
+export default function MentalHealthQuiz({ onSessionChange }: MentalHealthQuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizType, setQuizType] = useState<string>("stress-anxiety");
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  
+  useEffect(() => {
+    if (onSessionChange) {
+      onSessionChange(quizStarted);
+    }
+  }, [quizStarted, onSessionChange]);
   
   const quizTypes = [
     {
@@ -97,12 +106,11 @@ export default function MentalHealthQuiz() {
   };
   
   const calculateResults = (quizAnswers: QuizAnswer[]) => {
-    // Calculate scores for each category
     const categories = [...new Set(quizAnswers.map(a => a.category))];
     const categoryScores = categories.map(category => {
       const categoryAnswers = quizAnswers.filter(a => a.category === category);
       const totalScore = categoryAnswers.reduce((sum, answer) => sum + answer.value, 0);
-      const maxPossibleScore = categoryAnswers.length * 4; // Assuming 0-4 scale
+      const maxPossibleScore = categoryAnswers.length * 4;
       const percentageScore = Math.round((totalScore / maxPossibleScore) * 100);
       
       let level = "Low";
@@ -116,10 +124,8 @@ export default function MentalHealthQuiz() {
       };
     });
     
-    // Generate recommendations based on scores and quiz type
     const recommendations: QuizRecommendation[] = [];
     
-    // Common recommendations mapping
     const recommendationMap: Record<string, {
       high: { type: "breathing" | "mindfulness", ids: string[] },
       moderate: { type: "breathing" | "mindfulness", ids: string[] }
@@ -158,7 +164,6 @@ export default function MentalHealthQuiz() {
       }
     };
     
-    // Generate recommendations based on category scores
     categoryScores.forEach(score => {
       const categoryRecs = recommendationMap[score.category];
       if (!categoryRecs) return;
@@ -176,7 +181,6 @@ export default function MentalHealthQuiz() {
           exerciseIds: categoryRecs.moderate.ids
         });
       }
-      // For low scores, no specific recommendations needed
     });
     
     setQuizResult({

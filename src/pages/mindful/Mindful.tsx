@@ -28,9 +28,15 @@ export default function Mindful() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("breathing");
   const [showHelp, setShowHelp] = useState(false);
+  const [isInSession, setIsInSession] = useState(false);
   
   const handleFloatingButtonClick = () => {
     setShowHelp(true);
+  };
+
+  // Handler to pass to exercise components to update the session state
+  const handleSessionChange = (inSession: boolean) => {
+    setIsInSession(inSession);
   };
   
   return (
@@ -167,15 +173,15 @@ export default function Mindful() {
               className="pt-4"
             >
               <TabsContent value="breathing" className="mt-0">
-                <BreathingExercises />
+                <BreathingExercises onSessionChange={handleSessionChange} />
               </TabsContent>
               
               <TabsContent value="mindfulness" className="mt-0">
-                <MindfulnessExercises />
+                <MindfulnessExercises onSessionChange={handleSessionChange} />
               </TabsContent>
               
               <TabsContent value="quiz" className="mt-0">
-                <MentalHealthQuiz />
+                <MentalHealthQuiz onSessionChange={handleSessionChange} />
               </TabsContent>
               
               <TabsContent value="progress" className="mt-0">
@@ -223,15 +229,17 @@ export default function Mindful() {
         </DialogContent>
       </Dialog>
       
-      <button 
-        onClick={handleFloatingButtonClick}
-        className={cn(
-          "fixed bottom-20 right-6 z-30 p-4 rounded-full bg-mindscape-light shadow-md",
-          "animate-bounce-soft transition-all"
-        )}
-      >
-        <Info className="text-mindscape-primary w-5 h-5" />
-      </button>
+      {!isInSession && (
+        <button 
+          onClick={handleFloatingButtonClick}
+          className={cn(
+            "fixed bottom-20 right-6 z-30 p-4 rounded-full bg-mindscape-light shadow-md",
+            "animate-bounce-soft transition-all"
+          )}
+        >
+          <Info className="text-mindscape-primary w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }

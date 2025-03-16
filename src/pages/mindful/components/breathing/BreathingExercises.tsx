@@ -11,13 +11,24 @@ import EmptyState from "./EmptyState";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-export default function BreathingExercises() {
+interface BreathingExercisesProps {
+  onSessionChange?: (inSession: boolean) => void;
+}
+
+export default function BreathingExercises({ onSessionChange }: BreathingExercisesProps) {
   const [activeSession, setActiveSession] = useState<string | null>(null);
   const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("breathing-favorites", []);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredExercises, setFilteredExercises] = useState(breathingExercises);
+  
+  // Notify parent component about session state changes
+  useEffect(() => {
+    if (onSessionChange) {
+      onSessionChange(activeSession !== null);
+    }
+  }, [activeSession, onSessionChange]);
   
   const toggleFavorite = (id: string) => {
     if (favoriteExercises.includes(id)) {
