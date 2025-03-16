@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pause, Play, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BreathingExerciseType } from "../../types";
@@ -224,6 +224,8 @@ export default function BreathingSession({ exercise, onClose }: BreathingSession
           isPlaying={isPlaying}
           onPlayPause={() => setIsPlaying(!isPlaying)}
           onReset={resetSession}
+          onBell={playBellSound}
+          color={exercise.color}
         />
       </div>
     </div>
