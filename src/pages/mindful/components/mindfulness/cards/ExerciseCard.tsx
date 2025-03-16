@@ -12,31 +12,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface ExerciseCardProps {
   exercise: MindfulnessExerciseType;
   isFavorite: boolean;
-  isCompleted?: boolean;
   onToggleFavorite: (id: string) => void;
-  onStartSession?: (id: string) => void;
-  onSelect?: () => void;
+  onStartSession: (id: string) => void;
 }
 
 export default function ExerciseCard({
   exercise,
   isFavorite,
-  isCompleted,
   onToggleFavorite,
-  onStartSession,
-  onSelect
+  onStartSession
 }: ExerciseCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useIsMobile();
   
-  const handleCardClick = () => {
-    if (onSelect) {
-      onSelect();
-    } else if (onStartSession) {
-      onStartSession(exercise.id);
-    }
-  };
-
   return (
     <Card
       className={cn(
@@ -49,7 +37,6 @@ export default function ExerciseCard({
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={handleCardClick}
     >
       <CardContent className={cn("p-4", isMobile && "p-3")}>
         <div className="flex justify-between items-start mb-2">
@@ -94,11 +81,7 @@ export default function ExerciseCard({
           </div>
           
           <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onStartSession) onStartSession(exercise.id);
-              else if (onSelect) onSelect();
-            }}
+            onClick={() => onStartSession(exercise.id)}
             className={cn(
               "transition-all",
               exercise.color === "blue" && "bg-blue-500 hover:bg-blue-600",

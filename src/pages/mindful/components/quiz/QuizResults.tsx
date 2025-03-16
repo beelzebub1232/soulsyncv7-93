@@ -1,171 +1,330 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { BrainCircuit, RotateCcw, Play, ArrowRight, Brain, Heart, Clock, CloudSun } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Award, BarChart, DownloadCloud, ListChecks } from "lucide-react";
-import { motion } from "framer-motion";
-import { QuizResultsProps } from "../../types";
+import { QuizResult, QuizRecommendation } from "../../types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { format } from "date-fns";
+import { breathingExercises } from "../../data/breathingExercises";
+import { mindfulnessExercises } from "../../data/mindfulnessExercises";
 
-export default function QuizResults({ answers, onRestart, onExit }: QuizResultsProps) {
-  // Placeholder results - in a real app, this would be calculated based on answers
-  const results = {
-    stress: { score: 7, level: "Moderate" },
-    sleep: { score: 5, level: "Good" },
-    focus: { score: 8, level: "Needs Attention" },
-    resilience: { score: 6, level: "Moderate" }
+interface QuizResultsProps {
+  result: QuizResult;
+  onRetakeQuiz: () => void;
+  quizType: string;
+}
+
+export default function QuizResults({ result, onRetakeQuiz, quizType }: QuizResultsProps) {
+  const [activeTab, setActiveTab] = useState("results");
+  
+  const quizTypeInfo = {
+    "stress-anxiety": {
+      title: "Stress & Anxiety Assessment",
+      icon: Brain,
+      color: "blue"
+    },
+    "focus-mood": {
+      title: "Focus & Mood Assessment",
+      icon: CloudSun,
+      color: "purple"
+    },
+    "sleep-energy": {
+      title: "Sleep & Energy Assessment",
+      icon: Clock,
+      color: "green"
+    },
+    "balance": {
+      title: "Life Balance Assessment",
+      icon: Heart,
+      color: "orange"
+    }
   };
   
-  const getColorForScore = (score: number) => {
-    if (score <= 4) return "text-green-500";
-    if (score <= 7) return "text-amber-500";
-    return "text-red-500";
+  const currentQuizInfo = quizTypeInfo[quizType as keyof typeof quizTypeInfo] || quizTypeInfo["stress-anxiety"];
+  
+  const getColorForScore = (score: number, category: string) => {
+    // For focus, energy, social - higher is better
+    const inversedCategories = ["focus", "energy", "social", "work-life"];
+    const isInversed = inversedCategories.includes(category);
+    
+    if (isInversed) {
+      if (score >= 70) return "green";
+      if (score >= 40) return "yellow";
+      return "red";
+    } else {
+      // For stress, anxiety, etc. - lower is better
+      if (score < 30) return "green";
+      if (score < 60) return "yellow";
+      return "red";
+    }
   };
   
-  const getRecommendations = () => {
-    return [
-      {
-        category: "Stress Management",
-        description: "Techniques to help you manage stress and anxiety",
-        exercises: [
-          { id: "breathing-1", name: "4-7-8 Breathing Technique", type: "breathing" },
-          { id: "mindfulness-2", name: "Body Scan Meditation", type: "mindfulness" }
-        ]
+  const getTextColorForLevel = (level: string, category: string) => {
+    // For focus, energy, social - higher is better
+    const inversedCategories = ["focus", "energy", "social", "work-life"];
+    const isInversed = inversedCategories.includes(category);
+    
+    if (isInversed) {
+      if (level === "High") return "text-green-600";
+      if (level === "Moderate") return "text-yellow-600";
+      return "text-red-600";
+    } else {
+      // For stress, anxiety, etc. - lower is better
+      if (level === "Low") return "text-green-600";
+      if (level === "Moderate") return "text-yellow-600";
+      return "text-red-600";
+    }
+  };
+  
+  const getCategoryTitle = (category: string) => {
+    switch (category) {
+      case "stress": return "Stress";
+      case "anxiety": return "Anxiety";
+      case "mood": return "Mood";
+      case "focus": return "Focus";
+      case "sleep": return "Sleep Quality";
+      case "energy": return "Energy Levels";
+      case "work-life": return "Work-Life Balance";
+      case "social": return "Social Connection";
+      default: return category.charAt(0).toUpperCase() + category.slice(1);
+    }
+  };
+  
+  const getCategoryDescription = (category: string, level: string) => {
+    const descriptions = {
+      "stress": {
+        "High": "You're experiencing significant stress that may be affecting your daily life.",
+        "Moderate": "You're handling some stress, but have room for improvement in stress management.",
+        "Low": "Your stress levels appear to be well-managed."
       },
-      {
-        category: "Focus Enhancement",
-        description: "Exercises to improve concentration and mental clarity",
-        exercises: [
-          { id: "breathing-3", name: "Box Breathing", type: "breathing" },
-          { id: "mindfulness-4", name: "Mindful Observation", type: "mindfulness" }
-        ]
+      "anxiety": {
+        "High": "You're experiencing notable anxiety symptoms that may benefit from attention.",
+        "Moderate": "You have some anxiety symptoms that could be addressed.",
+        "Low": "Your anxiety levels appear to be well-managed."
+      },
+      "mood": {
+        "High": "Your mood patterns show some challenges that may benefit from attention.",
+        "Moderate": "Your mood is relatively stable with some fluctuations.",
+        "Low": "Your mood appears to be stable and positive."
+      },
+      "focus": {
+        "High": "You're maintaining good focus and attention.",
+        "Moderate": "You have moderate ability to maintain focus.",
+        "Low": "You may be experiencing some challenges with focus and attention."
+      },
+      "sleep": {
+        "High": "Your sleep quality appears to be compromised.",
+        "Moderate": "Your sleep quality is adequate but could be improved.",
+        "Low": "You appear to have healthy sleep patterns."
+      },
+      "energy": {
+        "High": "You have good energy levels throughout the day.",
+        "Moderate": "Your energy levels are adequate but fluctuate.",
+        "Low": "You may be experiencing low energy or fatigue."
+      },
+      "work-life": {
+        "High": "You maintain a healthy balance between work and personal life.",
+        "Moderate": "You have some balance but it could be improved.",
+        "Low": "You may be experiencing challenges with work-life boundaries."
+      },
+      "social": {
+        "High": "You have strong social connections and support.",
+        "Moderate": "You have some social connection but could benefit from more.",
+        "Low": "You may be experiencing social isolation or disconnection."
       }
-    ];
+    };
+    
+    // Return description if it exists, otherwise return generic message
+    return descriptions[category as keyof typeof descriptions]?.[level as keyof typeof descriptions["stress"]] || 
+      "No specific description available.";
   };
   
-  const recommendations = getRecommendations();
+  const getExercisesFromRecommendation = (recommendation: QuizRecommendation) => {
+    const allExercises = recommendation.exerciseType === "breathing" 
+      ? breathingExercises 
+      : mindfulnessExercises;
+      
+    return allExercises.filter(ex => recommendation.exerciseIds.includes(ex.id));
+  };
   
   return (
-    <Card className="border-2 border-mindscape-light max-w-3xl mx-auto">
-      <CardHeader className="bg-mindscape-light/20 border-b">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold text-mindscape-tertiary">Your Mental Wellness Assessment</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onExit}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </div>
-        <CardDescription>Based on your responses, we've created a personalized assessment</CardDescription>
-      </CardHeader>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-medium flex items-center gap-2">
+          <div 
+            className={cn(
+              "rounded-full p-1",
+              currentQuizInfo.color === "blue" && "bg-blue-100/50 text-blue-600",
+              currentQuizInfo.color === "purple" && "bg-purple-100/50 text-purple-600",
+              currentQuizInfo.color === "green" && "bg-green-100/50 text-green-600",
+              currentQuizInfo.color === "orange" && "bg-orange-100/50 text-orange-600"
+            )}
+          >
+            <currentQuizInfo.icon className="h-3.5 w-3.5" />
+          </div>
+          {currentQuizInfo.title}
+        </h2>
+        <span className="text-xs text-muted-foreground">
+          {format(new Date(result.date), "MMM d, yyyy")}
+        </span>
+      </div>
       
-      <Tabs defaultValue="summary" className="w-full">
-        <TabsList className="w-full justify-start px-6 pt-4">
-          <TabsTrigger value="summary" className="data-[state=active]:bg-mindscape-primary/10">
-            <BarChart className="h-4 w-4 mr-2" />
-            Summary
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <TabsList className="flex w-full h-auto bg-muted/30 rounded-lg p-1">
+          <TabsTrigger 
+            value="results" 
+            className="flex-1 py-1.5 rounded-md data-[state=active]:bg-mindscape-light data-[state=active]:text-mindscape-tertiary"
+          >
+            Results
           </TabsTrigger>
-          <TabsTrigger value="recommendations" className="data-[state=active]:bg-mindscape-primary/10">
-            <ListChecks className="h-4 w-4 mr-2" />
+          <TabsTrigger 
+            value="recommendations" 
+            className="flex-1 py-1.5 rounded-md data-[state=active]:bg-mindscape-light data-[state=active]:text-mindscape-tertiary"
+          >
             Recommendations
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="summary" className="p-0">
-          <CardContent className="p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-medium mb-3 flex items-center">
-                <Award className="h-5 w-5 mr-2 text-mindscape-primary" />
-                Your Wellness Scores
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {Object.entries(results).map(([category, result]) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    key={category}
-                    className="bg-background border rounded-lg p-4"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-medium capitalize">{category}</h4>
-                      <span className={cn("font-medium", getColorForScore(result.score))}>
-                        {result.level}
+        <TabsContent value="results" className="mt-4 space-y-4">
+          <Card className="border border-border/50">
+            <CardHeader className="px-4 py-3 pb-2">
+              <CardTitle className="text-base">Your Mental Health Profile</CardTitle>
+              <CardDescription className="text-xs">
+                Based on your responses, here's a summary of your current state
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 px-4 py-3">
+              {result.categoryScores.map((categoryScore) => {
+                const colorName = getColorForScore(categoryScore.score, categoryScore.category);
+                const textColorClass = getTextColorForLevel(categoryScore.level, categoryScore.category);
+                
+                return (
+                  <div key={categoryScore.category} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-sm">{getCategoryTitle(categoryScore.category)}</span>
+                      <span className={cn(
+                        "text-xs font-medium",
+                        textColorClass
+                      )}>
+                        {categoryScore.level}
                       </span>
                     </div>
-                    <div className="bg-muted h-2 rounded-full">
-                      <div 
-                        className={cn(
-                          "h-full rounded-full",
-                          result.score <= 4 ? "bg-green-500" : 
-                          result.score <= 7 ? "bg-amber-500" : "bg-red-500"
-                        )}
-                        style={{ width: `${(result.score / 10) * 100}%` }}
-                      />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-medium mb-3">Overall Assessment</h3>
-              <p className="text-muted-foreground">
-                Your results indicate moderate levels of stress and good resilience. 
-                You may benefit from exercises focused on improving focus and stress management.
-                The mindfulness practices we've recommended can help address these areas.
-              </p>
-            </div>
-          </CardContent>
+                    <Progress 
+                      value={categoryScore.score} 
+                      className="h-2"
+                      indicatorClassName={cn(
+                        colorName === "green" && "bg-green-500",
+                        colorName === "yellow" && "bg-yellow-500",
+                        colorName === "red" && "bg-red-500"
+                      )}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {getCategoryDescription(categoryScore.category, categoryScore.level)}
+                    </p>
+                  </div>
+                );
+              })}
+            </CardContent>
+            <CardFooter className="px-4 py-3 pt-2 border-t border-border/50">
+              <Button 
+                onClick={onRetakeQuiz}
+                variant="outline"
+                size="sm"
+                className="w-full text-xs h-8"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                Retake Assessment
+              </Button>
+            </CardFooter>
+          </Card>
         </TabsContent>
         
-        <TabsContent value="recommendations" className="p-0">
-          <CardContent className="p-6">
-            <div className="space-y-6">
-              {recommendations.map((rec, index) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  key={rec.category}
-                  className="border rounded-lg p-4"
-                >
-                  <h3 className="font-medium text-lg mb-1">{rec.category}</h3>
-                  <p className="text-muted-foreground text-sm mb-3">{rec.description}</p>
-                  
-                  <div className="space-y-2">
-                    {rec.exercises.map(exercise => (
-                      <div key={exercise.id} className="bg-muted/50 p-3 rounded-md">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <div className="font-medium">{exercise.name}</div>
-                            <div className="text-xs text-muted-foreground capitalize">
-                              {exercise.type} Exercise
-                            </div>
-                          </div>
-                          <Button size="sm" variant="ghost" className="h-8">
-                            Try Now
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+        <TabsContent value="recommendations" className="mt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium flex items-center gap-1.5">
+              <BrainCircuit className="h-4 w-4 text-mindscape-primary" />
+              Recommended Exercises
+            </h3>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 text-xs"
+              onClick={() => setActiveTab("results")}
+            >
+              View Results
+            </Button>
+          </div>
+          
+          <p className="text-xs text-muted-foreground mb-2">
+            Based on your assessment, we recommend these exercises to support your mental wellbeing:
+          </p>
+          
+          <ScrollArea className="h-[calc(100vh-280px)]">
+            <div className="space-y-4">
+              {result.recommendations.length > 0 ? (
+                result.recommendations.map((recommendation, index) => (
+                  <div key={index} className="space-y-2">
+                    <h4 className="text-sm font-medium flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-mindscape-primary"></div>
+                      For {getCategoryTitle(recommendation.category)}:
+                    </h4>
+                    <div className="grid grid-cols-1 gap-2.5">
+                      {getExercisesFromRecommendation(recommendation).map((exercise) => (
+                        <Card 
+                          key={exercise.id}
+                          className={cn(
+                            "overflow-hidden border border-border/50",
+                            exercise.color === "blue" && "bg-gradient-to-br from-blue-50/30 to-transparent",
+                            exercise.color === "purple" && "bg-gradient-to-br from-purple-50/30 to-transparent",
+                            exercise.color === "green" && "bg-gradient-to-br from-green-50/30 to-transparent",
+                            exercise.color === "orange" && "bg-gradient-to-br from-orange-50/30 to-transparent"
+                          )}
+                        >
+                          <CardHeader className="px-3 py-2.5 pb-1">
+                            <CardTitle className="text-sm font-medium">{exercise.name}</CardTitle>
+                            <CardDescription className="text-xs line-clamp-2">{exercise.description}</CardDescription>
+                          </CardHeader>
+                          <CardFooter className="px-3 py-2 pt-0 flex justify-between items-center">
+                            <span className="text-xs text-muted-foreground">{exercise.duration} min</span>
+                            <Button 
+                              variant="link"
+                              size="sm"
+                              className={cn(
+                                "p-0 h-auto text-xs",
+                                exercise.color === "blue" && "text-blue-600",
+                                exercise.color === "purple" && "text-purple-600",
+                                exercise.color === "green" && "text-green-600",
+                                exercise.color === "orange" && "text-orange-600"
+                              )}
+                            >
+                              Go to exercise
+                              <ArrowRight className="ml-1 h-3 w-3" />
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
-                </motion.div>
-              ))}
+                ))
+              ) : (
+                <Card className="border border-border/50">
+                  <CardContent className="py-8 px-4 text-center">
+                    <p className="text-muted-foreground text-sm">Great job! No specific recommendations needed based on your results.</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-          </CardContent>
+          </ScrollArea>
         </TabsContent>
       </Tabs>
-      
-      <CardFooter className="flex justify-between border-t p-6">
-        <Button variant="outline" onClick={onRestart}>
-          Retake Assessment
-        </Button>
-        <Button className="bg-mindscape-primary hover:bg-mindscape-primary/90">
-          <DownloadCloud className="h-4 w-4 mr-2" />
-          Save Results
-        </Button>
-      </CardFooter>
-    </Card>
+    </div>
   );
 }

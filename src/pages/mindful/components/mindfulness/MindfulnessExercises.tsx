@@ -1,175 +1,224 @@
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Flower, Clock, Filter, ScanFace, XCircle } from "lucide-react";
+import MindfulnessSession from "./MindfulnessSession";
 import { mindfulnessExercises } from "../../data/mindfulnessExercises";
-import ExerciseCard from "./cards/ExerciseCard";
-import EmptyState from "./EmptyState";
 import FilterSection from "./filters/FilterSection";
 import SearchBar from "./filters/SearchBar";
-import MindfulnessSession from "./MindfulnessSession";
-import { toast } from "@/hooks/use-toast";
-import { MindfulnessExerciseType } from "../../types";
+import ExerciseCard from "./cards/ExerciseCard";
+import EmptyState from "./EmptyState";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
-interface MindfulnessExercisesProps {
-  onExerciseStateChange?: (isActive: boolean) => void;
-}
-
-export default function MindfulnessExercises({ onExerciseStateChange }: MindfulnessExercisesProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string[]>([]);
-  const [durationFilter, setDurationFilter] = useState<string[]>([]);
-  const [selectedExercise, setSelectedExercise] = useState<MindfulnessExerciseType | null>(null);
-  const [completedExercises, setCompletedExercises] = useState<string[]>([]);
-  const [favorites, setFavorites] = useState<string[]>([]);
+export default function MindfulnessExercises() {
+  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [favoriteExercises, setFavoriteExercises] = useLocalStorage<string[]>("mindfulness-favorites", []);
+  const [activeFocusFilter, setActiveFocusFilter] = useState<string | null>(null);
+  const [activeDurationFilter, setActiveDurationFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filteredExercises, setFilteredExercises] = useState(mindfulnessExercises);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
+  const toggleFavorite = (id: string) => {
+    if (favoriteExercises.includes(id)) {
+      setFavoriteExercises(favoriteExercises.filter(exerciseId => exerciseId !== id));
+    } else {
+      setFavoriteExercises([...favoriteExercises, id]);
+    }
+  };
+
+  const focusFilters = [
+    { label: "All", value: null },
+    { label: "Stress Relief", value: "Stress Relief" },
+    { label: "Focus", value: "Focus" },
+    { label: "Body Awareness", value: "Body Awareness" },
+    { label: "Favorites", value: "favorites" }
+  ];
+
+  const durationFilters = [
+    { label: "All", value: null },
+    { label: "< 5 min", value: "quick" },
+    { label: "5-10 min", value: "medium" },
+    { label: "> 10 min", value: "long" }
+  ];
+
+  // Filter exercises whenever filter, search, or favorites change
   useEffect(() => {
-    // Load completed exercises and favorites from local storage
-    const storedCompleted = localStorage.getItem('completed-mindfulness');
-    const storedFavorites = localStorage.getItem('favorite-mindfulness');
+    let result = mindfulnessExercises;
     
-    if (storedCompleted) {
-      setCompletedExercises(JSON.parse(storedCompleted));
+    // Apply focus filter
+    if (activeFocusFilter === "favorites") {
+      result = result.filter(exercise => favoriteExercises.includes(exercise.id));
+    } else if (activeFocusFilter) {
+      result = result.filter(exercise => exercise.focus === activeFocusFilter);
     }
     
-    if (storedFavorites) {
-      setFavorites(JSON.parse(storedFavorites));
+    // Apply duration filter
+    if (activeDurationFilter) {
+      result = result.filter(exercise => {
+        const duration = exercise.duration;
+        switch (activeDurationFilter) {
+          case "quick": return duration < 5;
+          case "medium": return duration >= 5 && duration <= 10;
+          case "long": return duration > 10;
+          default: return true;
+        }
+      });
     }
-  }, []);
-  
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-  
-  const handleToggleDifficulty = (difficulty: string) => {
-    setDifficultyFilter(prev => {
-      if (prev.includes(difficulty)) {
-        return prev.filter(d => d !== difficulty);
-      } else {
-        return [...prev, difficulty];
-      }
-    });
-  };
-  
-  const handleToggleDuration = (duration: string) => {
-    setDurationFilter(prev => {
-      if (prev.includes(duration)) {
-        return prev.filter(d => d !== duration);
-      } else {
-        return [...prev, duration];
-      }
-    });
-  };
-  
-  const handleSelectExercise = (exercise: MindfulnessExerciseType) => {
-    setSelectedExercise(exercise);
-    if (onExerciseStateChange) {
-      onExerciseStateChange(true);
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        exercise => 
+          exercise.name.toLowerCase().includes(query) || 
+          exercise.description.toLowerCase().includes(query)
+      );
     }
-  };
-  
-  const handleCloseExercise = () => {
-    setSelectedExercise(null);
-    if (onExerciseStateChange) {
-      onExerciseStateChange(false);
-    }
-  };
-  
-  const handleToggleFavorite = (exerciseId: string) => {
-    setFavorites(prev => {
-      const newFavorites = prev.includes(exerciseId)
-        ? prev.filter(id => id !== exerciseId)
-        : [...prev, exerciseId];
-      
-      localStorage.setItem('favorite-mindfulness', JSON.stringify(newFavorites));
-      return newFavorites;
-    });
     
-    toast({
-      title: favorites.includes(exerciseId) ? "Removed from favorites" : "Added to favorites",
-      description: "Your preferences have been updated.",
-    });
+    setFilteredExercises(result);
+  }, [activeFocusFilter, activeDurationFilter, searchQuery, favoriteExercises]);
+
+  const clearFilters = () => {
+    setActiveFocusFilter(null);
+    setActiveDurationFilter(null);
+    setSearchQuery("");
   };
-  
-  const filteredExercises = mindfulnessExercises.filter(exercise => {
-    const matchesSearch = exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         exercise.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+  if (activeSession) {
+    const exercise = mindfulnessExercises.find(ex => ex.id === activeSession);
+    if (!exercise) return null;
     
-    const matchesDifficulty = difficultyFilter.length === 0 || difficultyFilter.includes(exercise.level || '');
-    const matchesDuration = durationFilter.length === 0 || durationFilter.includes(exercise.duration.toString());
-    
-    return matchesSearch && matchesDifficulty && matchesDuration;
-  });
-  
-  // No exercises matching filters
-  if (filteredExercises.length === 0) {
     return (
-      <div>
-        <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-          <SearchBar onSearch={handleSearch} searchQuery={searchQuery} />
-          <FilterSection 
-            difficultyFilter={difficultyFilter}
-            durationFilter={durationFilter}
-            onToggleDifficulty={handleToggleDifficulty}
-            onToggleDuration={handleToggleDuration}
-          />
-        </div>
-        <EmptyState 
-          title="No mindfulness exercises found" 
-          description="Try adjusting your filters or search query."
-        />
-      </div>
+      <MindfulnessSession 
+        exercise={exercise} 
+        onClose={() => setActiveSession(null)} 
+      />
     );
   }
-  
+
+  const toggleFilters = () => {
+    setIsFilterOpen(!isFilterOpen);
+  };
+
   return (
-    <div>
-      <AnimatePresence mode="wait">
-        {selectedExercise ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            key="session"
-          >
-            <MindfulnessSession 
-              exercise={selectedExercise}
-              onClose={handleCloseExercise}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            key="list"
-          >
-            <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-              <SearchBar onSearch={handleSearch} searchQuery={searchQuery} />
-              <FilterSection 
-                difficultyFilter={difficultyFilter}
-                durationFilter={durationFilter}
-                onToggleDifficulty={handleToggleDifficulty}
-                onToggleDuration={handleToggleDuration}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {filteredExercises.map(exercise => (
-                <ExerciseCard
-                  key={exercise.id}
-                  exercise={exercise}
-                  onSelect={() => handleSelectExercise(exercise)}
-                  onToggleFavorite={handleToggleFavorite}
-                  isFavorite={favorites.includes(exercise.id)}
-                  isCompleted={completedExercises.includes(exercise.id)}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold text-mindscape-tertiary flex items-center gap-2">
+          <Flower className="h-5 w-5 text-mindscape-primary" />
+          Mindfulness Exercises
+        </h2>
+        <span className="text-xs text-muted-foreground">Choose to begin</span>
+      </div>
+      
+      {/* Search Bar */}
+      <SearchBar 
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+      
+      {/* Mobile Filters */}
+      <div className="md:hidden">
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="filters" className="border-b-0">
+            <AccordionTrigger className="py-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span>Filters</span>
+                {(activeFocusFilter || activeDurationFilter) && (
+                  <span className="bg-mindscape-primary/20 text-mindscape-primary text-xs px-2 py-0.5 rounded-full">
+                    Active
+                  </span>
+                )}
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-3 py-2">
+                {/* Focus Filters */}
+                <FilterSection
+                  title="Focus Area"
+                  icon={<ScanFace className="h-4 w-4 text-muted-foreground" />}
+                  options={focusFilters}
+                  activeFilter={activeFocusFilter}
+                  onFilterChange={setActiveFocusFilter}
                 />
-              ))}
-            </div>
-          </motion.div>
+                
+                {/* Duration Filters */}
+                <FilterSection
+                  title="Duration"
+                  icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+                  options={durationFilters}
+                  activeFilter={activeDurationFilter}
+                  onFilterChange={setActiveDurationFilter}
+                />
+                
+                {/* Clear Filters Button */}
+                {(activeFocusFilter || activeDurationFilter || searchQuery) && (
+                  <button 
+                    className="text-mindscape-primary text-sm font-medium flex items-center gap-1 mt-2"
+                    onClick={clearFilters}
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+      
+      {/* Desktop Filters (hidden on mobile) */}
+      <div className="hidden md:block space-y-3">
+        {/* Focus Filters */}
+        <FilterSection
+          title="Focus Area"
+          icon={<ScanFace className="h-4 w-4 text-muted-foreground" />}
+          options={focusFilters}
+          activeFilter={activeFocusFilter}
+          onFilterChange={setActiveFocusFilter}
+        />
+        
+        {/* Duration Filters */}
+        <FilterSection
+          title="Duration"
+          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+          options={durationFilters}
+          activeFilter={activeDurationFilter}
+          onFilterChange={setActiveDurationFilter}
+        />
+        
+        {/* Clear Filters Button */}
+        {(activeFocusFilter || activeDurationFilter || searchQuery) && (
+          <button 
+            className="text-mindscape-primary text-sm font-medium flex items-center gap-1 mt-2"
+            onClick={clearFilters}
+          >
+            <XCircle className="h-4 w-4" />
+            Clear all filters
+          </button>
         )}
-      </AnimatePresence>
+      </div>
+      
+      <ScrollArea className="h-[calc(100vh-370px)] md:h-[calc(100vh-320px)]">
+        {filteredExercises.length === 0 ? (
+          <EmptyState onClearFilters={clearFilters} />
+        ) : (
+          <div className="grid grid-cols-1 gap-3">
+            {filteredExercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                isFavorite={favoriteExercises.includes(exercise.id)}
+                onToggleFavorite={toggleFavorite}
+                onStartSession={setActiveSession}
+              />
+            ))}
+          </div>
+        )}
+      </ScrollArea>
     </div>
   );
 }
